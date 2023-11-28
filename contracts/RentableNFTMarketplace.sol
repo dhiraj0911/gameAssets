@@ -146,6 +146,64 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
         _setUser(_tokenId, msg.sender, _expires);
     }
 
+    // Add a new function to return all available items for buy and rent
+    function fetchMarketItems() public view returns (MarketItem[] memory) {
+        uint totalItemCount = _tokenIds.current();
+        uint itemCount = _tokenIds.current() - _itemsSold.current();
+        uint currentIndex = 0;
+
+        MarketItem[] memory items = new MarketItem[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].owner == address(this)) {
+                uint currentId = i + 1;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+
+        return items;
+    }
+
+    // Add a new function to return all items owned by the user
+    function fetchMyNFTs() public view returns (MarketItem[] memory) {
+        uint totalItemCount = _tokenIds.current();
+        uint itemCount = _itemsSold.current();
+        uint currentIndex = 0;
+
+        MarketItem[] memory items = new MarketItem[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].owner == msg.sender) {
+                uint currentId = i + 1;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+
+        return items;
+    }
+
+    // Add a new function to return all items rented by the user
+    function fetchMyRentedNFTs() public view returns (MarketItem[] memory) {
+        uint totalItemCount = _tokenIds.current();
+        uint itemCount = _itemsSold.current();
+        uint currentIndex = 0;
+
+        MarketItem[] memory items = new MarketItem[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (userOf(i + 1) == msg.sender) {
+                uint currentId = i + 1;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+
+        return items;
+    }
+
+
     function updateRentPrice(uint256 _tokenId,uint256 rent_price) public{
         require(idToMarketItem[_tokenId].seller == msg.sender, "Only item owner can perform this operation");
         idToMarketItem[_tokenId].rentPrice = rent_price;
@@ -162,7 +220,9 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
         override
         returns (string memory)
     {
-        return string(abi.encodePacked("ipfs://",tokenURIs[_tokenId],"/metadata.json"));
+        // return string(abi.encodePacked("ipfs://",tokenURIs[_tokenId],"/metadata.json"));
+        return string(abi.encodePacked(tokenURIs[_tokenId],".ipfs.dweb.link"));
+
     }
 
     function withdraw() public {
@@ -170,5 +230,4 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       uint balance = address(this).balance;
       payable(msg.sender).transfer(balance);
     }
-
 }

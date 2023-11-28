@@ -13,7 +13,10 @@ describe("RentableNFTMarketplace", function () {
   before(async function () {
     RentableNFTMarketplace = await ethers.getContractFactory("RentableNFTMarketplace");
     [owner, seller, buyer, renter] = await ethers.getSigners();
-    marketplace = await RentableNFTMarketplace.deploy();
+    marketplace = await RentableNFTMarketplace.deploy({
+      gasPrice: ethers.utils.parseUnits('10', 'gwei'), // Specify gas price if needed
+      gasLimit: 4000000 // Specify gas limit if needed
+    });
     await marketplace.deployed();
     console.log("Deployed to:", marketplace.address);
   });
@@ -89,7 +92,64 @@ describe("RentableNFTMarketplace", function () {
         userOfToken = await marketplace.userOf(newTokenId);
         expect(userOfToken).to.equal(ethers.constants.AddressZero, "The token should not have an active user after expiry");
       });
+
+    it("Should allow users to rent out tokens", async function () {
+        // Seller lists an item for rent
+        const rentPrice = ethers.utils.parseEther("0.001"); // Rent price set by the seller
+        await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
+        const newTokenId = await marketplace._tokenIds();
       
+        // Set the expiration time for the rent
+        const rentDuration = 24 * 60 * 60; // 24 hours in seconds
+        const expires = (await ethers.provider.getBlock('latest')).timestamp + rentDuration;
+      
+        // Renter rents the item
+        await marketplace.connect(renter).rentOutToken(newTokenId, expires, { value: rentPrice });
+
+        // Check if the token is rented out correctly
+        let userOfToken = await marketplace.userOf(newTokenId);
+        expect(userOfToken).to.equal(renter.address);
+      
+        // Advance the blockchain time by less than 24 hours to simulate expiry
+        await ethers.provider.send('evm_increaseTime', [rentDuration - 1]); // +1 to ensure we're past the expiry
+        await ethers.provider.send('evm_mine'); // mine a new block to make sure the time change takes effect
+      
+        userOfToken = await marketplace.userOf(newTokenId);
+        expect(userOfToken).to.equal(renter.address, "The token should have an active user before expiry");
+      });
+
+      it("Should fetch and return all available NFTs for sale", async function () {
+        // Seller lists an item
+        await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), ethers.utils.parseEther("0.001"), true, true, false, { value: listingPrice });
+        const newTokenId1 = await marketplace._tokenIds();
+
+        await marketplace.connect(seller).createToken("tokenURI2", ethers.utils.parseEther("0.1"), ethers.utils.parseEther("0.001"), true, true, false, { value: listingPrice });
+        const newTokenId2 = await marketplace._tokenIds();
+      
+        // Buyer purchases an item
+        await marketplace.connect(buyer).createMarketSale(newTokenId1, { value: ethers.utils.parseEther("0.1") });
+        const item = await marketplace.idToMarketItem(newTokenId1);
+
+        const totalForSale = await marketplace.fetchMarketItems();
+
+        // console.log(totalForSale)
+        expect(totalForSale.length).to.equal(4);
+
+      });
+      
+      it("Should fetch and return user owner NFTs", async function() {
+
+        await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), ethers.utils.parseEther("0.001"), true, true, false, { value: listingPrice });
+        const newTokenId1 = await marketplace._tokenIds();
+
+        const myNFTs1 = await marketplace.connect(buyer).fetchMyNFTs();
+        const myNFTs2 = await marketplace.connect(seller).fetchMyNFTs();
+        const myNFTs3 = await marketplace.connect(renter).fetchMyNFTs();
+        expect(myNFTs1.length).to.equal(2);
+        expect(myNFTs2.length).to.equal(2);
+        expect(myNFTs3.length).to.equal(2);
+        
+      })
   });
 
 });
