@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useContext } from 'react';
+
+import { useRouter } from 'next/router';
+import { useDropzone } from 'react-dropzone';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
+
+import { NFTContext } from '../context/NFTContext';
+import { Button, Input, Loader } from '../components';
+import images from '../assets';
+
 
 const Game = () => {
   const [vendorEndpoint, setVendorEndpoint] = useState('');
   const [deployedAssets, setDeployedAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(null);
+  const { isLoadingNFT, createSale } = useContext(NFTContext);
+  const [price, setPrice] = useState('');
+  const [rentPrice, setRentPrice] = useState('');
+  const router = useRouter();
 
   const handleOpenModal = (asset) => {
     setCurrentAsset(asset);
@@ -14,6 +27,25 @@ const Game = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleMint = async (e) => {
+    e.preventDefault();
+    if (currentAsset) {
+      // Assuming currentAsset contains the URL and other details needed for the NFT creation
+      // and price and rentPrice are state variables holding the input values
+      await createSale(currentAsset.url, price, rentPrice, true, true, true);
+  
+      // Reset state if needed
+      setPrice('');
+      setRentPrice('');
+      setCurrentAsset(null);
+      
+      setIsModalOpen(false);
+  
+      // Optional: Redirect after successful minting
+      // router.push('/path-to-redirect-after-mint'); // Update this path as needed
+    }
   };
   
   const handleFetchAssets = async () => {
@@ -119,12 +151,28 @@ const Game = () => {
                           <textarea id="description" name="description" defaultValue={currentAsset && currentAsset.description} rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" readOnly></textarea>
                         </div>
                         <div>
-                            <label htmlFor="price" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Price</label>
-                            <input type="number" id="price" name="price" defaultValue={currentAsset.price} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required />
-                          </div>
+                          <label htmlFor="price" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Price</label>
+                          <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required
+                          />
+                        </div>
                         <div>
-                            <label htmlFor="rentPrice" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Rent Price per day</label>
-                            <input type="number" id="price" name="rentPrice" defaultValue={currentAsset.rentPrice} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" required />
+                          <label htmlFor="rentPrice" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Rent Price per day</label>
+                          <input
+                            type="number"
+                            id="rentPrice"
+                            name="rentPrice"
+                            value={rentPrice}
+                            onChange={(e) => setRentPrice(e.target.value)}
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required
+                          />
                         </div>
                         {/* <div>
 
@@ -145,8 +193,17 @@ const Game = () => {
                           
                         {/* )} */}
                         <div className="flex items-center justify-end p-4 rounded-b border-t border-gray-200 dark:border-gray-600">
-                          <button type="button" className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-600" onClick={handleCloseModal}>Cancel</button>
-                          <button type="submit" className="ml-3 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-800">Mint</button>
+                          <Button
+                            btnName="Cancel"
+                            classStyles="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-4 py-2 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-600"
+                            handleClick={handleCloseModal}
+                          />
+                          <Button
+                            btnName="Mint"
+                            type="submit"
+                            handleClick={handleMint}
+                            classStyles="ml-3 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-800"
+                          />
                         </div>
                       </form>
                     </div>

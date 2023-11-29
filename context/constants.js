@@ -1,4 +1,12 @@
 import market from './NFTMarketplace.json';
 
-export const MarketAddress = '0x7E3c34217176C0312CB502AD37C786B699eE8DA9';
-export const MarketAddressABI = market.abi;
+
+import rentableMarketPlace from './RentableNFTMarketplace.json';
+
+export const MarketAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+export const MarketAddressABI = rentableMarketPlace.abi;
+
+
+
+// export const RentableNFTMarketplaceAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+// export const RentableNFTMarketplaceABI = rentableMarketPlace.abi;
