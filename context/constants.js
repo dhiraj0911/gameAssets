@@ -1,4 +1,4 @@
-import market from './NFTMarketplace.json';
+// import market from './NFTMarketplace.json';
 
 
 import rentableMarketPlace from './RentableNFTMarketplace.json';

@@ -122,7 +122,8 @@ export const NFTProvider = ({ children }) => {
     // const listingPrice = await contract.getListingPrice();
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
     console.log("working");
-    const transaction = await contract.createToken("url", price, rentPrice, forRent, forSale, member, { value: listingPrice.toString() })
+    console.log(url);
+    const transaction = await contract.createToken( url, price, rentPrice, forRent, forSale, member, { value: listingPrice.toString() })
     //   : await contract.resellToken(id, price, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
     console.log("working2");
@@ -170,8 +171,12 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
 
 const fetchNFTs = async () => {
   setIsLoadingNFT(false);
-  const provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com/');
-  const contract = fetchContract(provider);
+  const web3Modal = new Web3Modal();
+  const connection = await web3Modal.connect();
+  const provider = new ethers.providers.Web3Provider(connection);
+  // const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+  const signer = provider.getSigner();
+  const contract = fetchContract(signer);
 
   const data = await contract.fetchMarketItems();
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price, rentPrice, forRent, forSale, sold: unformmattedPrice }) => {

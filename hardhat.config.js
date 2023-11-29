@@ -13,6 +13,8 @@ module.exports = {
   },
   networks: {
     hardhat: {
+      // url: "http://localhost:8545",
+      chainId: 1337,
     },
     mumbai: {
       url: "https://polygon-mainnet.infura.io/v3/a267d177c62044519523fc2e35cad350",
