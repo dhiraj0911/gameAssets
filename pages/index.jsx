@@ -46,6 +46,7 @@ const Home = () => {
       console.log(items);
     });
   }, []);
+
   useEffect(() => {
     const sortedNfts = [...nfts];
 
@@ -89,8 +90,8 @@ const Home = () => {
       window.removeEventListener('resize', isScrollable);
     };
   });
-  // const creators = getTopCreators(nftsCopy);
-  // console.log(creators);
+  const creators = getTopCreators(nftsCopy);
+  console.log(creators);
   return (
     <div className="flex justify-center ms:px-4 p-12">
       <div className="w-full minmd:w-4/5">
@@ -115,7 +116,7 @@ const Home = () => {
           <Loader />
         ) : (
           <>
-            {/* <div>
+            <div>
               <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">
                 Top Sellers
               </h1>
@@ -170,7 +171,7 @@ const Home = () => {
                   )}
                 </div>
               </div>
-            </div> */}
+            </div>
             <div className="mt-10">
               <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
                 <h1 className="flex-1 font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold sm:mb-4">
@@ -189,19 +190,19 @@ const Home = () => {
                 {nfts.map((nft) => (
                   <NFTCard key={nft.tokenId} nft={nft} />
                 ))}
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                {/* {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <NFTCard
                 key={`nft-${i}`}
                 nft={{
                   i,
                   name: `Nifty NFT ${i}`,
-                  price: (10 - i * 0.536).toFixed(2),
-                  seller: `0x${makeId(3)}...${makeId(4)}`,
-                  owner: `0x${makeId(3)}...${makeId(4)}`,
+                  price,
+                  seller,
+                  owner,
                   description: 'Cool NFT on Sale',
                 }}
               />
-            ))}
+            ))} */}
               </div>
             </div>
           </>

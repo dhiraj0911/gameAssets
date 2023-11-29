@@ -92,7 +92,7 @@ export const NFTProvider = ({ children }) => {
 
     const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice }) => {
       const tokenURI = await contract.tokenURI(tokenId);
-      const { data: { image, name, description } } = await axios.get(tokenURI);
+      const { data: { image, name, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
       const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
 
       return {
@@ -170,23 +170,21 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
 };
 
 const fetchNFTs = async () => {
+  console.log("fetching nfts");
   setIsLoadingNFT(false);
-  const web3Modal = new Web3Modal();
-  const connection = await web3Modal.connect();
-  const provider = new ethers.providers.Web3Provider(connection);
-  // const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
   const signer = provider.getSigner();
   const contract = fetchContract(signer);
 
   const data = await contract.fetchMarketItems();
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price, rentPrice, forRent, forSale, sold: unformmattedPrice }) => {
-    const tokenURI = await contract.tokenURI(tokenId);
-    const { data: { name, id, description } } = await axios.get(tokenURI);
-    // const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
 
-    return {
-      price,
-      rentPrice,
+  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price, rentPrice, forRent, forSale, sold }) => {
+    const tokenURI = await contract.tokenURI(tokenId);
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+
+    return {  
+      price: price.toString(),
+      rentPrice: rentPrice.toString(),
       forRent,
       forSale,
       tokenId: tokenId.toNumber(),
@@ -198,7 +196,6 @@ const fetchNFTs = async () => {
       tokenURI,
     };
   }));
-
   return items;
 };
 

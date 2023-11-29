@@ -221,7 +221,7 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
         returns (string memory)
     {
         // return string(abi.encodePacked("ipfs://",tokenURIs[_tokenId],"/metadata.json"));
-        return string(abi.encodePacked(tokenURIs[_tokenId],".ipfs.dweb.link"));
+        return string(abi.encodePacked(tokenURIs[_tokenId]));
 
     }
 

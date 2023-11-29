@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { NFTContext } from '../context/NFTContext';
 
 import images from '../assets';
-import { shortenAddress } from '../utils/shortenAddress';
+// import { shortenAddress } from '../utils/shortenAddress';
 
 const NFTCard = ({ nft, onProfilePage }) => {
   const { nftCurrency } = useContext(NFTContext);
@@ -22,16 +22,17 @@ const NFTCard = ({ nft, onProfilePage }) => {
           <h1>{nft.name}</h1>
         </div>
         <div className="mt-3 flex flex-col ">
-          <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-sm minlg:text-xl">{nft.name}</p>
-          <div className="flexBetween mt-1 minlg:mt-3 flex-row xs:flex-col xs:items-start xs:mt-3">
-            <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xs minlg:text-lg">{nft.price}
-              <span className="normal">
-                {nftCurrency}
-              </span>
-            </p>
-            <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-xs minlg:text-lg">{shortenAddress(onProfilePage ? nft.owner : nft.seller) }
-            </p>
-          </div>
+          <p className="font-poppins ...">{nft.name}</p>
+            {/* Display additional information */}
+            <p className="font-poppins ...">ID: {nft.id}</p>
+            {nft.forSale && (
+              <p className="font-poppins ...">Price: {nft.price} {nftCurrency}</p>
+            )}
+            {nft.forRent && (
+              <p className="font-poppins ...">Rent Price: {nft.rentPrice} {nftCurrency}</p>
+            )}
+            {/* View More Button */}
+            <button className="mt-2 ...">View More</button>
         </div>
       </div>
 
