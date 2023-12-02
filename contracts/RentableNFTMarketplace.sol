@@ -64,21 +64,21 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       return listingPrice;
     }
 
-    function createToken(string memory _tokenURI, uint256 price, uint256 rent_price,bool forRent, bool forSale, bool member) public payable {
+    function createToken(string memory _tokenURI, uint256 price, uint256 rent_price, bool forSale, bool forRent, bool member) public payable {
       require(member || msg.value == listingPrice, "Price must be equal to listing price");
       _tokenIds.increment();
       uint256 newTokenId = _tokenIds.current();
       _mint(msg.sender, newTokenId);
       tokenURIs[newTokenId] = _tokenURI;
-      createMarketItem(newTokenId, price, rent_price , forRent, forSale);
+      createMarketItem(newTokenId, price, rent_price , forSale, forRent);
     }
 
     function createMarketItem(
       uint256 tokenId,
       uint256 price,
       uint256 rent_price,
-      bool forRent,
-      bool forSale
+      bool forSale,
+      bool forRent
     ) private {
       require(price > 0, "price required");
       require(!forRent || rent_price > 0, "rent price required");

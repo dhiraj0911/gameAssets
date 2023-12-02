@@ -15,7 +15,7 @@ export const NFTProvider = ({ children }) => {
   const client = useRef({});
   const [currentAccount, setCurrentAccount] = useState('');
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
-  const nftCurrency = 'MATIC';
+  const nftCurrency = 'ETH';
 
   const checkIfWalletIsConnected = async () => {
     if (!window.ethereum) return alert('Please install Metamask wallet');
@@ -77,6 +77,7 @@ export const NFTProvider = ({ children }) => {
     }
   };
 
+
   const fetchMyNFTsOrListedNFTs = async (type) => {
     setIsLoadingNFT(false);
     const web3Modal = new Web3Modal();
@@ -110,7 +111,7 @@ export const NFTProvider = ({ children }) => {
     return items;
   };
 
-  const createSale = async (url, forminputPrice, forminputRentPrice, forRent, forSale, member) => {
+  const createSale = async (url, forminputPrice, forminputRentPrice, forSale, forRent, member) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -123,7 +124,7 @@ export const NFTProvider = ({ children }) => {
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
     console.log("working");
     console.log(url);
-    const transaction = await contract.createToken( url, price, rentPrice, forRent, forSale, member, { value: listingPrice.toString() })
+    const transaction = await contract.createToken( url, price, rentPrice, forSale, forRent, member, { value: listingPrice.toString() })
     //   : await contract.resellToken(id, price, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
     console.log("working2");

@@ -17,6 +17,8 @@ const Game = () => {
   const [currentAsset, setCurrentAsset] = useState(null);
   const { isLoadingNFT, createSale } = useContext(NFTContext);
   const [mintedAssets, setMintedAssets] = useState({});
+  const [isForSale, setIsForSale] = useState(true);
+  const [isForRent, setIsForRent] = useState(true); 
   const [price, setPrice] = useState('');
   const [rentPrice, setRentPrice] = useState('');
   const router = useRouter();
@@ -36,7 +38,7 @@ const Game = () => {
       // Assuming currentAsset contains the URL and other details needed for the NFT creation
       // and price and rentPrice are state variables holding the input values
       const url = currentAsset.ipfsHash;
-      await createSale( url, price, rentPrice, true, true, true);
+      await createSale( url, price, rentPrice, isForSale, isForRent, true);
       setMintedAssets(prev => ({ ...prev, [currentAsset.id]: true }));
       // Reset state if needed
       setPrice('');
@@ -106,12 +108,6 @@ const Game = () => {
                 <div key={index} className="max-w-sm p-6 bg-white bg-opacity-20 border border-gray-200 rounded-lg shadow dark:bg-black-800 dark:border-gray-700 dark:bg-opacity-10">
                     <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{asset.name}</h5>
                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Unique ID: {asset.id}</p>
-                    {/* <a href="#" className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        Mint
-                        <svg className="ml-2 w-3.5 h-3.5" aria-hidden="true" fill="none" viewBox="0 0 14 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                        </svg>
-                    </a> */}
                     {mintedAssets[asset.id] ? (
                       <button
                         className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-green-700 rounded-lg"
@@ -149,7 +145,7 @@ const Game = () => {
                     <div className="flex justify-center">
                       <form className="w-full px-5 py-2 lg:px-10 sm:pb-6 xl:pb-8 space-y-2" action="#">
                         <div>
-                          <label htmlFor="assetName" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Asset Name</label>
+                          <label htmlFor="assetName" className="block mb-2 text-sm font-small text-gray-600 dark:text-white" >Asset Name</label>
                           <input type="text" id="assetName" name="assetName" defaultValue={currentAsset && currentAsset.name} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" readOnly />
                         </div>
                         <div>
@@ -160,48 +156,52 @@ const Game = () => {
                           <label htmlFor="description" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Description</label>
                           <textarea id="description" name="description" defaultValue={currentAsset && currentAsset.description} rows="3" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white" readOnly></textarea>
                         </div>
-                        <div>
-                          <label htmlFor="price" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Price</label>
-                          <input
-                            type="number"
-                            id="price"
-                            name="price"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                            required
-                          />
+                        <div className="flex gap-6 mb-6">
+                          <div className="flex items-center mt-3">
+                            <input
+                              type="checkbox"
+                              id="saleCheckbox"
+                              checked={isForSale}
+                              onChange={(e) => setIsForSale(e.target.checked)}
+                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                            />
+                            <label htmlFor="saleCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">For Sale</label>
+                          </div>
+                          <div className="flex items-center mt-3">
+                            <input
+                              type="checkbox"
+                              id="rentCheckbox"
+                              checked={isForRent}
+                              onChange={(e) => setIsForRent(e.target.checked)}
+                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                            />
+                            <label htmlFor="rentCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">For Rent</label>
+                          </div>
                         </div>
-                        <div>
-                          <label htmlFor="rentPrice" className="block mb-2 text-sm font-small text-gray-600 dark:text-white">Rent Price per day</label>
-                          <input
-                            type="number"
-                            id="rentPrice"
-                            name="rentPrice"
-                            value={rentPrice}
-                            onChange={(e) => setRentPrice(e.target.value)}
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                            required
-                          />
-                        </div>
-                        {/* <div>
-
-                          <label htmlFor="sale" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">For Sale</label>
-                          <select id="sale" name="sale" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="rent" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">For Rent</label>
-                          <select id="rent" name="rent" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                          </select>
-                        </div> */}
-                        {/* {currentAsset && currentAsset.forRent === 'yes' && ( */}
-                          
-                        {/* )} */}
+                          <div className="mb-4">
+                            <label htmlFor="price" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
+                            <input
+                              type="number"
+                              id="price"
+                              name="price"
+                              value={price}
+                              onChange={(e) => setPrice(e.target.value)}
+                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              required
+                            />
+                          </div>
+                          <div className="mb-4">
+                            <label htmlFor="rentPrice" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Rent Price per day</label>
+                            <input
+                              type="number"
+                              id="rentPrice"
+                              name="rentPrice"
+                              value={rentPrice}
+                              onChange={(e) => setRentPrice(e.target.value)}
+                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              required
+                            />
+                          </div>
                         <div className="flex items-center justify-end p-4 rounded-b border-t border-gray-200 dark:border-gray-600">
                           <Button
                             btnName="Cancel"

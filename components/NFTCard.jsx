@@ -42,31 +42,34 @@
 
 // export default NFTCard;
 
+// https://uiverse.io/joe-watson-sbf/honest-bullfrog-6
+
 import React, { useContext } from 'react';
 import Link from 'next/link';
 import { NFTContext } from '../context/NFTContext';
 
 const NFTCard = ({ nft, onProfilePage }) => {
   const { nftCurrency } = useContext(NFTContext);
+
   return (
     <Link href={{ pathname: '/nft-details', query: nft }}>
-
-      <div className="w-[11.875em] h-[15.875em] p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_20px_1px_#ffbb763f] hover:border-opacity-45">
-        <h1 className="text-2xl font-semibold tracking-wide">{nft.name}</h1>
+      <div className="w-[11.875em] h-[15.875em] p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_20px_1px_#598392] hover:border-opacity-45 mt-8 ml-7">
+        <h1 className="text-xl font-semibold mb-2">{nft.name}</h1>
         <div>
-          <div>
-            <p>ID: {nft.id}</p>
-            {/* {nft.forSale && (
-              <p>Price: {nft.price} {nftCurrency}</p>
-            )} */}
-            {/* {nft.forRent && (
-              <p>Rent Price: {nft.rentPrice} {nftCurrency}</p>
-            )} */}
-            {/* <button>View More</button> */}
-          </div>
+          <p className="text-sm">ID: {nft.id}</p>
+          {/* for rent and sale*/}
+          For sale: {nft.forSale ? 'Yes' : 'No'}
+          <br></br>
+          FOr rent: {nft.forRent ? 'Yes' : 'No'}
+          {/* {nft.forSale && (
+            <p className="text-sm">Price: {nft.price} {nftCurrency}</p>
+          )}
+          {nft.forRent && (
+            <p className="text-sm">Rent Price: {nft.rentPrice} {nftCurrency}</p>
+          )} */}
+          <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">View More</button>
         </div>
       </div>
-
     </Link>
   );
 };
