@@ -52,12 +52,14 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
 const NFTDetails = () => {
   const { isLoadingNFT, currentAccount, nftCurrency, buyNft } = useContext(NFTContext);
   const [nft, setNft] = useState({
-    image: '',
     tokenId: '',
     name: '',
     owner: '',
     price: '',
     seller: '',
+    forRent: '',
+    forSale: '',
+    tokenURI: '',
   });
   const router = useRouter();
   const [paymentModal, setPaymentModal] = useState(false);
@@ -96,7 +98,7 @@ const NFTDetails = () => {
                   {nft.name}
                 </div>
                 <div className="text-gray-300 uppercase tracking-widest">
-                  {nft.tokenId}
+                  {nft.id}
                 </div>
               <div className="text-gray-400 mt-8">
                 <p className="font-bold">39.00 MLC</p>
@@ -112,7 +114,7 @@ const NFTDetails = () => {
       <div className="flex-1 justify-start sm:px-4 p-12 sm:pb-4">
         <div className="flex flex-row sm:flex-col">
           <h2 className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl minlg:text-3xl">
-            {nft.name}
+            {nft.name} {nft.forRent} {nft.forSale}
           </h2>
         </div>
         <div className="mt-10 flex flex-col">
@@ -145,72 +147,79 @@ const NFTDetails = () => {
             </p>
           </div>
         </div>
-
-        {/* <div className="mt-10 ">
-          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
+        <div className="mt-10 flex pr-32">
+        {/* For Rent Section */}
+        <div className="mr-3">
+          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
             For Rent
           </p>
-          
-          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
-            For Sale
-          </p>
-          
-        </div> */}
-        <div className="mt-10 flex pr-32">
-          <div className="mr-4">
-            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
-              For Rent
-            </p>
-            {nft.forRent ? (
-              // <svg className="checkmark-icon"> {/* SVG code for checkmark icon */} </svg>
-              <Button
-                btnName={`Buy for ${nft.price} ${nftCurrency}`}
-                classStyles="mr-5 sm:mr-0 rounded-xl mt-4"
-                handleClick={() => setPaymentModal(true)}
-              />
-            ) : (
-              <svg className="lock-icon"> {/* SVG code for lock icon */} </svg>
-            )}
-          </div>
-
-          <div>
-            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
-              For Sale
-            </p>
-            {nft.forSale ? (
-              <Button
-                btnName={`Buy for ${nft.price} ${nftCurrency}`}
-                classStyles="mr-5 sm:mr-0 rounded-xl mt-4"
-                handleClick={() => setPaymentModal(true)}
-              />
-            ) : (
-              <svg className="lock-icon"> {/* SVG code for lock icon */} </svg>
-            )}
-          </div>
-        </div>
-
-        
-        <div className="flex flex-row sm:flex-col mt-10 ">
-          {currentAccount === nft.seller.toLowerCase() ? (
-            <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
-              You Cannot Buy Your Own NFT
-            </p>
-          ) : currentAccount === nft.owner.toLowerCase() ? (
-            <Button
-              btnName="List on MarketPlace"
-              classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-              handleClick={() => router.push(
-                `/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`,
+          {nft.forRent == 'true' ? (
+            <div className="flex flex-row sm:flex-col mt-5 ">
+              {currentAccount === nft.seller.toLowerCase() ? (
+                <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
+                  You Cannot rent Your Own NFT
+                </p>
+              ) : currentAccount === nft.owner.toLowerCase() ? (
+                <Button
+                  btnName="List on MarketPlace"
+                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                  handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                />
+              ) : (
+                <Button
+                  btnName={`Rent for ${nft.rentPrice / 1e18} ${nftCurrency}`}
+                  classStyles="mr-5 sm:mr-0 rounded-xl"
+                  handleClick={() => setPaymentModal(true)}
+                />
               )}
-            />
+            </div>
           ) : (
-            <Button
-              btnName={`Buy for ${nft.price} ${nftCurrency}`}
-              classStyles="mr-5 sm:mr-0 rounded-xl"
-              handleClick={() => setPaymentModal(true)}
-            />
+            <div className="flex flex-row sm:flex-col mt-5 ">
+              <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
+                Not available for Renting
+              </p>
+            </div>
           )}
         </div>
+
+        {/* For Sale Section */}
+        <div>
+          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
+            For Sale
+          </p>
+          {nft.forSale == 'true' ? (
+            <div className="flex flex-row sm:flex-col mt-5 ">
+              {currentAccount === nft.seller.toLowerCase() ? (
+                <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
+                  You Cannot Buy Your Own NFT
+                </p>
+              ) : currentAccount === nft.owner.toLowerCase() ? (
+                <Button
+                  btnName="List on MarketPlace"
+                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                  handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                />
+              ) : (
+                <Button
+                  btnName={`Buy for ${nft.price / 1e18} ${nftCurrency}`}
+                  classStyles="mr-5 sm:mr-0 rounded-xl"
+                  handleClick={() => setPaymentModal(true)}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-row sm:flex-col mt-5 ">
+              <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
+                Not available for Selling
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+
+        
+        
       </div>
       {paymentModal && (
         <Modal
