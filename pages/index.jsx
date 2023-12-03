@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from 'react';
+import { useEffect, useRef, useState, useContext, useMemo } from 'react';
 
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
@@ -19,6 +19,64 @@ const Home = () => {
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
   const { theme } = useTheme();
+  const [rentNfts, setRentNfts] = useState([]);
+  const [saleNfts, setSaleNfts] = useState([]);
+
+  const [searchQueryRent, setSearchQueryRent] = useState('');
+  const [sortOptionRent, setSortOptionRent] = useState('Recently added');
+  const [searchQuerySale, setSearchQuerySale] = useState('');
+  const [sortOptionSale, setSortOptionSale] = useState('Recently added');
+
+
+  const filteredRentNfts = useMemo(() => {
+    let filtered = rentNfts.filter(nft =>
+      nft.name.toLowerCase().includes(searchQueryRent.toLowerCase())
+    );
+
+    if (sortOptionRent === 'Recently added') {
+      filtered.sort((a, b) => b.tokenId - a.tokenId);
+    }
+
+    return filtered;
+  }, [rentNfts, searchQueryRent, sortOptionRent]);
+
+  // Function to filter and sort Sale NFTs
+  const filteredSaleNfts = useMemo(() => {
+    let filtered = saleNfts.filter(nft =>
+      nft.name.toLowerCase().includes(searchQuerySale.toLowerCase())
+    );
+
+    if (sortOptionSale === 'Recently added') {
+      filtered.sort((a, b) => b.tokenId - a.tokenId);
+    }
+
+    return filtered;
+  }, [saleNfts, searchQuerySale, sortOptionSale]);
+
+
+  useEffect(() => {
+    fetchNFTs().then((items) => {
+      const itemsForRent = []; // Filter or separate items for rent
+      const itemsForSale = []; // Filter or separate items for sale
+
+      // Example logic, replace with actual filtering logic
+      items.forEach(item => {
+        if (item.forRent) {
+          itemsForRent.push(item);
+        } 
+        if (item.forSale){
+          itemsForSale.push(item);
+        }
+      });
+
+      setRentNfts(itemsForRent);
+      setSaleNfts(itemsForSale);
+      setIsLoading(false);
+    });
+  }, []);
+
+
+
   const handleScroll = (direction) => {
     const { current } = scrollRef;
     const scrollAmount = window.innerWidth > 1000 ? 270 : 210;
@@ -173,7 +231,7 @@ const Home = () => {
               </div>
             </div>
             <div className="mt-10">
-              <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
+              {/* <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
                 <h1 className="flex-1 font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold sm:mb-4">
                   Hot NFTs
                 </h1>
@@ -185,11 +243,11 @@ const Home = () => {
                     clearSearch={onClearSearch}
                   />
                 </div>
-              </div>
-              <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
-                {nfts.map((nft) => (
+              </div> */}
+              {/* <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center"> */}
+                {/* {nfts.map((nft) => (
                   <NFTCard key={nft.tokenId} nft={nft} />
-                ))}
+                ))} */}
                 {/* {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <NFTCard
                 key={`nft-${i}`}
@@ -203,6 +261,50 @@ const Home = () => {
                 }}
               />
             ))} */}
+
+            
+              {/* </div> */}
+
+              {/* NFTs for Rent Section */}
+              <div className="mt-10 mb-10">
+                <div className="flex items-center">
+                  <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">NFTs for Rent</h1>
+                  <div className="" style={{ width: '700px', marginLeft:"100px" }}> {/* Adjust the width as needed */}
+                    {/* Search and Sort for Rent NFTs */}
+                    <SearchBar
+                      activeSelect={sortOptionRent}
+                      setActiveSelect={setSortOptionRent}
+                      handleSearch={(value) => setSearchQueryRent(value)}
+                      clearSearch={() => setSearchQueryRent('')}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
+                  {filteredRentNfts.map((nft) => (
+                    <NFTCard key={nft.tokenId} nft={nft} />
+                  ))}
+                </div>
+              </div>
+
+              {/* NFTs for Sale Section */}
+              <div className="mt-10">
+                <div className="flex items-center">
+                  <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">NFTs for Sale</h1>
+                  <div className="" style={{ width: '700px', marginLeft: "100px" }}> {/* Adjust the width and margin as needed */}
+                    {/* Search and Sort for Sale NFTs */}
+                    <SearchBar
+                      activeSelect={sortOptionSale}
+                      setActiveSelect={setSortOptionSale}
+                      handleSearch={(value) => setSearchQuerySale(value)}
+                      clearSearch={() => setSearchQuerySale('')}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
+                  {filteredSaleNfts.map((nft) => (
+                    <NFTCard key={nft.tokenId} nft={nft} />
+                  ))}
+                </div>
               </div>
             </div>
           </>

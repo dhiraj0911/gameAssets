@@ -88,13 +88,24 @@ const NFTDetails = () => {
   return (
     <div className="relative flex justify-center md:flex-col min-h-screen ">
       <div className="relative flex-1 flexCenter sm:px-4 p-12 border-r md:border-r-0 md:border-b dark:border-nft-black-1 border-nft-gray-1 ">
-        <div className="relative w-557 minmd:w-2/3 sm:w-full sm:h-300 h-557">
-          <Image
-            src={nft.image}
-            objectFit="cover"
-            className="rounded-xl shadow-lg "
-            layout="fill"
-          />
+        <div className="relative w-700 h- minmd:w-2/3 sm:w-full sm:h-300 h-557">
+           <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+            <div className="px-8 py-10">
+              <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
+                <div className="uppercase font-bold text-xl">
+                  {nft.name}
+                </div>
+                <div className="text-gray-300 uppercase tracking-widest">
+                  {nft.tokenId}
+                </div>
+              <div className="text-gray-400 mt-8">
+                <p className="font-bold">39.00 MLC</p>
+                <p>Perfect everywhere</p>
+              </div>
+            </div>
+            <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>
+            <div className="h-0.5 group-hover:w-full bg-gradient-to-l  via-yellow-950 group-hover:via-pink-500 w-[70%] m-auto rounded transition-all"></div>
+          </div>
         </div>
       </div>
 
@@ -103,6 +114,18 @@ const NFTDetails = () => {
           <h2 className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl minlg:text-3xl">
             {nft.name}
           </h2>
+        </div>
+        <div className="mt-10 flex flex-col">
+          <div className="w-full border-b dark:border-nft-black-1 border-nft-gray-1 flex flex-row">
+            <p className="font-poppins dark:text-white text-nft-black-1 text-base minlg:text-base font-medium mb-2">
+              Details{' '}
+            </p>
+          </div>
+          <div className="mt-3">
+            <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal">
+              {nft.description}
+            </p>
+          </div>
         </div>
         <div className="mt-10 ">
           <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
@@ -117,23 +140,56 @@ const NFTDetails = () => {
               />
             </div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-semibold ">
-              {shortenAddress(nft.seller)}
+              {/* {shortenAddress(nft.seller)} */}
+              {nft.seller}
             </p>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col">
-          <div className="w-full border-b dark:border-nft-black-1 border-nft-gray-1 flex flex-row">
-            <p className="font-poppins dark:text-white text-nft-black-1 text-base minlg:text-base font-medium mb-2">
-              Details{' '}
+        {/* <div className="mt-10 ">
+          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
+            For Rent
+          </p>
+          
+          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
+            For Sale
+          </p>
+          
+        </div> */}
+        <div className="mt-10 flex pr-32">
+          <div className="mr-4">
+            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
+              For Rent
             </p>
+            {nft.forRent ? (
+              // <svg className="checkmark-icon"> {/* SVG code for checkmark icon */} </svg>
+              <Button
+                btnName={`Buy for ${nft.price} ${nftCurrency}`}
+                classStyles="mr-5 sm:mr-0 rounded-xl mt-4"
+                handleClick={() => setPaymentModal(true)}
+              />
+            ) : (
+              <svg className="lock-icon"> {/* SVG code for lock icon */} </svg>
+            )}
           </div>
-          <div className="mt-3">
-            <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal">
-              {nft.description}
+
+          <div>
+            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
+              For Sale
             </p>
+            {nft.forSale ? (
+              <Button
+                btnName={`Buy for ${nft.price} ${nftCurrency}`}
+                classStyles="mr-5 sm:mr-0 rounded-xl mt-4"
+                handleClick={() => setPaymentModal(true)}
+              />
+            ) : (
+              <svg className="lock-icon"> {/* SVG code for lock icon */} </svg>
+            )}
           </div>
         </div>
+
+        
         <div className="flex flex-row sm:flex-col mt-10 ">
           {currentAccount === nft.seller.toLowerCase() ? (
             <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">

@@ -53,14 +53,11 @@ const NFTCard = ({ nft, onProfilePage }) => {
 
   return (
     <Link href={{ pathname: '/nft-details', query: nft }}>
-      <div className="w-[11.875em] h-[15.875em] p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_20px_1px_#598392] hover:border-opacity-45 mt-8 ml-7">
+      <div className="w-[11.875em] h-[15.875em] p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_20px_1px_grey] hover:border-opacity-45 mt-8 ml-7">
         <h1 className="text-xl font-semibold mb-2">{nft.name}</h1>
         <div>
           <p className="text-sm">ID: {nft.id}</p>
-          {/* for rent and sale*/}
-          For sale: {nft.forSale ? 'Yes' : 'No'}
-          <br></br>
-          FOr rent: {nft.forRent ? 'Yes' : 'No'}
+
           {/* {nft.forSale && (
             <p className="text-sm">Price: {nft.price} {nftCurrency}</p>
           )}

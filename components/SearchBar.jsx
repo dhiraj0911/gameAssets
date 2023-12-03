@@ -11,7 +11,7 @@ const SearchBar = ({ activeSelect, setActiveSelect, handleSearch, clearSearch })
   const { theme } = useTheme();
 
   useEffect(() => {
-    const timer = setTimeout(() => setSearch(debouncedSearch), 1000);
+    const timer = setTimeout(() => setSearch(debouncedSearch), 100);
 
     return () => clearTimeout(timer);
   }, [debouncedSearch]);
@@ -44,7 +44,7 @@ const SearchBar = ({ activeSelect, setActiveSelect, handleSearch, clearSearch })
         />
       </div>
 
-      <div
+      {/* <div
         onClick={() => setToggle(!toggle)}
         className="relative flexBetween ml-4 sm:ml-0 sm:mt-2 min-w-190 cursor-pointer dark:bg-nft-black-2 bg-white border dark:border-nft-black-2 border-nft-gray-2 py-3 px-4 rounded-md"
       >
@@ -69,9 +69,9 @@ const SearchBar = ({ activeSelect, setActiveSelect, handleSearch, clearSearch })
                 {item}
               </p>
             ))}
-          </div>
+          // </div>
         )}
-      </div>
+      </div> */}
     </>
   );
 };
