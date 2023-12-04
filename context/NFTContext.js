@@ -138,7 +138,7 @@ const buyNft = async (nft) => {
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(RentableNFTMarketplaceAddress, RentableNFTMarketplaceABI, signer);
+    const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
     const transaction = await contract.createMarketSale(nft.tokenId, { value: price });
@@ -152,7 +152,7 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(RentableNFTMarketplaceAddress, RentableNFTMarketplaceABI, signer);
+    const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     // Assuming rentalPeriodInDays is the number of days the user wants to rent the NFT
     const rentPrice = ethers.utils.parseUnits(nft.rentPrice.toString(), 'ether');

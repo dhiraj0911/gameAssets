@@ -18,24 +18,17 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Subtotal
       </p>
     </div>
-    <div className="flexBetweenStart my-5">
-      <div className="flex-1 flexStartCenter">
-        <div className="relative w-28 h-28">
-          <Image src={nft.image} layout="fill" objectFit="cover" />
+    <div className='flex justify-between'>
+      <div>
+        <div className="uppercase font-bold text-xl mt-5">
+          {nft.name}
         </div>
-        <div className="flexCenterStart ml-5 flex-col">
-          <p className="font-poppins dark:text-white text-nft-black-1 font-semibold  text-sm minlg:text-xl">
-            {shortenAddress(nft.seller)}
-          </p>
-          <p className="font-poppins dark:text-white text-nft-black-1 font-semibold  text-sm minlg:text-xl">
-            {nft.name}
-          </p>
+        <div className="text-gray-300 uppercase tracking-widest">
+          {nft.id}
         </div>
       </div>
-      <div>
-        <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-          {nft.price} <span className="font-semibold">{nftCurrency}</span>
-        </p>
+      <div className="pt-5">
+        {nft.price / 1e18} {nftCurrency}
       </div>
     </div>
     <div className="flexBetween mt-10">
@@ -43,8 +36,8 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Total
       </p>
       <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-        {nft.price} <span className="font-semibold">{nftCurrency}</span>
-      </p>
+        {nft.price / 1e18} <span className="font-semibold">{nftCurrency}</span>
+     </p>
     </div>
   </div>
 );
@@ -114,7 +107,7 @@ const NFTDetails = () => {
       <div className="flex-1 justify-start sm:px-4 p-12 sm:pb-4">
         <div className="flex flex-row sm:flex-col">
           <h2 className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl minlg:text-3xl">
-            {nft.name} {nft.forRent} {nft.forSale}
+            {nft.name}
           </h2>
         </div>
         <div className="mt-10 flex flex-col">
@@ -148,77 +141,72 @@ const NFTDetails = () => {
           </div>
         </div>
         <div className="mt-10 flex pr-32">
-        {/* For Rent Section */}
-        <div className="mr-3">
-          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
-            For Rent
-          </p>
-          {nft.forRent == 'true' ? (
-            <div className="flex flex-row sm:flex-col mt-5 ">
-              {currentAccount === nft.seller.toLowerCase() ? (
-                <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
-                  You Cannot rent Your Own NFT
+          {/* For Rent Section */}
+          <div className="mr-14">
+            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
+              For Rent
+            </p>
+            {nft.forRent == 'true' ? (
+              <div className="flex flex-row sm:flex-col mt-5 ">
+                {currentAccount === nft.seller.toLowerCase() ? (
+                  <p className="font-mono dark:text-white text-nft-black-1 text-xs border border-gray p-2">
+                    You Cannot rent Your Own NFT
+                  </p>
+                ) : currentAccount === nft.owner.toLowerCase() ? (
+                  <Button
+                    btnName="List on MarketPlace"
+                    classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                  />
+                ) : (
+                  <Button
+                    btnName={`Rent for ${nft.rentPrice / 1e18} ${nftCurrency}`}
+                    classStyles="mr-5 sm:mr-0 rounded-xl"
+                    handleClick={() => setPaymentModal(true)}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-row sm:flex-col mt-5 ">
+                <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
+                  Not available for Renting
                 </p>
-              ) : currentAccount === nft.owner.toLowerCase() ? (
-                <Button
-                  btnName="List on MarketPlace"
-                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                  handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
-                />
-              ) : (
-                <Button
-                  btnName={`Rent for ${nft.rentPrice / 1e18} ${nftCurrency}`}
-                  classStyles="mr-5 sm:mr-0 rounded-xl"
-                  handleClick={() => setPaymentModal(true)}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-row sm:flex-col mt-5 ">
-              <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
-                Not available for Renting
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* For Sale Section */}
-        <div>
-          <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
-            For Sale
-          </p>
-          {nft.forSale == 'true' ? (
-            <div className="flex flex-row sm:flex-col mt-5 ">
-              {currentAccount === nft.seller.toLowerCase() ? (
-                <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
-                  You Cannot Buy Your Own NFT
+              </div>
+            )}
+          </div>
+          <div>
+            <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
+              For Sale
+            </p>
+            {nft.forSale == 'true' ? (
+              <div className="flex flex-row sm:flex-col mt-5 ">
+                {currentAccount === nft.seller.toLowerCase() ? (
+                  <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
+                    You Cannot Buy Your Own NFT
+                  </p>
+                ) : currentAccount === nft.owner.toLowerCase() ? (
+                  <Button
+                    btnName="List on MarketPlace"
+                    classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                  />
+                ) : (
+                  <Button
+                    btnName={`Buy for ${nft.price / 1e18} ${nftCurrency}`}
+                    classStyles="mr-5 sm:mr-0 rounded-xl"
+                    handleClick={() => setPaymentModal(true)}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-row sm:flex-col mt-5 ">
+                <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
+                  Not available for Selling
                 </p>
-              ) : currentAccount === nft.owner.toLowerCase() ? (
-                <Button
-                  btnName="List on MarketPlace"
-                  classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                  handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
-                />
-              ) : (
-                <Button
-                  btnName={`Buy for ${nft.price / 1e18} ${nftCurrency}`}
-                  classStyles="mr-5 sm:mr-0 rounded-xl"
-                  handleClick={() => setPaymentModal(true)}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-row sm:flex-col mt-5 ">
-              <p className="font-poppins dark:text-white text-nft-black-1 text-base font-normal border border-gray p-2">
-                Not available for Selling
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-
-        
+              </div>
+            )}
+          </div>
+        </div>        
         
       </div>
       {paymentModal && (
