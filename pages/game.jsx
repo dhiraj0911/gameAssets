@@ -38,6 +38,7 @@ const Game = () => {
       // Assuming currentAsset contains the URL and other details needed for the NFT creation
       // and price and rentPrice are state variables holding the input values
       const url = currentAsset.ipfsHash;
+      console.log(price, rentPrice)
       await createSale( url, price, rentPrice, isForSale, isForRent, true);
       setMintedAssets(prev => ({ ...prev, [currentAsset.id]: true }));
       // Reset state if needed

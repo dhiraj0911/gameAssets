@@ -58,12 +58,12 @@ const NFTCard = ({ nft, onProfilePage }) => {
         <div>
           <p className="text-sm">ID: {nft.id}</p>
 
-          {/* {nft.forSale && (
+          {nft.forSale && (
             <p className="text-sm">Price: {nft.price} {nftCurrency}</p>
           )}
           {nft.forRent && (
             <p className="text-sm">Rent Price: {nft.rentPrice} {nftCurrency}</p>
-          )} */}
+          )}
           <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">View More</button>
         </div>
       </div>

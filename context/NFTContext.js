@@ -118,19 +118,14 @@ export const NFTProvider = ({ children }) => {
     const signer = provider.getSigner();
     const contract = fetchContract(signer);
 
-    const price = ethers.utils.parseUnits(forminputPrice, 'ether');
-    const rentPrice  = ethers.utils.parseUnits(forminputRentPrice, 'ether');
-    // const listingPrice = await contract.getListingPrice();
+    const priceInWei = ethers.utils.parseUnits(forminputPrice, 'ether');
+    const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
+
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-    console.log("working");
-    console.log(url);
-    const transaction = await contract.createToken( url, price, rentPrice, forSale, forRent, member, { value: listingPrice.toString() })
+    const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
     //   : await contract.resellToken(id, price, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
-    console.log("working2");
     await transaction.wait();
-    console.log("working3");
-
 };
 
 const buyNft = async (nft) => {
@@ -179,13 +174,15 @@ const fetchNFTs = async () => {
 
   const data = await contract.fetchMarketItems();
 
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price, rentPrice, forRent, forSale, sold }) => {
+  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice , forRent, forSale, sold }) => {
     const tokenURI = await contract.tokenURI(tokenId);
     const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
     return {  
-      price: price.toString(),
-      rentPrice: rentPrice.toString(),
+      price,
+      rentPrice,
       forRent,
       forSale,
       tokenId: tokenId.toNumber(),

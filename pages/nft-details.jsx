@@ -28,7 +28,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         </div>
       </div>
       <div className="pt-5">
-        {nft.price / 1e18} {nftCurrency}
+        {nft.price} {nftCurrency}
       </div>
     </div>
     <div className="flexBetween mt-10">
@@ -36,7 +36,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Total
       </p>
       <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-        {nft.price / 1e18} <span className="font-semibold">{nftCurrency}</span>
+        {nft.price} <span className="font-semibold">{nftCurrency}</span>
      </p>
     </div>
   </div>
@@ -160,7 +160,7 @@ const NFTDetails = () => {
                   />
                 ) : (
                   <Button
-                    btnName={`Rent for ${nft.rentPrice / 1e18} ${nftCurrency}`}
+                    btnName={`Rent for ${nft.rentPrice} ${nftCurrency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setPaymentModal(true)}
                   />
@@ -192,7 +192,7 @@ const NFTDetails = () => {
                   />
                 ) : (
                   <Button
-                    btnName={`Buy for ${nft.price / 1e18} ${nftCurrency}`}
+                    btnName={`Buy for ${nft.price} ${nftCurrency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setPaymentModal(true)}
                   />
