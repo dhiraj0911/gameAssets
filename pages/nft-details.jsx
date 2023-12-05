@@ -12,7 +12,7 @@ import { shortenAddress } from '../utils/shortenAddress';
 const calculateRentalCost = (nft, rentalPeriodInDays) => {
   const dailyRate = nft.rentPrice; // This is an example rate, adjust as needed
   return dailyRate * rentalPeriodInDays;
-};
+}
 
 const PaymentBodyCmp = ({ nft, nftCurrency }) => (
   <div className="flex flex-col">
