@@ -136,6 +136,7 @@ const buyNft = async (nft) => {
     const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
+    console.log(nft);
     const transaction = await contract.createMarketSale(nft.tokenId, { value: price });
     setIsLoadingNFT(true);
     await transaction.wait();
@@ -149,8 +150,9 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
     const signer = provider.getSigner();
     const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
+    const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
     // Assuming rentalPeriodInDays is the number of days the user wants to rent the NFT
-    const rentPrice = ethers.utils.parseUnits(nft.rentPrice.toString(), 'ether');
+    const rentPrice = ethers.utils.parseUnits(totalRentPrice.toString(), 'ether');
     // Calculate the expiry time as the current time plus the rental period in seconds
     const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
 

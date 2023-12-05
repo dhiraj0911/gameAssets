@@ -165,10 +165,9 @@ const Home = () => {
 
         {/* Need to change here  !nft.length */}
 
-        {isLoading && nfts.length ? ( <>
+        {isLoading || (rentNfts.length === 0 && saleNfts.length === 0) ? ( <>
           <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">That&apos;s Weird... No GameAsset Found</h1>
           <br></br>
-          <h3 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">Let's add new one</h3>
         </>
         ) : isLoading ? (
           <Loader />
@@ -264,9 +263,8 @@ const Home = () => {
 
             
               {/* </div> */}
-
-              {/* NFTs for Rent Section */}
-              <div className="mt-10 mb-10">
+              {rentNfts.length > 0 ? (
+                <div className="mt-10 mb-10">
                 <div className="flex items-center">
                   <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">NFTs for Rent</h1>
                   <div className="" style={{ width: '700px', marginLeft:"100px" }}> {/* Adjust the width as needed */}
@@ -285,27 +283,33 @@ const Home = () => {
                   ))}
                 </div>
               </div>
-
-              {/* NFTs for Sale Section */}
-              <div className="mt-10">
-                <div className="flex items-center">
-                  <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">NFTs for Sale</h1>
-                  <div className="" style={{ width: '700px', marginLeft: "100px" }}> {/* Adjust the width and margin as needed */}
-                    {/* Search and Sort for Sale NFTs */}
-                    <SearchBar
-                      activeSelect={sortOptionSale}
-                      setActiveSelect={setSortOptionSale}
-                      handleSearch={(value) => setSearchQuerySale(value)}
-                      clearSearch={() => setSearchQuerySale('')}
-                    />
+              ):(
+                <></>
+              )}
+              {saleNfts.length > 0 ? (
+                <div className="mt-10">
+                  <div className="flex items-center">
+                    <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">NFTs for Sale</h1>
+                    <div className="" style={{ width: '700px', marginLeft: "100px" }}> {/* Adjust the width and margin as needed */}
+                      {/* Search and Sort for Sale NFTs */}
+                      <SearchBar
+                        activeSelect={sortOptionSale}
+                        setActiveSelect={setSortOptionSale}
+                        handleSearch={(value) => setSearchQuerySale(value)}
+                        clearSearch={() => setSearchQuerySale('')}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
+                    {filteredSaleNfts.map((nft) => (
+                      <NFTCard key={nft.tokenId} nft={nft} />
+                    ))}
                   </div>
                 </div>
-                <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
-                  {filteredSaleNfts.map((nft) => (
-                    <NFTCard key={nft.tokenId} nft={nft} />
-                  ))}
-                </div>
-              </div>
+              ): (
+                <></>
+              )}
+              
             </div>
           </>
         )}

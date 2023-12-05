@@ -8,6 +8,12 @@ import { Loader, Button, Modal } from '../components';
 import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
 
+
+const calculateRentalCost = (nft, rentalPeriodInDays) => {
+  const dailyRate = nft.rentPrice; // This is an example rate, adjust as needed
+  return dailyRate * rentalPeriodInDays;
+};
+
 const PaymentBodyCmp = ({ nft, nftCurrency }) => (
   <div className="flex flex-col">
     <div className="flexBetween">
@@ -42,8 +48,68 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
   </div>
 );
 
+const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
+  <div className="flex flex-col">
+    <div className="flex justify-between">
+      <p className="font-poppins dark:text-white text-nft-black-1 minlg:text-xl text-base font-semibold">
+        Items
+      </p>
+      <p className="font-poppins dark:text-white text-nft-black-1 minlg:text-xl mr-20 text-base font-semibold">
+        Subtotal
+      </p>
+    </div>
+
+    <div className="flex justify-between items-start">
+      <div>
+        <div className="uppercase font-bold text-xl mt-5">
+          {nft.name}
+        </div>
+        <div className="text-gray-300 uppercase tracking-widest">
+          {nft.id}
+        </div>
+        <div className="mt-5">
+          <label htmlFor="rentalDays" className="font-poppins dark:text-white text-nft-black-1 text-base font-semibold mr-10 ">
+            Rental Period (Days):
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div className="pt-5 ml-20 pl-20">
+          {nft.rentPrice} {nftCurrency} {'/ day'}
+        </div>
+        <div className="mt-8 px-10 pr-10">
+          <input min="1"
+            placeholder="Enter number of days" value={rentalPeriod}
+            onChange={(e) => setRentalPeriod(e.target.value)} type="number" id="rentalDays" className="w-30 ml-10 pl-5 py-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+        </div>
+      </div>
+    </div>
+
+    <div className="flex justify-between mt-10">
+      <p className="font-poppins dark:text-white text-nft-black-1 font-normal text-base minlg:text-xl">
+        Total
+      </p>
+      <p className="font-poppins dark:text-white text-nft-black-1 font-normal text-xl minlg:text-xl mr-20">
+        {
+          rentalPeriod === 0 || rentalPeriod === '' ? '0' : (
+            `${rentalPeriod} x ${nft.rentPrice} = `
+          )
+        }
+        {
+          rentalPeriod !== 0 && rentalPeriod !== '' && (
+            <span className="font-bold">
+              {`${calculateRentalCost(nft, rentalPeriod)} ${nftCurrency}`}
+            </span>
+          )
+        }
+      </p>
+    </div>
+  </div>
+);
+
 const NFTDetails = () => {
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft } = useContext(NFTContext);
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT } = useContext(NFTContext);
   const [nft, setNft] = useState({
     tokenId: '',
     name: '',
@@ -56,8 +122,11 @@ const NFTDetails = () => {
   });
   const router = useRouter();
   const [paymentModal, setPaymentModal] = useState(false);
-  const [successModal, setSuccessModal] = useState(false);
+  const [rentPaymentModal, setRentPaymentModal] = useState(false);
+  const [buySuccessModal, setBuySuccessModal] = useState(false);
+  const [rentSuccessModal, setRentSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [rentalPeriod, setRentalPeriod] = useState(0);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -65,12 +134,21 @@ const NFTDetails = () => {
     setIsLoading(false);
   }, [router.isReady]);
 
-  const checkout = async () => {
+  const buyCheckout = async () => {
     await buyNft(nft);
 
     setPaymentModal(false);
-    setSuccessModal(true);
+    setBuySuccessModal(true);
   };
+
+
+  const rentCheckout = async (rentalPeriodInDays) => {
+    await rentNFT(nft, rentalPeriodInDays);
+
+    setRentPaymentModal(false);
+    setRentSuccessModal(true);
+  }
+    
 
   if (isLoading) {
     return (
@@ -81,11 +159,11 @@ const NFTDetails = () => {
   }
 
   return (
-    <div className="relative flex justify-center md:flex-col min-h-screen ">
-      <div className="relative flex-1 flexCenter sm:px-4 p-12 border-r md:border-r-0 md:border-b dark:border-nft-black-1 border-nft-gray-1 ">
-        <div className="relative w-700 h- minmd:w-2/3 sm:w-full sm:h-300 h-557">
-           <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
-            <div className="px-8 py-10">
+    <div className="relative flex justify-center md:flex-col mb-10 pb-20">
+      <div className="relative flex-1 flexCenter sm:px-0 p-0 border-r md:border-r-0 md:border-b dark:border-nft-black-1 border-nft-gray-1 ">
+        <div className="relative  h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
+           <div className="card m-auto text-gray-300 w-[clamp(400px,80%,10px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+            <div className="px-8 py-8 mr-10 pr-20">
               <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
                 <div className="uppercase font-bold text-xl">
                   {nft.name}
@@ -162,7 +240,7 @@ const NFTDetails = () => {
                   <Button
                     btnName={`Rent for ${nft.rentPrice} ${nftCurrency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
-                    handleClick={() => setPaymentModal(true)}
+                    handleClick={() => setRentPaymentModal(true)}
                   />
                 )}
               </div>
@@ -206,10 +284,11 @@ const NFTDetails = () => {
               </div>
             )}
           </div>
-        </div>        
+        </div>
         
       </div>
-      {paymentModal && (
+      {paymentModal
+       && (
         <Modal
           header="Check Out"
           body={<PaymentBodyCmp nft={nft} nftCurrency={nftCurrency} />}
@@ -218,7 +297,28 @@ const NFTDetails = () => {
               <Button
                 btnName="Checkout"
                 classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                handleClick={checkout}
+                handleClick={buyCheckout}
+              />
+              <Button
+                btnName="Cancel"
+                classStyles="mr-5 sm:mr-0 rounded-xl"
+                handleClick={() => setPaymentModal(false)}
+              />
+            </div>
+          )}
+          handleClose={() => setPaymentModal(false)}
+        />
+      )}
+      {rentPaymentModal && (
+        <Modal
+          header="Rent asset on day basis"
+          body={<RentBobyCmp nft={nft} nftCurrency={nftCurrency} rentalPeriod={rentalPeriod} setRentalPeriod={setRentalPeriod} />}
+          footer={(
+            <div className="flex flex-row sm:flex-col">
+              <Button
+                btnName="Checkout"
+                classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                handleClick={() => rentCheckout(rentalPeriod)}
               />
               <Button
                 btnName="Cancel"
@@ -243,20 +343,31 @@ const NFTDetails = () => {
           handleClose={() => setPaymentModal(false)}
         />
       )}
-      {successModal && (
+      {buySuccessModal && (
         <Modal
           header="Payment Successfull"
           body={(
             <div
               className="flexCenter flex-col text-center"
-              onClick={() => setSuccessModal(false)}
             >
-              <div className="relative w-52 h-52">
-                <Image
-                  src={nft.image || images[`nft${nft.i}`]}
-                  objectFit="cover"
-                  layout="fill"
-                />
+              <div className="relative w-87 h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
+                <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+                  <div className="px-8 py-10">
+                    <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
+                      <div className="uppercase font-bold text-xl">
+                        {nft.name}
+                      </div>
+                      <div className="text-gray-300 uppercase tracking-widest">
+                        {nft.id}
+                      </div>
+                    <div className="text-gray-400 mt-8">
+                      <p className="font-bold">39.00 MLC</p>
+                      <p>Perfect everywhere</p>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>
+                  <div className="h-0.5 group-hover:w-full bg-gradient-to-l  via-yellow-950 group-hover:via-pink-500 w-[70%] m-auto rounded transition-all"></div>
+                </div>
               </div>
               <p className="font-poppins dark:text-white text-nft-black-1 text-sm minlg:text-xl font-normal mt-10">
                 {' '}
@@ -278,7 +389,56 @@ const NFTDetails = () => {
               />
             </div>
           )}
-          handleClose={() => setSuccessModal(false)}
+          handleClose={() => setBuySuccessModal(false)}
+        />
+      )}
+      {rentSuccessModal && (
+        <Modal
+          header="Renting Successfull"
+          body={(
+            <div
+              className="flexCenter flex-col text-center"
+            >
+              <div className="relative w-87 h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
+                <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+                  <div className="px-8 py-10">
+                    <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
+                      <div className="uppercase font-bold text-xl">
+                        {nft.name}
+                      </div>
+                      <div className="text-gray-300 uppercase tracking-widest">
+                        {nft.id}
+                      </div>
+                    <div className="text-gray-400 mt-8">
+                      <p className="font-bold">39.00 MLC</p>
+                      <p>Perfect everywhere</p>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>
+                  <div className="h-0.5 group-hover:w-full bg-gradient-to-l  via-yellow-950 group-hover:via-pink-500 w-[70%] m-auto rounded transition-all"></div>
+                </div>
+              </div>
+              <p className="font-poppins dark:text-white text-nft-black-1 text-sm minlg:text-xl font-normal mt-10">
+                {' '}
+                You successfully rented{' '}
+                <span className="font-semibold">{nft.name}</span> from{' '}
+                <span className="font-semibold">
+                  {shortenAddress(nft.seller)}
+                </span>
+                .
+              </p>
+            </div>
+          )}
+          footer={(
+            <div className="flexCenter flex-col">
+              <Button
+                btnName="Check it out"
+                classStyles="sm:mr-0 sm:mb-5 rounded-xl"
+                handleClick={() => router.push('/my-nfts')}
+              />
+            </div>
+          )}
+          handleClose={() => setRentSuccessModal(false)}
         />
       )}
     </div>
