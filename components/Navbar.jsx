@@ -57,7 +57,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
       handleClick={() => {
         setActive('');
         setIsOpen(false);
-        router.push('/create-nft');
+        router.push('/game');
       }}
     />
   ) : (

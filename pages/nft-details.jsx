@@ -10,7 +10,7 @@ import { shortenAddress } from '../utils/shortenAddress';
 
 
 const calculateRentalCost = (nft, rentalPeriodInDays) => {
-  const dailyRate = nft.rentPrice; // This is an example rate, adjust as needed
+  const dailyRate = nft.rentPrice;
   return dailyRate * rentalPeriodInDays;
 }
 
