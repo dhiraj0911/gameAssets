@@ -119,6 +119,7 @@ const NFTDetails = () => {
     forRent: '',
     forSale: '',
     tokenURI: '',
+    id: '',
   });
   const router = useRouter();
   const [paymentModal, setPaymentModal] = useState(false);
@@ -323,11 +324,11 @@ const NFTDetails = () => {
               <Button
                 btnName="Cancel"
                 classStyles="mr-5 sm:mr-0 rounded-xl"
-                handleClick={() => setPaymentModal(false)}
+                handleClick={() => setRentPaymentModal(false)}
               />
             </div>
           )}
-          handleClose={() => setPaymentModal(false)}
+          handleClose={() => setRentPaymentModal(false)}
         />
       )}
       {isLoadingNFT && (

@@ -136,7 +136,7 @@ const buyNft = async (nft) => {
     const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
-    console.log(nft);
+    
     const transaction = await contract.createMarketSale(nft.tokenId, { value: price });
     setIsLoadingNFT(true);
     await transaction.wait();
@@ -151,16 +151,14 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
     const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
-    // Assuming rentalPeriodInDays is the number of days the user wants to rent the NFT
     const rentPrice = ethers.utils.parseUnits(totalRentPrice.toString(), 'ether');
-    // Calculate the expiry time as the current time plus the rental period in seconds
     const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
 
     // Send the transaction with the value to rent the NFT
     const transaction = await contract.rentOutToken(
-        nft.tokenId, // The ID of the token to rent
-        expiry, // The expiration time of the rental
-        { value: rentPrice } // The rental price to pay
+        nft.tokenId,
+        expiry,
+        { value: rentPrice }
     );
 
     await transaction.wait(); // Wait for the transaction to be confirmed
@@ -209,10 +207,46 @@ const fetchMyNFTs = async () => {
 
   const data = await contract.fetchMyNFTs();
 
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price, rentPrice, forRent, forSale, sold: unformmattedPrice }) => {
+  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold }) => {
     const tokenURI = await contract.tokenURI(tokenId);
-    const { data: { name, id, description } } = await axios.get(tokenURI);
-    // const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
+
+    return {
+      price,
+      rentPrice,
+      forRent,
+      forSale,
+      tokenId: tokenId.toNumber(),
+      seller,
+      owner,
+      name,
+      id,
+      description,
+      tokenURI,
+    };
+  }));
+
+  return items;
+};
+
+const fetchMyRentedNFT = async () => {
+  setIsLoadingNFT(false); // Assuming you have a state to track loading status
+
+  const web3Modal = new Web3Modal();
+  const connection = await web3Modal.connect();
+  const provider = new ethers.providers.Web3Provider(connection);
+  const signer = provider.getSigner();
+  const contract = fetchContract(signer);
+
+  const data = await contract.fetchMyRentedNFTs();
+
+  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold }) => {
+    const tokenURI = await contract.tokenURI(tokenId);
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
     return {
       price,
@@ -240,7 +274,7 @@ const fetchMyNFTs = async () => {
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

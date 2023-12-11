@@ -68,7 +68,6 @@ const Home = () => {
           itemsForSale.push(item);
         }
       });
-
       setRentNfts(itemsForRent);
       setSaleNfts(itemsForSale);
       setIsLoading(false);
@@ -101,7 +100,7 @@ const Home = () => {
       setNfts(items);
       setNftsCopy(items);
       setIsLoading(false);
-      console.log(items);
+      // console.log(items);
     });
   }, []);
 
@@ -149,7 +148,6 @@ const Home = () => {
     };
   });
   const creators = getTopCreators(nftsCopy);
-  console.log(creators);
   return (
     <div className="flex justify-center ms:px-4 p-12">
       <div className="w-full minmd:w-4/5">

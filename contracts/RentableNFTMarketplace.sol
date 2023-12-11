@@ -80,7 +80,7 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       bool forSale,
       bool forRent
     ) private {
-      require(price > 0, "price required");
+      require(!forSale || price > 0, "price required");
       require(!forRent || rent_price > 0, "rent price required");
 
       idToMarketItem[tokenId] =  MarketItem(
@@ -106,7 +106,7 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       );
     }
 
-    function resellToken(uint256 tokenId, uint256 price,uint256 rent_price,bool forRent,bool forSale,bool member) public payable {
+    function resellToken(uint256 tokenId, uint256 price, uint256 rent_price, bool forRent, bool forSale, bool member) public payable {
       require(idToMarketItem[tokenId].owner == msg.sender, "Only item owner can perform this operation");
       require(member || msg.value == listingPrice, "Price must be equal to listing price");
       idToMarketItem[tokenId].sold = false;
@@ -135,16 +135,35 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       payable(seller).transfer(msg.value);
     }
 
-    function rentOutToken(
-        uint256 _tokenId,
-        uint64 _expires
-    ) public payable{
-        require(idToMarketItem[_tokenId].forRent, "Token was not for renting");
-        require(userOf(_tokenId) == address(0), "Token is already rented");
-        uint rentPrice = idToMarketItem[_tokenId].rentPrice;
-        require(msg.value>= rentPrice, "pay the rent price");
-        _setUser(_tokenId, msg.sender, _expires);
-    }
+    // function rentOutToken(
+    //     uint256 _tokenId,
+    //     uint64 _expires
+    // ) public payable{
+    //     require(idToMarketItem[_tokenId].forRent, "Token was not for renting");
+    //     require(userOf(_tokenId) == address(0), "Token is already rented");
+    //     uint rentPrice = idToMarketItem[_tokenId].rentPrice;
+    //     require(msg.value>= rentPrice, "pay the rent price");
+    //     _setUser(_tokenId, msg.sender, _expires);
+    // }
+
+function rentOutToken(
+    uint256 _tokenId,
+    uint64 _expires
+) public payable {
+    MarketItem storage marketItem = idToMarketItem[_tokenId];
+    
+    // Check if the token is available for rent
+    require(marketItem.forRent, "Token is not available for rent");
+    
+    // Check if the token is not already rented
+    require(userOf(_tokenId) == address(0), "Token is already rented");
+    
+    // Check if the sent value is equal to or greater than the rent price
+    require(msg.value >= marketItem.rentPrice, "Insufficient funds to rent the token");
+    
+    // Rent the token by setting the user and expiration date
+    _setUser(_tokenId, msg.sender, _expires);
+}
 
     // Add a new function to return all available items for buy and rent
     function fetchMarketItems() public view returns (MarketItem[] memory) {
@@ -185,24 +204,48 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
     }
 
     // Add a new function to return all items rented by the user
-    function fetchMyRentedNFTs() public view returns (MarketItem[] memory) {
-        uint totalItemCount = _tokenIds.current();
-        uint itemCount = _itemsSold.current();
-        uint currentIndex = 0;
+    // function fetchMyRentedNFTs() public view returns (MarketItem[] memory) {
+    //     uint totalItemCount = _tokenIds.current();
+    //     uint itemCount = _itemsSold.current();
+    //     uint currentIndex = 0;
 
-        MarketItem[] memory items = new MarketItem[](itemCount);
-        for (uint i = 0; i < totalItemCount; i++) {
-            if (userOf(i + 1) == msg.sender) {
-                uint currentId = i + 1;
-                MarketItem storage currentItem = idToMarketItem[currentId];
-                items[currentIndex] = currentItem;
-                currentIndex += 1;
-            }
-        }
+    //     MarketItem[] memory items = new MarketItem[](itemCount);
+    //     for (uint i = 0; i < totalItemCount; i++) {
+    //         if (userOf(i + 1) == msg.sender) {
+    //             uint currentId = i + 1;
+    //             MarketItem storage currentItem = idToMarketItem[currentId];
+    //             items[currentIndex] = currentItem;
+    //             currentIndex += 1;
+    //         }
+    //     }
 
-        return items;
-    }
+    //     return items;
+    // }
+  function fetchMyRentedNFTs() public view returns (MarketItem[] memory) {
+      uint totalItemCount = _tokenIds.current();
+      uint itemCount = 0;
+      uint[] memory rentedItemIds = new uint[](totalItemCount);
 
+      // Loop through all NFTs to find rented items owned by the user
+      for (uint i = 0; i < totalItemCount; i++) {
+          if (userOf(i + 1) == msg.sender) {
+              rentedItemIds[itemCount] = i + 1;
+              itemCount += 1;
+          }
+      }
+
+      // Create an array to store rented items
+      MarketItem[] memory items = new MarketItem[](itemCount);
+
+      // Populate the items array with rented items
+      for (uint i = 0; i < itemCount; i++) {
+          uint currentId = rentedItemIds[i];
+          MarketItem storage currentItem = idToMarketItem[currentId];
+          items[i] = currentItem;
+      }
+
+      return items;
+  }
 
     function updateRentPrice(uint256 _tokenId,uint256 rent_price) public{
         require(idToMarketItem[_tokenId].seller == msg.sender, "Only item owner can perform this operation");

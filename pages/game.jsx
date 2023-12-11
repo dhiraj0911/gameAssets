@@ -17,10 +17,10 @@ const Game = () => {
   const [currentAsset, setCurrentAsset] = useState(null);
   const { isLoadingNFT, createSale } = useContext(NFTContext);
   const [mintedAssets, setMintedAssets] = useState({});
-  const [isForSale, setIsForSale] = useState(true);
-  const [isForRent, setIsForRent] = useState(true); 
-  const [price, setPrice] = useState('');
-  const [rentPrice, setRentPrice] = useState('');
+  const [isForSale, setIsForSale] = useState(false);
+  const [isForRent, setIsForRent] = useState(false);
+  const [price, setPrice] = useState('0');
+  const [rentPrice, setRentPrice] = useState('0');
   const router = useRouter();
 
   const handleOpenModal = (asset) => {
@@ -42,8 +42,8 @@ const Game = () => {
       await createSale( url, price, rentPrice, isForSale, isForRent, true);
       setMintedAssets(prev => ({ ...prev, [currentAsset.id]: true }));
       // Reset state if needed
-      setPrice('');
-      setRentPrice('');
+      setPrice('0');
+      setRentPrice('0');
       setCurrentAsset(null);
       
       setIsModalOpen(false);
@@ -163,7 +163,13 @@ const Game = () => {
                               type="checkbox"
                               id="saleCheckbox"
                               checked={isForSale}
-                              onChange={(e) => setIsForSale(e.target.checked)}
+                              onChange={(e) => {
+                                setIsForSale(e.target.checked);
+                                // If the checkbox is checked, unlock the price input field
+                                if (!isForSale) {
+                                  setPrice('0');
+                                }
+                              }}
                               className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
                             />
                             <label htmlFor="saleCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">For Sale</label>
@@ -173,36 +179,46 @@ const Game = () => {
                               type="checkbox"
                               id="rentCheckbox"
                               checked={isForRent}
-                              onChange={(e) => setIsForRent(e.target.checked)}
+                              onChange={(e) => {
+                                setIsForRent(e.target.checked);
+                                // If the checkbox is checked, unlock the rent price input field
+                                if (!isForRent) {
+                                  setRentPrice('0');
+                                }
+                              }}
                               className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
                             />
                             <label htmlFor="rentCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">For Rent</label>
                           </div>
                         </div>
-                          <div className="mb-4">
-                            <label htmlFor="price" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-                            <input
-                              type="number"
-                              id="price"
-                              name="price"
-                              value={price}
-                              onChange={(e) => setPrice(e.target.value)}
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              required
-                            />
-                          </div>
-                          <div className="mb-4">
-                            <label htmlFor="rentPrice" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Rent Price per day</label>
-                            <input
-                              type="number"
-                              id="rentPrice"
-                              name="rentPrice"
-                              value={rentPrice}
-                              onChange={(e) => setRentPrice(e.target.value)}
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              required
-                            />
-                          </div>
+
+                        <div className="mb-4">
+                          <label htmlFor="price" className={`block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isForSale ? '' : 'hidden'}`}>Price</label>
+                          <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            // value={price}
+                            placeholder='Enter price'
+                            onChange={(e) => setPrice(e.target.value)}
+                            className={`bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${isForSale ? '' : 'hidden'}`}
+                            required={isForSale}
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <label htmlFor="rentPrice" className={`block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isForRent ? '' : 'hidden'}`}>Rent Price per day</label>
+                          <input
+                            type="number"
+                            id="rentPrice"
+                            name="rentPrice"
+                            // value={rentPrice}
+                            placeholder='Enter rent price'
+                            onChange={(e) => setRentPrice(e.target.value)}
+                            className={`bg-white border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${isForRent ? '' : 'hidden'}`}
+                            required={isForRent}
+                          />
+                        </div>
                         <div className="flex items-center justify-end p-4 rounded-b border-t border-gray-200 dark:border-gray-600">
                           <Button
                             btnName="Cancel"

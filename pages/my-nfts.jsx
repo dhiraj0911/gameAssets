@@ -7,17 +7,27 @@ import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
 
 const MyNFTs = () => {
-  const { fetchMyNFTsOrListedNFTs, currentAccount } = useContext(NFTContext);
+  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount } = useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [rentedNfts, setRentedNfts] = useState([]);
   const [activeSelect, setActiveSelect] = useState('Recently added');
 
   useEffect(() => {
-    fetchMyNFTsOrListedNFTs()
+    fetchMyNFTs()
       .then((items) => {
         setNfts(items);
         setNftsCopy(items);
+        setIsLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    // setIsLoading(true);
+    fetchMyRentedNFT()
+      .then((items) => {
+        setRentedNfts(items);
         setIsLoading(false);
       });
   }, []);
@@ -69,7 +79,7 @@ const MyNFTs = () => {
     <div className="w-full flex justify-start items-center flex-col min-h-screen">
       <div className="w-full flexCenter flex-col">
         <Banner
-          name="Your Nifty NFTs"
+          name="Your NFTs"
           childStyles="text-center mb-4"
           parentStyles="h-80 justify-center"
         />
@@ -98,6 +108,26 @@ const MyNFTs = () => {
           </div>
           <div className="mt-3 w-full flex flex-wrap">
             {nfts.map((nft) => <NFTCard key={nft.token} nft={nft} onProfilePage />)}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !rentedNfts.length ? (
+        <div className="flexCenter sm:p-4 p-16">
+          <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">No NFTs rented</h1>
+        </div>
+      ) : (
+        <div className="sm:px-4 p-12 w-full minmd:w-4/5 flexCenter flex-col">
+          <div className="flex-1 w-full flex flex-row sm:flex-col px-4 xs:px-0 minlg:px-8">
+            <SearchBar
+              activeSelect={activeSelect}
+              setActiveSelect={setActiveSelect}
+              handleSearch={onHandleSearch}
+              clearSearch={onClearSearch}
+            />
+          </div>
+          <div className="mt-3 w-full flex flex-wrap">
+            {rentedNfts.map((nft) => <NFTCard key={nft.token} nft={nft} onProfilePage />)}
           </div>
         </div>
       )}
