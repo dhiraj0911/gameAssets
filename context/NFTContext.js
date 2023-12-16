@@ -77,6 +77,16 @@ export const NFTProvider = ({ children }) => {
     }
   };
 
+  const userOf = async (id) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
+
+    const user = await contract.userOf(id);
+    return user;
+  }
 
   const fetchMyNFTsOrListedNFTs = async (type) => {
     setIsLoadingNFT(false);
@@ -170,7 +180,9 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
 
     const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
     const rentPrice = ethers.utils.parseUnits(totalRentPrice.toString(), 'ether');
-    const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
+    // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
+    //for 1 minute
+    const expiry = Math.floor(Date.now() / 1000) + 60;
 
     // Send the transaction with the value to rent the NFT
     const transaction = await contract.rentOutToken(
@@ -199,6 +211,19 @@ const checkExpireAndResetState = async(tokenId) => {
       console.error("Error checking expiry:", error);
       return false;
   }
+}
+
+const returnNFT = async (id) => {
+  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+  const signer = provider.getSigner();
+  const contract = fetchContract(signer);
+
+  // contract.events.NFTrented({
+  //   fromBlock: 'latest'
+  // }, function(error, event) {
+  //     console.log(event);
+  // });
+  await contract.returnToken(id);
 }
 
 const fetchNFTs = async () => {
@@ -322,7 +347,7 @@ const fetchMyRentedNFT = async () => {
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, userOf, returnNFT, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

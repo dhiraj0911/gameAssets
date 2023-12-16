@@ -109,7 +109,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 );
 
 const NFTDetails = () => {
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT } = useContext(NFTContext);
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf, returnNFT } = useContext(NFTContext);
   const [nft, setNft] = useState({
     tokenId: '',
     name: '',
@@ -128,12 +128,43 @@ const NFTDetails = () => {
   const [rentSuccessModal, setRentSuccessModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [rentalPeriod, setRentalPeriod] = useState(0);
+  const [user, setUser] = useState('');
 
   useEffect(() => {
     if (!router.isReady) return;
     setNft(router.query);
     setIsLoading(false);
   }, [router.isReady]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const address = await userOf(nft.tokenId);
+        setUser(address);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    if (nft && nft.tokenId) {
+      fetchUser();
+    }
+  }, [nft, nft.tokenId, userOf]);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await returnNFT(nft.tokenId);
+      } catch (error) {
+        console.error("Error returning NFT:", error);
+      }
+    };
+  
+    init();
+  }, [nft.tokenId]);
+
+
+  
 
   const buyCheckout = async () => {
     await buyNft(nft);
@@ -231,12 +262,6 @@ const NFTDetails = () => {
                   <p className="font-mono dark:text-white text-nft-black-1 text-xs border border-gray p-2">
                     You Cannot rent Your Own NFT
                   </p>
-                ) : currentAccount === nft.owner.toLowerCase() ? (
-                  <Button
-                    btnName="List on MarketPlace"
-                    classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
-                  />
                 ) : (
                   <Button
                     btnName={`Rent for ${nft.rentPrice} ${nftCurrency}`}
@@ -247,11 +272,18 @@ const NFTDetails = () => {
               </div>
             ) : (
               <div className="flex flex-row sm:flex-col mt-5 ">
-                <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
-                  Not available for Renting
-                </p>
+                {currentAccount === user.toLowerCase() ? (
+                  <p className="font-mono dark:text-white text-nft-black-1 text-s border border-gray p-2">
+                    You Have rented this Asset
+                  </p>
+                ) : (
+                  <p className="font-mono dark:text-white text-nft-black-1 text-s border border-gray p-2">
+                    Not available for Renting
+                  </p>
+                )}
               </div>
-            )}
+            )
+          }
           </div>
           <div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
@@ -261,15 +293,9 @@ const NFTDetails = () => {
               <div className="flex flex-row sm:flex-col mt-5 ">
                 {currentAccount === nft.seller.toLowerCase() ? (
                   <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
-                    You Cannot Buy Your Own NFT
+                    You Cannot Buy Your Own Asset
                   </p>
-                ) : currentAccount === nft.owner.toLowerCase() ? (
-                  <Button
-                    btnName="List on MarketPlace"
-                    classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&price=${nft.price}&rentPrice=${nft.rentPrice}&forSale=${nft.forSale}&forRent=${nft.forRent}`)}
-                  />
-                ) : (
+                ) :(
                   <Button
                     btnName={`Buy for ${nft.price} ${nftCurrency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
@@ -278,10 +304,18 @@ const NFTDetails = () => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-row sm:flex-col mt-5 ">
+              <div className="flex flex-row sm:flex-col mt-5 text-s">
+                {currentAccount === nft.owner.toLowerCase() ? (
+                  <Button
+                    btnName="List on MarketPlace"
+                    classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
+                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&price=${nft.price}&rentPrice=${nft.rentPrice}&forSale=${nft.forSale}&forRent=${nft.forRent}`)}
+                  />
+                ):(
                 <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
                   Not available for Selling
                 </p>
+                )}
               </div>
             )}
           </div>

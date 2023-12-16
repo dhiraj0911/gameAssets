@@ -29,6 +29,19 @@ const NFTCard = ({ nft, onProfilePage }) => {
 
     return () => clearInterval(interval);
   }, [nft.expires]);
+
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       await returnNFT(nft.tokenId);
+  //     } catch (error) {
+  //       console.error("Error returning NFT:", error);
+  //     }
+  //   };
+  
+  //   init();
+  // }, [nft.tokenId]);
+
   
   return (
     <div className="flex flex-col rounded-3xl border-solid hover:border-dotted m-3" style={{ backgroundColor: '#011627 ' }}>
@@ -38,12 +51,13 @@ const NFTCard = ({ nft, onProfilePage }) => {
             <h2 className="text-lg font-medium tracking-tighter text-white lg:text-3xl">
               {nft.name}
             </h2>
-            <p className="mt-2 text-sm text-gray-100">ID: {nft.id}</p>
+            <p className="mt-6 text-sm text-gray-100">ID: {nft.id}</p>
           </div>
           {ownerAddress === currentAccountAddress ? (
-              <>
-                
-              </>
+              // <span className="mt-5 ml-7 text-base font-medium text-white">
+              //   List It on marketPlace
+              // </span>
+              <></>
           ): nft.rented ? (
             <div className="flex gap-5 mt-4 text-center">
               <div className="flex flex-col">

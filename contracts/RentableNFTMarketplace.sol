@@ -5,8 +5,6 @@ import "./ERC4907.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "usingtellor/contracts/UsingTellor.sol";
 
-
-
 contract RentableNFTMarketplace is ERC4907, UsingTellor{
 
     using Counters for Counters.Counter;
@@ -49,6 +47,12 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       bool forSale,
       bool sold,
       bool rented
+    );
+
+    event rentedNFT(
+        uint256 indexed tokenId,
+        address indexed renter,
+        uint64 expires
     );
 
     modifier onlyOwner(uint256 _tokenId) {
@@ -122,14 +126,14 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       );
     }
 
-    function resellToken(uint256 tokenId, uint256 price, uint256 rent_price, bool forRent, bool forSale, bool member) public payable {
+    function resellToken(uint256 tokenId, uint256 price, uint256 rentPrice, bool forRent, bool forSale, bool member) public payable {
       require(idToMarketItem[tokenId].owner == msg.sender, "Only item owner can perform this operation");
       require(member || msg.value == listingPrice, "Price must be equal to listing price");
       idToMarketItem[tokenId].sold = false;
       idToMarketItem[tokenId].price = price;
       idToMarketItem[tokenId].seller = payable(msg.sender);
       idToMarketItem[tokenId].owner = payable(address(this));
-      idToMarketItem[tokenId].rentPrice = rent_price;
+      idToMarketItem[tokenId].rentPrice = rentPrice;
       idToMarketItem[tokenId].originalForRent = forRent;
       idToMarketItem[tokenId].originalForSale = forSale;
       idToMarketItem[tokenId].forRent = forRent;
@@ -150,46 +154,46 @@ contract RentableNFTMarketplace is ERC4907, UsingTellor{
       idToMarketItem[tokenId].owner = payable(msg.sender);
       idToMarketItem[tokenId].sold = true;
       idToMarketItem[tokenId].seller = payable(address(0));
+      idToMarketItem[tokenId].forSale = false;
       _itemsSold.increment();
       _transfer(address(this), msg.sender, tokenId);
       payable(seller).transfer(msg.value);
     }
 
-function rentOutToken(
-    uint256 _tokenId,
-    uint64 _expires
-) public payable {
-    MarketItem storage marketItem = idToMarketItem[_tokenId];
-    
-    require(marketItem.forRent, "Token is not available for rent");
-    require(userOf(_tokenId) == address(0), "Token is already rented");
-    require(msg.value >= marketItem.rentPrice, "Insufficient funds to rent the token");
+  function rentOutToken(
+      uint256 _tokenId,
+      uint64 _expires
+  ) public payable {
+      MarketItem storage marketItem = idToMarketItem[_tokenId];
+      
+      require(marketItem.forRent, "Token is not available for rent");
+      require(userOf(_tokenId) == address(0), "Token is already rented");
+      require(msg.value >= marketItem.rentPrice, "Insufficient funds to rent the token");
 
-    idToMarketItem[_tokenId].rented = true;
-    idToMarketItem[_tokenId].originalForRent = idToMarketItem[_tokenId].forRent;
-    idToMarketItem[_tokenId].originalForSale = idToMarketItem[_tokenId].forSale;
-    idToMarketItem[_tokenId].expires = _expires;
-    
-    idToMarketItem[_tokenId].forRent = false;
-    idToMarketItem[_tokenId].forSale = false;
-    _setUser(_tokenId, msg.sender, _expires);
-}
+      idToMarketItem[_tokenId].rented = true;
+      idToMarketItem[_tokenId].originalForRent = idToMarketItem[_tokenId].forRent;
+      idToMarketItem[_tokenId].originalForSale = idToMarketItem[_tokenId].forSale;
+      idToMarketItem[_tokenId].expires = _expires;
+      
+      idToMarketItem[_tokenId].forRent = false;
+      idToMarketItem[_tokenId].forSale = false;
+      _setUser(_tokenId, msg.sender, _expires);
+      emit rentedNFT(_tokenId, msg.sender, _expires);
+  }
 
-function checkExpiryAndResetState(uint256 _tokenId) public {
-    MarketItem storage marketItem = idToMarketItem[_tokenId];
+  function returnToken(uint256 _tokenId) public payable {
+      MarketItem storage marketItem = idToMarketItem[_tokenId];
+      // require(userOf(_tokenId) == msg.sender, "Only the renter can return the token");
+      require(marketItem.rented, "Token is not rented");
+      require(marketItem.expires < block.timestamp, "Token is not expired yet");
+      idToMarketItem[_tokenId].rented = false;
+      idToMarketItem[_tokenId].forRent = idToMarketItem[_tokenId].originalForRent;
+      idToMarketItem[_tokenId].forSale = idToMarketItem[_tokenId].originalForSale;
+      _setUser(_tokenId, address(0), 0);
+  }
 
-    // Check if the rental period has expired
-    if (block.timestamp > marketItem.expires) {
-        // Reset the forRent and forSale to their original values
-        idToMarketItem[_tokenId].forRent = idToMarketItem[_tokenId].originalForRent;
-        idToMarketItem[_tokenId].forSale = idToMarketItem[_tokenId].originalForSale;
-        idToMarketItem[_tokenId].rented = false;  
-        // Optionally, you might want to reset the user of the token
-        _setUser(_tokenId, address(0), 0);
-    }
-}
     // Add a new function to return all available items for buy and rent
-function fetchMarketItems() public view returns (MarketItem[] memory) {
+    function fetchMarketItems() public view returns (MarketItem[] memory) {
         uint totalItemCount = _tokenIds.current();
         uint itemCount = _tokenIds.current() - _itemsSold.current();
         uint currentIndex = 0;
@@ -296,4 +300,9 @@ function fetchMarketItems() public view returns (MarketItem[] memory) {
       uint balance = address(this).balance;
       payable(msg.sender).transfer(balance);
     }
+
+    function getUserOf(uint256 tokenId) public view returns (address) {
+      return userOf(tokenId);
+    }
+
 }

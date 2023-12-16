@@ -7,7 +7,7 @@ import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, currentAccount } = useContext(NFTContext);
+  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount, returnNFT } = useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,31 +31,17 @@ const MyNFTs = () => {
       });
   }, []);
 
-
-  // useEffect(() => {
-  //   const checkAllExpiries = async () => {
-  //     let stateChanged = false;
-  //     for (const nft of rentedNfts) {
-  //       const changed = await checkExpireAndResetState(nft.tokenId);
-  //       if (changed) {
-  //         stateChanged = true;
-  //       }
-  //     }
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await returnNFT(rentedNfts.tokenId);
+      } catch (error) {
+        console.error("Error returning NFT:", error);
+      }
+    };
   
-  //     // If any NFT's state was changed, re-fetch the rented NFTs
-  //     if (stateChanged) {
-  //       const updatedRentedNfts = await fetchMyRentedNFT();
-  //       setRentedNfts(updatedRentedNfts);
-  //     }
-  //   };
-  
-  //   const interval = setInterval(() => {
-  //     checkAllExpiries();
-  //   }, 5000); // Check every 60 seconds, adjust as needed
-  
-  //   return () => clearInterval(interval);
-  // }, [rentedNfts]); // Dependency on rentedNfts
-
+    init();
+  }, [rentedNfts.tokenId]);
 
   useEffect(() => {
     const sortedNfts = [...nfts];

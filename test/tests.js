@@ -69,59 +69,7 @@ describe("RentableNFTMarketplace", function () {
         expect(newItem.rentPrice).to.equal(ethers.utils.parseEther("0.01"));  // Check newItem's rentPrice
     });
 
-    // it("Should not allow users to rent out tokens after expiry", async function () {
-    //     // Seller lists an item for rent
-    //     const rentPrice = ethers.utils.parseEther("0.001"); // Rent price set by the seller
-    //     await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
-    //     const newTokenId = await marketplace._tokenIds();
-      
-    //     // Set the expiration time for the rent
-    //     const rentDuration = 24 * 60 * 60; // 24 hours in seconds
-    //     const expires = (await ethers.provider.getBlock('latest')).timestamp + rentDuration;
-      
-    //     // Renter rents the item
-    //     await marketplace.connect(renter).rentOutToken(newTokenId, expires, { value: rentPrice });
-
-    //     // Check if the token is rented out correctly
-    //     let userOfToken = await marketplace.userOf(newTokenId);
-    //     expect(userOfToken).to.equal(renter.address);
-      
-    //     // Advance the blockchain time by more than 24 hours to simulate expiry
-    //     await ethers.provider.send('evm_increaseTime', [rentDuration + 1]); // +1 to ensure we're past the expiry
-    //     await ethers.provider.send('evm_mine'); // mine a new block to make sure the time change takes effect
-      
-    //     userOfToken = await marketplace.userOf(newTokenId);
-    //     expect(userOfToken).to.equal(ethers.constants.AddressZero, "The token should not have an active user after expiry");
-    //   });
-
-    it("Should reset the token state after expiry", async function () {
-      // Seller lists an item for rent
-      const rentPrice = ethers.utils.parseEther("0.001");
-      await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
-      const newTokenId = await marketplace._tokenIds();
-  
-      // Set the expiration time for the rent
-      const rentDuration = 24 * 60 * 60; // 24 hours in seconds
-      const expires = (await ethers.provider.getBlock('latest')).timestamp + rentDuration;
-  
-      // Renter rents the item
-      await marketplace.connect(renter).rentOutToken(newTokenId, expires, { value: rentPrice });
-  
-      // Advance the blockchain time to simulate expiry
-      await ethers.provider.send('evm_increaseTime', [rentDuration + 1]);
-      await ethers.provider.send('evm_mine');
-  
-      // Call checkExpiryAndResetState
-      await marketplace.connect(anyUser).checkExpiryAndResetState(newTokenId);
-  
-      // Verify that the token's state has been reset
-      const marketItem = await marketplace.idToMarketItem(newTokenId);
-      expect(marketItem.forRent).to.equal(marketItem.originalForRent);
-      expect(marketItem.forSale).to.equal(marketItem.originalForSale);
-  });
-  
-
-    it("Should allow users to rent out tokens", async function () {
+    it("Should not allow users to rent out tokens after expiry", async function () {
         // Seller lists an item for rent
         const rentPrice = ethers.utils.parseEther("0.001"); // Rent price set by the seller
         await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
@@ -136,15 +84,71 @@ describe("RentableNFTMarketplace", function () {
 
         // Check if the token is rented out correctly
         let userOfToken = await marketplace.userOf(newTokenId);
+        console.log(userOfToken);
         expect(userOfToken).to.equal(renter.address);
       
-        // Advance the blockchain time by less than 24 hours to simulate expiry
-        await ethers.provider.send('evm_increaseTime', [rentDuration - 1]); // +1 to ensure we're past the expiry
+        // Advance the blockchain time by more than 24 hours to simulate expiry
+        await ethers.provider.send('evm_increaseTime', [rentDuration + 1]); // +1 to ensure we're past the expiry
         await ethers.provider.send('evm_mine'); // mine a new block to make sure the time change takes effect
       
+
         userOfToken = await marketplace.userOf(newTokenId);
-        expect(userOfToken).to.equal(renter.address, "The token should have an active user before expiry");
+        console.log(userOfToken);
+
+        expect(userOfToken).to.equal(ethers.constants.AddressZero, "The token should not have an active user after expiry");
       });
+
+  //   it("Should reset the token state after expiry", async function () {
+  //     // Seller lists an item for rent
+  //     const rentPrice = ethers.utils.parseEther("0.001");
+  //     await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
+  //     const newTokenId = await marketplace._tokenIds();
+  
+  //     // Set the expiration time for the rent
+  //     const rentDuration = 24 * 60 * 60; // 24 hours in seconds
+  //     const expires = (await ethers.provider.getBlock('latest')).timestamp + rentDuration;
+  
+  //     // Renter rents the item
+  //     await marketplace.connect(renter).rentOutToken(newTokenId, expires, { value: rentPrice });
+  
+  //     // Advance the blockchain time to simulate expiry
+  //     await ethers.provider.send('evm_increaseTime', [rentDuration + 1]);
+  //     await ethers.provider.send('evm_mine');
+  
+  //     // Call checkExpiryAndResetState
+  //     await marketplace.connect(anyUser).checkExpiryAndResetState(newTokenId);
+  
+  //     // Verify that the token's state has been reset
+  //     const marketItem = await marketplace.idToMarketItem(newTokenId);
+  //     expect(marketItem.forRent).to.equal(marketItem.originalForRent);
+  //     expect(marketItem.forSale).to.equal(marketItem.originalForSale);
+  // });
+  
+
+  //   it("Should allow users to rent out tokens", async function () {
+  //       // Seller lists an item for rent
+  //       const rentPrice = ethers.utils.parseEther("0.001"); // Rent price set by the seller
+  //       await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("0.1"), rentPrice, true, true, false, { value: listingPrice });
+  //       const newTokenId = await marketplace._tokenIds();
+      
+  //       // Set the expiration time for the rent
+  //       const rentDuration = 24 * 60 * 60; // 24 hours in seconds
+  //       const expires = (await ethers.provider.getBlock('latest')).timestamp + rentDuration;
+      
+  //       // Renter rents the item
+  //       await marketplace.connect(renter).rentOutToken(newTokenId, expires, { value: rentPrice });
+
+  //       // Check if the token is rented out correctly
+  //       let userOfToken = await marketplace.userOf(newTokenId);
+  //       expect(userOfToken).to.equal(renter.address);
+      
+  //       // Advance the blockchain time by less than 24 hours to simulate expiry
+  //       await ethers.provider.send('evm_increaseTime', [rentDuration - 1]); // +1 to ensure we're past the expiry
+  //       await ethers.provider.send('evm_mine'); // mine a new block to make sure the time change takes effect
+      
+  //       userOfToken = await marketplace.userOf(newTokenId);
+  //       expect(userOfToken).to.equal(renter.address, "The token should have an active user before expiry");
+  //     });
 
       // it("Should fetch and return all available NFTs for sale", async function () {
       //   // Seller lists an item
