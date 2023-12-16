@@ -1,73 +1,117 @@
-// import { useContext } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { NFTContext } from '../context/NFTContext';
-
-// import images from '../assets';
-// // import { shortenAddress } from '../utils/shortenAddress';
-
-// const NFTCard = ({ nft, onProfilePage }) => {
-//   const { nftCurrency } = useContext(NFTContext);
-//   return (
-//     <Link href={{ pathname: '/nft-details', query: nft }}>
-
-//       <div className="flex-1 min-w-215 max-w-max xs:max-w-none sm:w-full sm:min-w-155 minmd:min-w-256 minlg:min-w-327 dark:bg-nft-black-3 bg-white rounded-2xl p-4 m-4 minlg:m-8 sm:my-2 sm:mx-2 cursor-pointer shadow-md">
-//         <div className="relative w-full h-52 sm:h-36 minmd:h-60 minlg:h-300 rounded-2xl overflow-hidden">
-//           {/* <Image
-//             src={nft.image || images[`nft${nft.i}`]}
-//             layout="fill"
-//             objectFit="cover"
-//             alt={`nft-${nft.i}`}
-//           /> */}
-//           <h1>{nft.name}</h1>
-//         </div>
-//         <div className="mt-3 flex flex-col ">
-//           <p className="font-poppins ...">{nft.name}</p>
-//             {/* Display additional information */}
-//             <p className="font-poppins ...">ID: {nft.id}</p>
-//             {nft.forSale && (
-//               <p className="font-poppins ...">Price: {nft.price} {nftCurrency}</p>
-//             )}
-//             {nft.forRent && (
-//               <p className="font-poppins ...">Rent Price: {nft.rentPrice} {nftCurrency}</p>
-//             )}
-//             {/* View More Button */}
-//             <button className="mt-2 ...">View More</button>
-//         </div>
-//       </div>
-
-//     </Link>
-//   );
-// };
-
-// export default NFTCard;
-
-// https://uiverse.io/joe-watson-sbf/honest-bullfrog-6
-
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NFTContext } from '../context/NFTContext';
 
 const NFTCard = ({ nft, onProfilePage }) => {
-  const { nftCurrency } = useContext(NFTContext);
+  const { nftCurrency, currentAccount } = useContext(NFTContext);
+  const ownerAddress = nft.owner.toLowerCase();
+  const currentAccountAddress = currentAccount.toLowerCase();
+  const [days, setDays] = useState(0);
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
 
+  useEffect(() => {
+    const targetDate = new Date(nft.expires);
+    const interval = setInterval(() => {
+      const now = new Date();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        setDays(Math.floor(difference / (1000 * 60 * 60 * 24)));
+        setHours(Math.floor((difference / (1000 * 60 * 60)) % 24));
+        setMinutes(Math.floor((difference / 1000 / 60) % 60));
+        setSeconds(Math.floor((difference / 1000) % 60));
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [nft.expires]);
+  
   return (
-    <Link href={{ pathname: '/nft-details', query: nft }}>
-      <div className="w-[11.875em] h-[15.875em] p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_20px_1px_white] hover:border-opacity-45 mt-8 ml-7">
-        <h1 className="text-xl font-semibold mb-2">{nft.name}</h1>
-        <div>
-          <p className="text-sm">ID: {nft.id}</p>
-
-          {nft.forSale && (
-            <p className="text-sm">Price: {nft.price} {nftCurrency}</p>
+    <div className="flex flex-col rounded-3xl border-solid hover:border-dotted m-3" style={{ backgroundColor: '#011627 ' }}>
+      <div className="px-4 py-7 sm:p-10 sm:pb-6">
+        <div className="grid items-center justify-center w-full grid-cols-1 text-left">
+          <div>
+            <h2 className="text-lg font-medium tracking-tighter text-white lg:text-3xl">
+              {nft.name}
+            </h2>
+            <p className="mt-2 text-sm text-gray-100">ID: {nft.id}</p>
+          </div>
+          {ownerAddress === currentAccountAddress ? (
+              <>
+                
+              </>
+          ): nft.rented ? (
+            <div className="flex gap-5 mt-4 text-center">
+              <div className="flex flex-col">
+                <span className="countdown font-mono text-4xl">
+                  <span style={{ "--value": `${days}` }}>{days}</span>
+                </span>
+                days
+              </div>
+              <div className="flex flex-col">
+                <span className="countdown font-mono text-4xl">
+                  <span style={{ "--value": `${hours}` }}>{hours}</span>
+                </span>
+                hours
+              </div>
+              <div className="flex flex-col">
+                <span className="countdown font-mono text-4xl">
+                  <span style={{ "--value": `${minutes}` }}>{minutes}</span>
+                </span>
+                min
+              </div>
+              <div className="flex flex-col">
+                <span className="countdown font-mono text-4xl">
+                  <span style={{ "--value": `${seconds}` }}>{seconds}</span>
+                </span>
+                sec
+              </div>
+            </div>
+          ) : nft.sold ? (
+              <>
+                This NFT is already sold.
+              </>
+          ) : nft.rented ? (
+              <>
+                This NFT is already rented.
+              </>
+          ) : (
+              <>
+                {nft.forRent ? (
+                <div className="mt-6">
+                  <p>
+                    <span className="text-5xl font-light tracking-tight text-white">
+                      {nft.rentPrice}
+                    </span>
+                    <span className="text-base font-medium text-white"> {nftCurrency} /day </span>
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <p>
+                    <span className="text-5xl font-light tracking-tight text-white">
+                      {nft.price}
+                    </span>
+                    <span className="text-base font-medium text-white"> {nftCurrency}</span>
+                  </p>
+                </div>
+              )}
+            </>
           )}
-          {nft.forRent && (
-            <p className="text-sm">Rent Price: {nft.rentPrice} {nftCurrency}</p>
-          )}
-          <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">View More</button>
         </div>
       </div>
-    </Link>
+      <Link href={{ pathname: '/nft-details', query: nft }}>
+        <div className="flex px-6 pb-8 sm:px-8">
+          <a aria-describedby="tier-starter" className="items-center justify-center w-full px-6 py-2.5 text-center text-black duration-200 bg-white border-2 border-white rounded-full inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-sm focus-visible:ring-white" href="#">
+            View More
+          </a>
+        </div>
+      </Link>
+    </div>
   );
 };
 

@@ -267,7 +267,7 @@ const NFTDetails = () => {
                   <Button
                     btnName="List on MarketPlace"
                     classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
+                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&price=${nft.price}&rentPrice=${nft.rentPrice}&forSale=${nft.forSale}&forRent=${nft.forRent}`)}
                   />
                 ) : (
                   <Button

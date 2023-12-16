@@ -7,7 +7,7 @@ import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount } = useContext(NFTContext);
+  const { fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, currentAccount } = useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,13 +24,38 @@ const MyNFTs = () => {
   }, []);
 
   useEffect(() => {
-    // setIsLoading(true);
     fetchMyRentedNFT()
       .then((items) => {
         setRentedNfts(items);
         setIsLoading(false);
       });
   }, []);
+
+
+  // useEffect(() => {
+  //   const checkAllExpiries = async () => {
+  //     let stateChanged = false;
+  //     for (const nft of rentedNfts) {
+  //       const changed = await checkExpireAndResetState(nft.tokenId);
+  //       if (changed) {
+  //         stateChanged = true;
+  //       }
+  //     }
+  
+  //     // If any NFT's state was changed, re-fetch the rented NFTs
+  //     if (stateChanged) {
+  //       const updatedRentedNfts = await fetchMyRentedNFT();
+  //       setRentedNfts(updatedRentedNfts);
+  //     }
+  //   };
+  
+  //   const interval = setInterval(() => {
+  //     checkAllExpiries();
+  //   }, 5000); // Check every 60 seconds, adjust as needed
+  
+  //   return () => clearInterval(interval);
+  // }, [rentedNfts]); // Dependency on rentedNfts
+
 
   useEffect(() => {
     const sortedNfts = [...nfts];
@@ -97,7 +122,7 @@ const MyNFTs = () => {
           <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">No NFTs Owned</h1>
         </div>
       ) : (
-        <div className="sm:px-4 p-12 w-full minmd:w-4/5 flexCenter flex-col">
+        <div className="sm:px-4 pl-12 pr-12 pt-10 w-full minmd:w-4/5 flexCenter flex-col">
           <div className="flex-1 w-full flex flex-row sm:flex-col px-4 xs:px-0 minlg:px-8">
             <SearchBar
               activeSelect={activeSelect}
@@ -117,7 +142,10 @@ const MyNFTs = () => {
           <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">No NFTs rented</h1>
         </div>
       ) : (
-        <div className="sm:px-4 p-12 w-full minmd:w-4/5 flexCenter flex-col">
+        <div className="sm:px-4 pl-12 pr-12 pt-5 w-full minmd:w-4/5 flexCenter flex-col">
+          <div className="flexCenter sm:p-4 p-16">
+            <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">My NFTs rented</h1>
+          </div>
           <div className="flex-1 w-full flex flex-row sm:flex-col px-4 xs:px-0 minlg:px-8">
             <SearchBar
               activeSelect={activeSelect}
