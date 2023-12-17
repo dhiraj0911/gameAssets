@@ -138,7 +138,7 @@ export const NFTProvider = ({ children }) => {
     await transaction.wait();
 };
 
-const reSale = async (url, forminputPrice, forminputRentPrice, forSale, forRent, member) => {
+const reSale = async (tokenId, forminputPrice, forminputRentPrice, forRent, forSale, member) => {
   const web3Modal = new Web3Modal();
   const connection = await web3Modal.connect();
   const provider = new ethers.providers.Web3Provider(connection);
@@ -150,7 +150,7 @@ const reSale = async (url, forminputPrice, forminputRentPrice, forSale, forRent,
 
   const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
   // const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
-  const transaction =  await contract.resellToken(id, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() });
+  const transaction =  await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, member, { value: listingPrice.toString() });
   setIsLoadingNFT(true);
   await transaction.wait();
 };
@@ -347,7 +347,7 @@ const fetchMyRentedNFT = async () => {
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, userOf, returnNFT, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, userOf, returnNFT, reSale, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

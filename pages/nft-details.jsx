@@ -204,7 +204,7 @@ const NFTDetails = () => {
                   {nft.id}
                 </div>
               <div className="text-gray-400 mt-8">
-                <p className="font-bold">39.00 MLC</p>
+                <p className="font-bold">{nft.price}</p>
                 <p>Perfect everywhere</p>
               </div>
             </div>
@@ -282,8 +282,7 @@ const NFTDetails = () => {
                   </p>
                 )}
               </div>
-            )
-          }
+            )}
           </div>
           <div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal">
@@ -309,7 +308,7 @@ const NFTDetails = () => {
                   <Button
                     btnName="List on MarketPlace"
                     classStyles="mr-5 sm:mr-0 sm:mb-5 rounded-xl"
-                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&price=${nft.price}&rentPrice=${nft.rentPrice}&forSale=${nft.forSale}&forRent=${nft.forRent}`)}
+                    handleClick={() => router.push(`/resell-nft?tokenId=${nft.tokenId}&tokenURI=${nft.tokenURI}`)}
                   />
                 ):(
                 <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
