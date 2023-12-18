@@ -133,7 +133,6 @@ export const NFTProvider = ({ children }) => {
 
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
     const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
-    //   : await contract.resellToken(id, price, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
     await transaction.wait();
 };
@@ -195,46 +194,53 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
     console.log(`NFT with tokenId ${nft.tokenId} rented successfully! to ${signer.address}`);
 };
 
-const checkExpireAndResetState = async(tokenId) => {
-  const web3Modal = new Web3Modal();
-  const connection = await web3Modal.connect();
-  const provider = new ethers.providers.Web3Provider(connection);
-  const signer = provider.getSigner();
-  const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
+// const checkExpireAndResetState = async(tokenId) => {
+//   const web3Modal = new Web3Modal();
+//   const connection = await web3Modal.connect();
+//   const provider = new ethers.providers.Web3Provider(connection);
+//   const signer = provider.getSigner();
+//   const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
-  try {
-    const transaction = await contract.checkExpiryAndResetState(tokenId);
-    await transaction.wait();
-    console.log(`Checked expiry for tokenId ${tokenId}`);
-    return true;
-  } catch (error) {
-      console.error("Error checking expiry:", error);
-      return false;
-  }
-}
+//   try {
+//     const transaction = await contract.checkExpiryAndResetState(tokenId);
+//     await transaction.wait();
+//     console.log(`Checked expiry for tokenId ${tokenId}`);
+//     return true;
+//   } catch (error) {
+//       console.error("Error checking expiry:", error);
+//       return false;
+//   }
+// }
 
-const returnNFT = async (id) => {
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const signer = provider.getSigner();
-  const contract = fetchContract(signer);
+// const returnNFT = async (id) => {
+//   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 
-  // contract.events.NFTrented({
-  //   fromBlock: 'latest'
-  // }, function(error, event) {
-  //     console.log(event);
-  // });
-  await contract.returnToken(id);
-}
+//   const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
+  
+//   const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
+//   const signer = provider.getSigner();
+//   const contract = fetchContract(signer);
+
+//   // contract.events.NFTrented({
+//   //   fromBlock: 'latest'
+//   // }, function(error, event) {
+//   //     console.log(event);
+//   // });
+//   await contract.returnToken(id);
+// }
 
 const fetchNFTs = async () => {
   console.log("fetching nfts");
   setIsLoadingNFT(false);
-  const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-  const signer = provider.getSigner();
-  const contract = fetchContract(signer);
+  const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
+
+  // Use provider directly for read-only operations
+  const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
+  const contract = fetchContract(provider); // Use provider instead of signer
+  console.log("error 1");
 
   const data = await contract.fetchMarketItems();
-
+  console.log("error 2");
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice , forRent, forSale, sold, rented, expires }) => {
     const tokenURI = await contract.tokenURI(tokenId);
     const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
@@ -337,7 +343,7 @@ const fetchMyRentedNFT = async () => {
   }));
 
   return items;
-};
+};  
 
   useEffect(async () => {
     checkIfWalletIsConnected();
@@ -347,7 +353,7 @@ const fetchMyRentedNFT = async () => {
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, checkExpireAndResetState, userOf, returnNFT, reSale, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, userOf, reSale, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

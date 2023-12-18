@@ -109,7 +109,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 );
 
 const NFTDetails = () => {
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf, returnNFT } = useContext(NFTContext);
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } = useContext(NFTContext);
   const [nft, setNft] = useState({
     tokenId: '',
     name: '',
@@ -151,17 +151,17 @@ const NFTDetails = () => {
     }
   }, [nft, nft.tokenId, userOf]);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await returnNFT(nft.tokenId);
-      } catch (error) {
-        console.error("Error returning NFT:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       await returnNFT(nft.tokenId);
+  //     } catch (error) {
+  //       console.error("Error returning NFT:", error);
+  //     }
+  //   };
   
-    init();
-  }, [nft.tokenId]);
+  //   init();
+  // }, [nft.tokenId]);
 
 
   

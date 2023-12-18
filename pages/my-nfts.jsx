@@ -7,7 +7,7 @@ import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount, returnNFT } = useContext(NFTContext);
+  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount } = useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,17 +31,17 @@ const MyNFTs = () => {
       });
   }, []);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await returnNFT(rentedNfts.tokenId);
-      } catch (error) {
-        console.error("Error returning NFT:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     try {
+  //       await returnNFT(rentedNfts.tokenId);
+  //     } catch (error) {
+  //       console.error("Error returning NFT:", error);
+  //     }
+  //   };
   
-    init();
-  }, [rentedNfts.tokenId]);
+  //   init();
+  // }, [rentedNfts.tokenId]);
 
   useEffect(() => {
     const sortedNfts = [...nfts];

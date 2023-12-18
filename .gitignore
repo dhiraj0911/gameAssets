@@ -2,4 +2,4 @@ cache
 .next
 artifacts
 node_modules
-
+.env

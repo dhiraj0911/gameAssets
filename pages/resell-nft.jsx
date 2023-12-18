@@ -1,9 +1,11 @@
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/router";
-
+import axios from "axios";
 import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Input } from "../components";
-import axios from "axios";
+
+
+
 
 const ResellNFT = () => {
   const { reSale, isLoadingNFT } = useContext(NFTContext);
@@ -20,7 +22,7 @@ const ResellNFT = () => {
   useEffect(async () => {
     if (!tokenURI) return;
     const {
-      data: { id, name, description },
+      data: { id, name },
     } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
 
     setName(name);

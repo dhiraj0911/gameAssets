@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chainlink/contracts": "^0.2.2",
     "@openzeppelin/contracts": "4.5.0",
     "axios": "0.26.0",
     "buffer": "^6.0.3",
