@@ -62,6 +62,10 @@ const Game = () => {
       }
 
       // Make a request to your backend with the dynamic API endpoint
+<<<<<<< HEAD
+=======
+      // const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
+>>>>>>> b7625c8d77240217a243364eb0d6358c2f699a98
       const response = await fetch(`https://gameasset-backend.onrender.com/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
         method: 'POST',
       });
