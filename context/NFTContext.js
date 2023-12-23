@@ -237,10 +237,9 @@ const fetchNFTs = async () => {
   // Use provider directly for read-only operations
   const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
   const contract = fetchContract(provider); // Use provider instead of signer
-  console.log("error 1");
 
   const data = await contract.fetchMarketItems();
-  console.log("error 2");
+  console.log(data);
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice , forRent, forSale, sold, rented, expires }) => {
     const tokenURI = await contract.tokenURI(tokenId);
     const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);

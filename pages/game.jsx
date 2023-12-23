@@ -7,7 +7,6 @@ import { useTheme } from 'next-themes';
 
 import { NFTContext } from '../context/NFTContext';
 import { Button, Input, Loader } from '../components';
-// import images from '../assets';
 
 
 const Game = () => {
@@ -62,8 +61,8 @@ const Game = () => {
       }
 
       // Make a request to your backend with the dynamic API endpoint
-      // const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
-      const response = await fetch(`https://gameasset-backend.onrender.com/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
+      const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
+      // const response = await fetch(`https://gameasset-backend.onrender.com/games/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
         method: 'POST',
       });
 
