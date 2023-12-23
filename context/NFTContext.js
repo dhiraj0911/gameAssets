@@ -242,8 +242,7 @@ const fetchNFTs = async () => {
   console.log(data);
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice , forRent, forSale, sold, rented, expires }) => {
     const tokenURI = await contract.tokenURI(tokenId);
-    // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const { data: { name, id, description } } = await axios.get(`https://${tokenURI}.ipfs.dweb.link/`);
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
     const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
     const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
