@@ -17,6 +17,67 @@ export const NFTProvider = ({ children }) => {
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   const nftCurrency = 'ETH';
 
+  const [isSigned, setIsSigned] = useState(false);
+
+  useEffect(() => {
+    const jwt = window.localStorage.getItem('token');
+    console.log(jwt);
+    if (jwt) {
+      setIsSigned(true);
+    } else {
+      setIsSigned(false);
+    }
+  }, []);
+
+  const signIn = async (email, password) => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/vendor/signin', {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        const token = window.localStorage.setItem('token', response.data.token);
+        if (token) {
+          setIsSigned(true);
+        } else {
+          setIsSigned(false);
+        }
+        window.location.href = '/';
+      } else {
+        console.log('Authentication failed');
+      }
+    } catch (error) {
+      console.error('Error during sign-in:', error);
+    }
+  };
+
+  const signUp = async (email, password, name, ethAddress) => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/vendor/signup', {
+        email,
+        password,
+        name,
+        ethAddress,
+      });
+
+      if (response.status === 200) {
+        window.location.href = '/';
+      } else {
+        console.log('Authentication failed');
+      }
+    } catch (error) {
+      console.error('Error during sign-up:', error);
+    }
+  }
+
+  const signOut = async() => {
+    window.localStorage.clear();
+    window.location.href = '/';
+  }
+
+  
+
   const checkIfWalletIsConnected = async () => {
     if (!window.ethereum) return alert('Please install Metamask wallet');
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -345,7 +406,7 @@ const fetchMyRentedNFT = async () => {
   }));
 
   return items;
-};  
+};
 
   useEffect(async () => {
     checkIfWalletIsConnected();
@@ -355,7 +416,7 @@ const fetchMyRentedNFT = async () => {
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, userOf, reSale, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, userOf, reSale, signIn, signUp, isSigned, signOut, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

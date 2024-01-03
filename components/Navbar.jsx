@@ -1,15 +1,15 @@
 import { useState, useContext, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import Link from 'next/link';
+import  Link from 'next/link';
+import  { useRouter } from 'next/router';
 
 import { NFTContext } from '../context/NFTContext';
 import Button from './Button';
 import images from '../assets';
 
 const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
-  const generateLink = (i) => {
+  const generateLink = (i) => { 
     switch (i) {
       case 0:
         return '/';
@@ -29,7 +29,7 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
       }`}
     >
       {['Explore NFTs', 'Listed NFTs', 'My NFTs'].map((item, i) => (
-        <li
+        < li
           key={i}
           onClick={() => {
             setActive(item);
@@ -47,25 +47,60 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
     </ul>
   );
 };
-const ButtonGroup = ({ setActive, router, setIsOpen }) => {
-  const { connectWallet, currentAccount } = useContext(NFTContext);
 
-  return currentAccount ? (
-    <Button
-      btnName="Create"
-      classStyles="mx-2 rounded-xl"
-      handleClick={() => {
-        setActive('');
-        setIsOpen(false);
-        router.push('/game');
-      }}
-    />
-  ) : (
-    <Button
-      btnName="Connect"
-      classStyles="mx-2 rounded-xl"
-      handleClick={connectWallet}
-    />
+const ButtonGroup = ({ setActive, router, setIsOpen }) => {
+  const { connectWallet, currentAccount, signOut, isSigned } = useContext(NFTContext);
+
+  return (
+    <>
+      {!isSigned ? (
+        <>
+          <Button
+            btnName="Sign In"
+            classStyles="mx-2 rounded-xl"
+            handleClick={() => {
+              setActive('');
+              setIsOpen(false);
+              router.push('/signin');
+            }}
+          />
+          <Button
+            btnName="Sign Up"
+            classStyles="mx-2 rounded-xl"
+            handleClick={() => {
+              setActive('');
+              setIsOpen(false);
+              router.push('/signup');
+            }}
+          />
+        </>
+      ) : (
+        <>
+          {currentAccount ? (
+            <Button
+              btnName="Create"
+              classStyles="mx-2 rounded-xl"
+              handleClick={() => {
+                setActive('');
+                setIsOpen(false);
+                router.push('/game');
+              }}
+            />
+          ) : (
+            <Button
+              btnName="Connect"
+              classStyles="mx-2 rounded-xl"
+              handleClick={connectWallet}
+            />
+          )}
+          <Button
+            btnName="Sign Out"
+            classStyles="mx-2 rounded-xl"
+            handleClick={signOut}
+          />
+        </>
+      )}
+    </>
   );
 };
 
@@ -94,8 +129,8 @@ const checkActive = (active, setActive, router) => {
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
   const [active, setActive] = useState('Explore NFTs');
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     checkActive(active, setActive, router);
@@ -108,7 +143,7 @@ const Navbar = () => {
             className="flexCenter md:hidden cursor-pointer"
             onClick={() => {
               setActive('Explore NFTs');
-              setIsOpen(false);
+              setIsOpen( false);
             }}
           >
             <Image
