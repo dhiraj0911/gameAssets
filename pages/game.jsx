@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useContext } from 'react';
-
+import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useDropzone } from 'react-dropzone';
 import Image from 'next/image';
@@ -14,7 +14,7 @@ const Game = () => {
   const [deployedAssets, setDeployedAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(null);
-  const { isLoadingNFT, createSale } = useContext(NFTContext);
+  const { isLoadingNFT, createSale, currentAccount } = useContext(NFTContext);
   const [mintedAssets, setMintedAssets] = useState({});
   const [isForSale, setIsForSale] = useState(false);
   const [isForRent, setIsForRent] = useState(false);
@@ -34,21 +34,34 @@ const Game = () => {
   const handleMint = async (e) => {
     e.preventDefault();
     if (currentAsset) {
-      // Assuming currentAsset contains the URL and other details needed for the NFT creation
-      // and price and rentPrice are state variables holding the input values
-      const url = currentAsset.ipfsHash;
-      console.log(price, rentPrice)
-      await createSale( url, price, rentPrice, isForSale, isForRent, true);
+      const uri = currentAsset.ipfsHash;
+      await createSale( uri, price, rentPrice, isForSale, isForRent, true);
+
+      const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${uri}`);
+      // const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+      // const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
+      try {
+        await axios.post('http://localhost:3001/api/assets/create', {
+          id,
+          name,
+          description,
+          uri,
+          price,
+          rentPrice,
+          isForSale,
+          isForRent,
+          owner: "ourContract",
+          seller: currentAccount
+        });
+      } catch (error) {
+        console.error('Error in storing asset in backend', error);
+      }
       setMintedAssets(prev => ({ ...prev, [currentAsset.id]: true }));
-      // Reset state if needed
       setPrice('0');
       setRentPrice('0');
       setCurrentAsset(null);
       
       setIsModalOpen(false);
-  
-      // Optional: Redirect after successful minting
-      // router.push('/path-to-redirect-after-mint'); // Update this path as needed
     }
   };
   
@@ -60,7 +73,6 @@ const Game = () => {
         return;
       }
 
-      // Make a request to your backend with the dynamic API endpoint
       const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
       // const response = await fetch(`https://gameasset-backend.onrender.com/games/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
         method: 'POST',

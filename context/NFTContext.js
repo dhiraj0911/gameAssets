@@ -76,8 +76,6 @@ export const NFTProvider = ({ children }) => {
     window.location.href = '/';
   }
 
-  
-
   const checkIfWalletIsConnected = async () => {
     if (!window.ethereum) return alert('Please install Metamask wallet');
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
