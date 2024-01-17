@@ -78,11 +78,6 @@ const Game = () => {
         return;
       }
       const response = await axios.get(vendorEndpoint);
-      // const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
-      // // const response = await fetch(`https://gameasset-backend.onrender.com/games/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
-      //   method: 'POST',
-      // });
-
       const data = response.data;
       setFetchedAsset(data);
     } catch (error) {
