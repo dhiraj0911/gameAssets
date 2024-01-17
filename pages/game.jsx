@@ -37,6 +37,8 @@ const Game = () => {
       } catch (error) {
           console.error('Error:', error);
       }
+
+      const sellerId = window.localStorage.getItem('objectId');
     
       const uri = response.data.ipfsResult.IpfsHash;
       const {name, id, description} = currentAsset;
@@ -44,17 +46,17 @@ const Game = () => {
       await createSale( uri, price, rentPrice, isForSale, isForRent, true);
 
       try {
-        await axios.post('http://localhost:3001/api/assets/create', {
-          id,
+        await axios.post('http://localhost:3001/api/assets/', {
           name,
           description,
+          id,
           uri,
-          price,
-          rentPrice,
           isForSale,
           isForRent,
-          owner: "ourContract",
-          seller: currentAccount
+          price,
+          rentPrice,
+          owner: '65a7e1fb99d3f531e66f4531',
+          seller: sellerId,
         });
       } catch (error) {
         console.error('Error in storing asset in backend', error);

@@ -18,7 +18,7 @@ const SignUp = () => {
       alert("Passwords do not match");
       return;
     }
-    // Call the signUp function from your context
+    
     signUp( email, name, ethAddress, password );
     router.push('/signin');
   };

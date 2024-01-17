@@ -34,6 +34,7 @@ export const NFTProvider = ({ children }) => {
         email,
         password,
       });
+      window.localStorage.setItem('objectId', response.data.vendorId);
 
       if (response.status === 200) {
         const token = window.localStorage.setItem('token', response.data.token);
@@ -60,7 +61,7 @@ export const NFTProvider = ({ children }) => {
         ethAddress,
       });
 
-      if (response.status === 200) {
+      if (response.status) {
         window.location.href = '/';
       } else {
         console.log('Authentication failed');
@@ -70,7 +71,7 @@ export const NFTProvider = ({ children }) => {
     }
   }
 
-  const signOut = async() => {
+  const signOut = async () => {
     window.localStorage.clear();
     window.location.href = '/';
   }
@@ -190,30 +191,30 @@ export const NFTProvider = ({ children }) => {
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
 
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-    const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
+    const transaction = await contract.createToken(url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
     setIsLoadingNFT(true);
     await transaction.wait();
-};
+  };
 
-const reSale = async (tokenId, forminputPrice, forminputRentPrice, forRent, forSale, member) => {
-  const web3Modal = new Web3Modal();
-  const connection = await web3Modal.connect();
-  const provider = new ethers.providers.Web3Provider(connection);
-  const signer = provider.getSigner();
-  const contract = fetchContract(signer);
+  const reSale = async (tokenId, forminputPrice, forminputRentPrice, forRent, forSale, member) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
 
-  const priceInWei = ethers.utils.parseUnits(forminputPrice, 'ether');
-  const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
+    const priceInWei = ethers.utils.parseUnits(forminputPrice, 'ether');
+    const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
 
-  const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-  // const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
-  const transaction =  await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, member, { value: listingPrice.toString() });
-  setIsLoadingNFT(true);
-  await transaction.wait();
-};
+    const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
+    // const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
+    const transaction = await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, member, { value: listingPrice.toString() });
+    setIsLoadingNFT(true);
+    await transaction.wait();
+  };
 
 
-const buyNft = async (nft) => {
+  const buyNft = async (nft) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -221,14 +222,14 @@ const buyNft = async (nft) => {
     const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
-    
+
     const transaction = await contract.createMarketSale(nft.tokenId, { value: price });
     setIsLoadingNFT(true);
     await transaction.wait();
     setIsLoadingNFT(false);
-};
+  };
 
-const rentNFT = async (nft, rentalPeriodInDays) => {
+  const rentNFT = async (nft, rentalPeriodInDays) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -243,168 +244,168 @@ const rentNFT = async (nft, rentalPeriodInDays) => {
 
     // Send the transaction with the value to rent the NFT
     const transaction = await contract.rentOutToken(
-        nft.tokenId,
-        expiry,
-        { value: rentPrice }
+      nft.tokenId,
+      expiry,
+      { value: rentPrice }
     );
 
     await transaction.wait(); // Wait for the transaction to be confirmed
     console.log(`NFT with tokenId ${nft.tokenId} rented successfully! to ${signer.address}`);
-};
+  };
 
-// const checkExpireAndResetState = async(tokenId) => {
-//   const web3Modal = new Web3Modal();
-//   const connection = await web3Modal.connect();
-//   const provider = new ethers.providers.Web3Provider(connection);
-//   const signer = provider.getSigner();
-//   const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
+  // const checkExpireAndResetState = async(tokenId) => {
+  //   const web3Modal = new Web3Modal();
+  //   const connection = await web3Modal.connect();
+  //   const provider = new ethers.providers.Web3Provider(connection);
+  //   const signer = provider.getSigner();
+  //   const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
 
-//   try {
-//     const transaction = await contract.checkExpiryAndResetState(tokenId);
-//     await transaction.wait();
-//     console.log(`Checked expiry for tokenId ${tokenId}`);
-//     return true;
-//   } catch (error) {
-//       console.error("Error checking expiry:", error);
-//       return false;
-//   }
-// }
+  //   try {
+  //     const transaction = await contract.checkExpiryAndResetState(tokenId);
+  //     await transaction.wait();
+  //     console.log(`Checked expiry for tokenId ${tokenId}`);
+  //     return true;
+  //   } catch (error) {
+  //       console.error("Error checking expiry:", error);
+  //       return false;
+  //   }
+  // }
 
-// const returnNFT = async (id) => {
-//   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+  // const returnNFT = async (id) => {
+  //   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
 
-//   const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
-  
-//   const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
-//   const signer = provider.getSigner();
-//   const contract = fetchContract(signer);
+  //   const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
 
-//   // contract.events.NFTrented({
-//   //   fromBlock: 'latest'
-//   // }, function(error, event) {
-//   //     console.log(event);
-//   // });
-//   await contract.returnToken(id);
-// }
+  //   const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
+  //   const signer = provider.getSigner();
+  //   const contract = fetchContract(signer);
 
-const fetchNFTs = async () => {
-  console.log("fetching nfts");
-  setIsLoadingNFT(false);
-  const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
+  //   // contract.events.NFTrented({
+  //   //   fromBlock: 'latest'
+  //   // }, function(error, event) {
+  //   //     console.log(event);
+  //   // });
+  //   await contract.returnToken(id);
+  // }
 
-  // Use provider directly for read-only operations
-  const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
-  const contract = fetchContract(provider); // Use provider instead of signer
+  const fetchNFTs = async () => {
+    console.log("fetching nfts");
+    setIsLoadingNFT(false);
+    const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
 
-  const data = await contract.fetchMarketItems();
-  console.log(data);
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice , forRent, forSale, sold, rented, expires }) => {
-    const tokenURI = await contract.tokenURI(tokenId);
-    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
-    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
+    // Use provider directly for read-only operations
+    const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
+    const contract = fetchContract(provider); // Use provider instead of signer
 
-    return {  
-      price,
-      rentPrice,
-      forRent,
-      forSale,
-      tokenId: tokenId.toNumber(),
-      seller,
-      owner,
-      name,
-      id,
-      description,
-      tokenURI,
-      sold,
-      rented,
-      expires
-    };
-  }));
-  return items;
-};
+    const data = await contract.fetchMarketItems();
+    console.log(data);
+    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
+      const tokenURI = await contract.tokenURI(tokenId);
+      const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+      const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+      const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
-const fetchMyNFTs = async () => {
-  setIsLoadingNFT(false);
-  const web3Modal = new Web3Modal();
-  const connection = await web3Modal.connect();
-  const provider = new ethers.providers.Web3Provider(connection);
-  const signer = provider.getSigner();
-  const contract = fetchContract(signer);
+      return {
+        price,
+        rentPrice,
+        forRent,
+        forSale,
+        tokenId: tokenId.toNumber(),
+        seller,
+        owner,
+        name,
+        id,
+        description,
+        tokenURI,
+        sold,
+        rented,
+        expires
+      };
+    }));
+    return items;
+  };
 
-  const data = await contract.fetchMyNFTs();
-  var i = 0;
-  console.log(data.length);
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
-    console.log(tokenId)
-    const tokenURI = await contract.tokenURI(tokenId);
-    
-    console.log(tokenURI, i++, tokenId._hex);
-    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
-    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
+  const fetchMyNFTs = async () => {
+    setIsLoadingNFT(false);
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
 
-    return {
-      price,
-      rentPrice,
-      forRent,
-      forSale,
-      tokenId: tokenId.toNumber(),
-      seller,
-      owner,
-      name,
-      id,
-      description,
-      tokenURI,
-      sold,
-      rented,
-      expires
-    };
-  }));
+    const data = await contract.fetchMyNFTs();
+    var i = 0;
+    console.log(data.length);
+    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
+      console.log(tokenId)
+      const tokenURI = await contract.tokenURI(tokenId);
 
-  return items;
-};
+      console.log(tokenURI, i++, tokenId._hex);
+      const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+      const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+      const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
-const fetchMyRentedNFT = async () => {
-  setIsLoadingNFT(false); // Assuming you have a state to track loading status
+      return {
+        price,
+        rentPrice,
+        forRent,
+        forSale,
+        tokenId: tokenId.toNumber(),
+        seller,
+        owner,
+        name,
+        id,
+        description,
+        tokenURI,
+        sold,
+        rented,
+        expires
+      };
+    }));
 
-  const web3Modal = new Web3Modal();
-  const connection = await web3Modal.connect();
-  const provider = new ethers.providers.Web3Provider(connection);
-  const signer = provider.getSigner();
-  const contract = fetchContract(signer);
+    return items;
+  };
 
-  const data = await contract.fetchMyRentedNFTs();
+  const fetchMyRentedNFT = async () => {
+    setIsLoadingNFT(false); // Assuming you have a state to track loading status
 
-  const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires: unformmattedExpries}) => {
-    const tokenURI = await contract.tokenURI(tokenId);
-    // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
-    const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
-    // expires in string
-    const expires = new Date(unformmattedExpries * 1000).toLocaleString();
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
 
-    return {
-      price,
-      rentPrice,
-      forRent,
-      forSale,
-      tokenId: tokenId.toNumber(),
-      seller,
-      owner,
-      name,
-      id,
-      description,
-      tokenURI,
-      sold,
-      rented,
-      expires
-    };
-  }));
+    const data = await contract.fetchMyRentedNFTs();
 
-  return items;
-};
+    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires: unformmattedExpries }) => {
+      const tokenURI = await contract.tokenURI(tokenId);
+      // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+      const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+      const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
+      const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
+      // expires in string
+      const expires = new Date(unformmattedExpries * 1000).toLocaleString();
+
+      return {
+        price,
+        rentPrice,
+        forRent,
+        forSale,
+        tokenId: tokenId.toNumber(),
+        seller,
+        owner,
+        name,
+        id,
+        description,
+        tokenURI,
+        sold,
+        rented,
+        expires
+      };
+    }));
+
+    return items;
+  };
 
   useEffect(async () => {
     checkIfWalletIsConnected();
