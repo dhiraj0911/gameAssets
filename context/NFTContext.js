@@ -21,7 +21,6 @@ export const NFTProvider = ({ children }) => {
 
   useEffect(() => {
     const jwt = window.localStorage.getItem('token');
-    console.log(jwt);
     if (jwt) {
       setIsSigned(true);
     } else {
@@ -162,7 +161,7 @@ export const NFTProvider = ({ children }) => {
 
     const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice }) => {
       const tokenURI = await contract.tokenURI(tokenId);
-      const { data: { image, name, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+      const { data: { image, name, description } } = await axios.get(`https://gateway.pinata.cloud/ipfs/${tokenURI}`);
       const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
 
       return {
@@ -334,15 +333,16 @@ const fetchMyNFTs = async () => {
   const contract = fetchContract(signer);
 
   const data = await contract.fetchMyNFTs();
-
+  var i = 0;
+  console.log(data.length);
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
+    console.log(tokenId)
     const tokenURI = await contract.tokenURI(tokenId);
-    // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
     
-    const { data: { name, id, description } } = await axios.get(`https://${tokenURI}.ipfs.dweb.link/`);
+    console.log(tokenURI, i++, tokenId._hex);
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
     const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
     const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
-    console.log(owner);
 
     return {
       price,
@@ -379,7 +379,7 @@ const fetchMyRentedNFT = async () => {
   const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires: unformmattedExpries}) => {
     const tokenURI = await contract.tokenURI(tokenId);
     // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-    const { data: { name, id, description } } = await axios.get(`https://${tokenURI}.ipfs.dweb.link/`);
+    const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
     const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
     const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
     // expires in string

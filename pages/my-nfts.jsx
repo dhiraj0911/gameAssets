@@ -90,7 +90,7 @@ const MyNFTs = () => {
     <div className="w-full flex justify-start items-center flex-col min-h-screen">
       <div className="w-full flexCenter flex-col">
         <Banner
-          name="Your NFTs"
+          name="Your Assets"
           childStyles="text-center mb-4"
           parentStyles="h-80 justify-center"
         />
@@ -125,12 +125,12 @@ const MyNFTs = () => {
 
       {!isLoading && !rentedNfts.length ? (
         <div className="flexCenter sm:p-4 p-16">
-          <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">No NFTs rented</h1>
+          <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">No Assets rented</h1>
         </div>
       ) : (
         <div className="sm:px-4 pl-12 pr-12 pt-5 w-full minmd:w-4/5 flexCenter flex-col">
           <div className="flexCenter sm:p-4 p-16">
-            <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">My NFTs rented</h1>
+            <h1 className="font-poppins dark:text-white text-nft-black-1 font-extrabold text-3xl">My Assets rented</h1>
           </div>
           <div className="flex-1 w-full flex flex-row sm:flex-col px-4 xs:px-0 minlg:px-8">
             <SearchBar

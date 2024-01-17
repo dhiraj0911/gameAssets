@@ -1,16 +1,13 @@
 import React, { useState, useMemo, useCallback, useContext } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/router';
-import { useDropzone } from 'react-dropzone';
-import Image from 'next/image';
 import { useTheme } from 'next-themes';
 
 import { NFTContext } from '../context/NFTContext';
-import { Button, Input, Loader } from '../components';
-
+import { Button } from '../components';
 
 const Game = () => {
   const [vendorEndpoint, setVendorEndpoint] = useState('');
+  const [fetchedAssets, setFetchedAsset] = useState([])
   const [deployedAssets, setDeployedAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(null);
@@ -20,7 +17,6 @@ const Game = () => {
   const [isForRent, setIsForRent] = useState(false);
   const [price, setPrice] = useState('0');
   const [rentPrice, setRentPrice] = useState('0');
-  const router = useRouter();
 
   const handleOpenModal = (asset) => {
     setCurrentAsset(asset);
@@ -34,12 +30,19 @@ const Game = () => {
   const handleMint = async (e) => {
     e.preventDefault();
     if (currentAsset) {
-      const uri = currentAsset.ipfsHash;
+
+      let response;
+      try {
+        response = await axios.post('http://localhost:3001/mint-asset', currentAsset);
+      } catch (error) {
+          console.error('Error:', error);
+      }
+    
+      const uri = response.data.ipfsResult.IpfsHash;
+      const {name, id, description} = currentAsset;
+
       await createSale( uri, price, rentPrice, isForSale, isForRent, true);
 
-      const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${uri}`);
-      // const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
-      // const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
       try {
         await axios.post('http://localhost:3001/api/assets/create', {
           id,
@@ -72,20 +75,14 @@ const Game = () => {
         alert('Please provide a valid API endpoint');
         return;
       }
+      const response = await axios.get(vendorEndpoint);
+      // const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
+      // // const response = await fetch(`https://gameasset-backend.onrender.com/games/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
+      //   method: 'POST',
+      // });
 
-      const response = await fetch(`http://localhost:3001/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
-      // const response = await fetch(`https://gameasset-backend.onrender.com/games/fetch-assets/${encodeURIComponent(vendorEndpoint)}`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Update the state with the received deployed assets
-      setDeployedAssets(data.deployedAssets);
+      const data = response.data;
+      setFetchedAsset(data);
     } catch (error) {
       console.error('Error fetching assets:', error);
     }
@@ -111,13 +108,13 @@ const Game = () => {
               onClick={handleFetchAssets}
               className="mt-3 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded w-full dark:bg-nft-black-1 dark:text-white font-semibold text-m py-3 mx-auto col-span-2"
             >
-              Fetch and Mint Asset
+              Fetch Assets
             </button>
           </div>
 
           {/* Cards container */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-7">
-            {deployedAssets.map((asset, index) => (
+            {fetchedAssets.map((asset, index) => (
                 <div key={index} className="max-w-sm p-6 bg-white bg-opacity-20 border border-gray-200 rounded-lg shadow dark:bg-black-800 dark:border-gray-700 dark:bg-opacity-10">
                     <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{asset.name}</h5>
                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Unique ID: {asset.id}</p>

@@ -272,9 +272,14 @@ contract RentableNFTMarketplace is
     // Add a new function to return all items owned by the user
     function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint totalItemCount = _tokenIds.current();
-        uint itemCount = _itemsSold.current();
+        uint itemCount = 0;
         uint currentIndex = 0;
 
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].owner == msg.sender) {
+                itemCount += 1;
+            }
+        }
         MarketItem[] memory items = new MarketItem[](itemCount);
         for (uint i = 0; i < totalItemCount; i++) {
             if (idToMarketItem[i + 1].owner == msg.sender) {
