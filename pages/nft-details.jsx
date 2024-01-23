@@ -182,10 +182,30 @@ const NFTDetails = () => {
   };
 
   const rentCheckout = async (rentalPeriodInDays) => {
-    await rentNFT(nft, rentalPeriodInDays);
+    try {
+      // await rentNFT(nft, rentalPeriodInDays);
 
-    setRentPaymentModal(false);
-    setRentSuccessModal(true);
+      const assetId = await axios.get(`http://localhost:3001/api/assets/${nft.id}`);
+
+
+      await axios.post(
+        `http://localhost:3001/api/rental/`,
+        {
+          nftId: assetId.data._id,
+          renter: window.localStorage.getItem("objectId"),
+          rentPrice: nft.rentPrice,
+          rentStartDate: new Date(),
+          rentEndData: new Data + (rentalPeriodInDays * 24 * 60 * 60 * 1000),
+          status: "active",
+        }
+      );
+
+      setRentPaymentModal(false);
+      setRentSuccessModal(true);
+  
+    } catch (error) {
+      console.error("Error renting NFT:", error);      
+    }
   };
 
   if (isLoading) {

@@ -1,0 +1,52 @@
+[
+  {
+    "_id": "65a81e118065037ff7504fab",
+    "name": "Nightmare Nexus",
+    "description": "Dive into the dark and surreal world of /u/BoogyMan10.",
+    "id": "t5_fghij",
+    "uri": "QmSmC3G364JJdR26h8HFjNUh77rmwnDGcM5r6VdS3ZxBME",
+    "isForSale": true,
+    "isForRent": false,
+    "price": 12,
+    "rentPrice": 0,
+    "owner": null,
+    "seller": {
+      "_id": "65a7f34d7073a404dd107928",
+      "email": "0x158f65db710824CE337c91efC379FEBc985Cf59E",
+      "password": "$2b$08$5JJ0daYPFqmuQtzDDwujzemRowxBHstHIrbk68foOjJJ3OjngGHVq",
+      "name": "0x158f65db710824CE337c91efC379FEBc985Cf59E",
+      "ethAddress": "0x158f65db710824CE337c91efC379FEBc985Cf59E",
+      "createdAt": "2024-01-17T15:33:33.368Z",
+      "updatedAt": "2024-01-17T15:33:33.368Z",
+      "__v": 0
+    },
+    "createdAt": "2024-01-17T18:36:01.976Z",
+    "updatedAt": "2024-01-17T19:38:52.628Z",
+    "__v": 0
+  },
+  {
+    "_id": "65a8e1f5fecd2fc95c9285a8",
+    "name": "Creepy Chronicles",
+    "description": "Explore spine-chilling tales and discussions in this subreddit.",
+    "id": "t5_pqrst",
+    "uri": "Qmaao8sbTCumw7YY4fiVMBnkaCQ6RZtXLbRywV5UWYpAkG",
+    "isForSale": true,
+    "isForRent": true,
+    "price": 0.0012,
+    "rentPrice": 0.000043,
+    "owner": null,
+    "seller": {
+      "_id": "65a7f3d535101be96ba29327",
+      "email": "0x35Be4c74ce5e21e4c38f5e319Da6eC45C0766820",
+      "password": "$2b$08$9Jh1eAH/RNBCuR4I1m.fbO.fm3nUlJRC8nCJ.dZ3./5FPnVonswVC",
+      "name": "0x35Be4c74ce5e21e4c38f5e319Da6eC45C0766820",
+      "ethAddress": "0x35Be4c74ce5e21e4c38f5e319Da6eC45C0766820",
+      "createdAt": "2024-01-17T15:35:49.783Z",
+      "updatedAt": "2024-01-17T15:35:49.783Z",
+      "__v": 0
+    },
+    "createdAt": "2024-01-18T08:31:49.401Z",
+    "updatedAt": "2024-01-18T08:48:41.378Z",
+    "__v": 0
+  }
+]

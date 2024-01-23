@@ -32,6 +32,15 @@ const ResellNFT = () => {
 
   const resell = async () => {
     await reSale(tokenId, price, rentPrice, isForRent, isForSale, true);
+    await axios.put(
+      `http://localhost:3001/api/assets/${id}`,
+      {
+        isForSale,
+        isForRent,
+        owner: "65a7e1fb99d3f531e66f4531",
+        seller: window.localStorage.getItem("objectId"),
+      }
+    );
     router.push("/");
   };
 
