@@ -48,7 +48,7 @@ const SignIn = () => {
             </a>
             <p className="text-white mt-4">
               {" "}
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a
                 className="text-sm text-blue-500 -200 hover:underline mt-4"
                 href="#"
