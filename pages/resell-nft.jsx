@@ -30,7 +30,7 @@ const ResellNFT = () => {
   const resell = async () => {
     await reSale(tokenId, price, rentPrice, isForRent, isForSale, true);
     await axios.put(
-      `ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${id}`,
+      `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${id}`,
       {
         isForSale,
         isForRent,
