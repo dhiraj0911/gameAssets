@@ -33,7 +33,7 @@ const Game = () => {
 
       let response;
       try {
-        response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/mint-asset', currentAsset);
+        response = await axios.post('ec2-3-82-136-125.compute-1.amazonaws.com/mint-asset', currentAsset);
       } catch (error) {
           console.error('Error:', error);
       }
@@ -46,7 +46,7 @@ const Game = () => {
       await createSale( uri, price, rentPrice, isForSale, isForRent, true);
 
       try {
-        await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/assets/', {
+        await axios.post('ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/', {
           name,
           description,
           id,

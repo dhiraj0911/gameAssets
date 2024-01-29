@@ -26,7 +26,7 @@ export const NFTProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/vendor/signin', {
+      const response = await axios.post('ec2-3-82-136-125.compute-1.amazonaws.com/api/vendor/signin', {
         email,
         password,
       });
@@ -50,7 +50,7 @@ export const NFTProvider = ({ children }) => {
 
   const signUp = async (email, password, name, ethAddress) => {
     try {
-      const response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/vendor/signup', {
+      const response = await axios.post('ec2-3-82-136-125.compute-1.amazonaws.com/api/vendor/signup', {
         email,
         password,
         name,
