@@ -166,7 +166,7 @@ const NFTDetails = () => {
     try {
       await buyNft(nft);
       await axios.put(
-        `http://localhost:3001/api/assets/${nft.id}`,
+        `http://ec2-44-201-81-108.compute-1.amazonaws.com/api/assets/${nft.id}`,
         {
           isForSale: false,
           owner: window.localStorage.getItem("objectId"),
@@ -183,13 +183,11 @@ const NFTDetails = () => {
 
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
-      // await rentNFT(nft, rentalPeriodInDays);
-
-      const assetId = await axios.get(`http://localhost:3001/api/assets/${nft.id}`);
-
+      await rentNFT(nft, rentalPeriodInDays);
+      const assetId = await axios.get(`http://ec2-44-201-81-108.compute-1.amazonaws.com/api/assets/${nft.id}`);
 
       await axios.post(
-        `http://localhost:3001/api/rental/`,
+        `http://ec2-44-201-81-108.compute-1.amazonaws.com/api/rental/`,
         {
           nftId: assetId.data._id,
           renter: window.localStorage.getItem("objectId"),

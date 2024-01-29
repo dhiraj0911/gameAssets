@@ -3,12 +3,10 @@ pragma solidity ^0.8.4;
 
 import "./ERC4907.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "usingtellor/contracts/UsingTellor.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 contract RentableNFTMarketplace is
     ERC4907,
-    UsingTellor,
     KeeperCompatibleInterface
 {
     using Counters for Counters.Counter;
@@ -18,8 +16,6 @@ contract RentableNFTMarketplace is
 
     uint256 listingPrice = 1 ether;
     address payable public owner;
-    address payable _tellorAddress =
-        payable(0x840c23e39F9D029fFa888F47069aA6864f0401D7);
 
     mapping(uint256 => MarketItem) public idToMarketItem;
 
@@ -63,7 +59,7 @@ contract RentableNFTMarketplace is
         _;
     }
 
-    constructor() ERC4907("Rentable", "RT") UsingTellor(_tellorAddress) {
+    constructor() ERC4907("Rentable", "RT") {
         owner = payable(msg.sender);
     }
 

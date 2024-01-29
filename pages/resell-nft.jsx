@@ -4,9 +4,6 @@ import axios from "axios";
 import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Input } from "../components";
 
-
-
-
 const ResellNFT = () => {
   const { reSale, isLoadingNFT } = useContext(NFTContext);
   const router = useRouter();
@@ -33,11 +30,11 @@ const ResellNFT = () => {
   const resell = async () => {
     await reSale(tokenId, price, rentPrice, isForRent, isForSale, true);
     await axios.put(
-      `http://localhost:3001/api/assets/${id}`,
+      `http://ec2-44-201-81-108.compute-1.amazonaws.com/api/assets/${id}`,
       {
         isForSale,
         isForRent,
-        owner: "65a7e1fb99d3f531e66f4531",
+        owner: "65b780257d539ba920ad514c",
         seller: window.localStorage.getItem("objectId"),
       }
     );
@@ -80,11 +77,8 @@ const ResellNFT = () => {
         </div>
 
         <div className="flex justify-center sm:px-4 p-12">
-          {/* Container for both checkbox sections */}
           <div className="w-3/5 md:w-full">
-            {/* Flex container for side-by-side layout */}
             <div className="flex justify-between">
-              {/* Container for the 'For Sale' checkbox and input field */}
               <div className="flex-1 mr-2">
                 <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
                   <input

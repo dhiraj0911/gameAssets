@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
-
 import axios from 'axios';
-import { create as ipfsHttpClient } from 'ipfs-http-client';
 
 import { MarketAddress, MarketAddressABI } from './constants';
 
@@ -11,8 +9,6 @@ export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) => new ethers.Contract(MarketAddress, MarketAddressABI, signerORProvider);
 
 export const NFTProvider = ({ children }) => {
-  const auth = useRef('');
-  const client = useRef({});
   const [currentAccount, setCurrentAccount] = useState('');
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   const nftCurrency = 'ETH';
@@ -30,7 +26,7 @@ export const NFTProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/vendor/signin', {
+      const response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/vendor/signin', {
         email,
         password,
       });
@@ -54,7 +50,7 @@ export const NFTProvider = ({ children }) => {
 
   const signUp = async (email, password, name, ethAddress) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/vendor/signup', {
+      const response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/vendor/signup', {
         email,
         password,
         name,
@@ -91,51 +87,7 @@ export const NFTProvider = ({ children }) => {
     setCurrentAccount(accounts[0]);
     window.location.reload();
   };
-
-  const uploadToIPFS = async (file) => {
-    const subdomain = 'https://cryptoketnft.infura-ipfs.io';
-    try {
-      const added = await client.current.add({ content: file });
-      const URL = `${subdomain}/ipfs/${added.path}`;
-      return URL;
-    } catch (error) {
-      console.log('Error uploading file to IPFS.', error);
-    }
-  };
-  const fetchAuth = async () => {
-    const response = await fetch('/api/secure');
-    const data = await response.json();
-    return data;
-  };
-  const getClient = (author) => {
-    const responseClient = ipfsHttpClient({
-      host: 'ipfs.infura.io',
-      port: 5001,
-      protocol: 'https',
-      apiPath: '/api/v0',
-      headers: {
-        authorization: author,
-      },
-    });
-    return responseClient;
-  };
-
-
-  const CreateNFT = async (formInput, fileUrl, router) => {
-    const { name, description, price } = formInput;
-    if (!name || !description || !price || !fileUrl) return;
-    const data = JSON.stringify({ name, description, image: fileUrl });
-    try {
-      const added = await client.current.add(data);
-      const subdomain = 'https://cryptoketnft.infura-ipfs.io';
-      const URL = `${subdomain}/ipfs/${added.path}`;
-      await createSale(URL, price);
-      router.push('/');
-    } catch (error) {
-      console.log('Error uploading file to IPFS', error);
-    }
-  };
-
+  
   const userOf = async (id) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -207,7 +159,6 @@ export const NFTProvider = ({ children }) => {
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
 
     const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-    // const transaction = await contract.createToken( url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
     const transaction = await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, member, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
     await transaction.wait();
@@ -239,7 +190,7 @@ export const NFTProvider = ({ children }) => {
     const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
     const rentPrice = ethers.utils.parseUnits(totalRentPrice.toString(), 'ether');
     // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
-    //for 1 minute
+    //for 2 minute
     const expiry = Math.floor(Date.now() / 1000) + 60;
 
     // Send the transaction with the value to rent the NFT
@@ -253,43 +204,8 @@ export const NFTProvider = ({ children }) => {
     console.log(`NFT with tokenId ${nft.tokenId} rented successfully! to ${signer.address}`);
   };
 
-  // const checkExpireAndResetState = async(tokenId) => {
-  //   const web3Modal = new Web3Modal();
-  //   const connection = await web3Modal.connect();
-  //   const provider = new ethers.providers.Web3Provider(connection);
-  //   const signer = provider.getSigner();
-  //   const contract = new ethers.Contract(MarketAddress, MarketAddressABI, signer);
-
-  //   try {
-  //     const transaction = await contract.checkExpiryAndResetState(tokenId);
-  //     await transaction.wait();
-  //     console.log(`Checked expiry for tokenId ${tokenId}`);
-  //     return true;
-  //   } catch (error) {
-  //       console.error("Error checking expiry:", error);
-  //       return false;
-  //   }
-  // }
-
-  // const returnNFT = async (id) => {
-  //   // const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
-
-  //   const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
-
-  //   const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
-  //   const signer = provider.getSigner();
-  //   const contract = fetchContract(signer);
-
-  //   // contract.events.NFTrented({
-  //   //   fromBlock: 'latest'
-  //   // }, function(error, event) {
-  //   //     console.log(event);
-  //   // });
-  //   await contract.returnToken(id);
-  // }
-
   const fetchNFTs = async () => {
-    console.log("fetching nfts");
+    console.log("Fetching assets...");
     setIsLoadingNFT(false);
     const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
 
@@ -367,7 +283,7 @@ export const NFTProvider = ({ children }) => {
   };
 
   const fetchMyRentedNFT = async () => {
-    setIsLoadingNFT(false); // Assuming you have a state to track loading status
+    setIsLoadingNFT(false);
 
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -379,7 +295,6 @@ export const NFTProvider = ({ children }) => {
 
     const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires: unformmattedExpries }) => {
       const tokenURI = await contract.tokenURI(tokenId);
-      // const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
       const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
       const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
       const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
@@ -409,13 +324,10 @@ export const NFTProvider = ({ children }) => {
 
   useEffect(async () => {
     checkIfWalletIsConnected();
-    const { data } = await fetchAuth();
-    auth.current = data;
-    client.current = getClient(auth.current);
   }, []);
 
   return (
-    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, CreateNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, userOf, reSale, signIn, signUp, isSigned, signOut, isLoadingNFT }}>
+    <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, rentNFT, fetchMyNFTs, fetchMyRentedNFT, userOf, reSale, signIn, signUp, isSigned, signOut, isLoadingNFT }}>
       {children}
     </NFTContext.Provider>
   );

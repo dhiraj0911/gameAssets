@@ -33,7 +33,7 @@ const Game = () => {
 
       let response;
       try {
-        response = await axios.post('http://localhost:3001/mint-asset', currentAsset);
+        response = await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/mint-asset', currentAsset);
       } catch (error) {
           console.error('Error:', error);
       }
@@ -46,7 +46,7 @@ const Game = () => {
       await createSale( uri, price, rentPrice, isForSale, isForRent, true);
 
       try {
-        await axios.post('http://localhost:3001/api/assets/', {
+        await axios.post('http://ec2-44-201-81-108.compute-1.amazonaws.com/api/assets/', {
           name,
           description,
           id,
@@ -55,7 +55,7 @@ const Game = () => {
           isForRent,
           price,
           rentPrice,
-          owner: '65a7e1fb99d3f531e66f4531',
+          owner: '65b780257d539ba920ad514c',
           seller: sellerId,
         });
       } catch (error) {
