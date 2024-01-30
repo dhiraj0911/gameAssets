@@ -40,7 +40,6 @@ const Home = () => {
     return filtered;
   }, [rentNfts, searchQueryRent, sortOptionRent]);
 
-  // Function to filter and sort Sale NFTs
   const filteredSaleNfts = useMemo(() => {
     let filtered = saleNfts.filter(nft =>
       nft.name.toLowerCase().includes(searchQuerySale.toLowerCase())
@@ -56,10 +55,9 @@ const Home = () => {
 
   useEffect(() => {
     fetchNFTs().then((items) => {
-      const itemsForRent = []; // Filter or separate items for rent
-      const itemsForSale = []; // Filter or separate items for sale
+      const itemsForRent = [];
+      const itemsForSale = [];
 
-      // Example logic, replace with actual filtering logic
       items.forEach(item => {
         if (item.forRent) {
           itemsForRent.push(item);
@@ -100,7 +98,6 @@ const Home = () => {
       setNfts(items);
       setNftsCopy(items);
       setIsLoading(false);
-      // console.log(items);
     });
   }, []);
 
@@ -161,14 +158,9 @@ const Home = () => {
             childStyles="md:text-4xl sm:text-2xl xs:text-xl text-left"
           />
 
-        {/* Need to change here  !nft.length */}
-
-        {isLoading || (rentNfts.length === 0 && saleNfts.length === 0) ? ( <>
-          <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">That&apos;s Weird... No GameAsset Found</h1>
-          <br></br>
-        </>
-        ) : isLoading ? (
+        {(rentNfts.length === 0 && saleNfts.length === 0) ? ( <>
           <Loader />
+        </>
         ) : (
           <>
             <div>

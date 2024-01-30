@@ -34,7 +34,7 @@ const ResellNFT = () => {
       {
         isForSale,
         isForRent,
-        owner: "65b780257d539ba920ad514c",
+        owner: "65b894f3900b82a068a6a5f8",
         seller: window.localStorage.getItem("objectId"),
       }
     );

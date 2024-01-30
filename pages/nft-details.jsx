@@ -184,19 +184,19 @@ const NFTDetails = () => {
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
       await rentNFT(nft, rentalPeriodInDays);
-      const assetId = await axios.get(`http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${nft.id}`);
+      // const assetId = await axios.get(`http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${nft.id}`);
 
-      await axios.post(
-        `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/rental/`,
-        {
-          nftId: assetId.data._id,
-          renter: window.localStorage.getItem("objectId"),
-          rentPrice: nft.rentPrice,
-          rentStartDate: new Date(),
-          rentEndData: new Data + (rentalPeriodInDays * 24 * 60 * 60 * 1000),
-          status: "active",
-        }
-      );
+      // await axios.post(
+      //   `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/rental/`,
+      //   {
+      //     nftId: assetId.data._id,
+      //     renter: window.localStorage.getItem("objectId"),
+      //     rentPrice: nft.rentPrice,
+      //     rentStartDate: new Date(),
+      //     rentEndData: new Data + (rentalPeriodInDays * 24 * 60 * 60 * 1000),
+      //     status: "active",
+      //   }
+      // );
 
       setRentPaymentModal(false);
       setRentSuccessModal(true);

@@ -191,16 +191,15 @@ export const NFTProvider = ({ children }) => {
     const rentPrice = ethers.utils.parseUnits(totalRentPrice.toString(), 'ether');
     // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
     //for 2 minute
-    const expiry = Math.floor(Date.now() / 1000) + 60;
+    const expiry = Math.floor(Date.now() / 1000) + 120;
 
-    // Send the transaction with the value to rent the NFT
     const transaction = await contract.rentOutToken(
       nft.tokenId,
       expiry,
       { value: rentPrice }
     );
 
-    await transaction.wait(); // Wait for the transaction to be confirmed
+    await transaction.wait();
     console.log(`NFT with tokenId ${nft.tokenId} rented successfully! to ${signer.address}`);
   };
 
