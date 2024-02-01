@@ -17,6 +17,7 @@ const Game = () => {
   const [isForRent, setIsForRent] = useState(false);
   const [price, setPrice] = useState('0');
   const [rentPrice, setRentPrice] = useState('0');
+  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
 
   const handleOpenModal = (asset) => {
     setCurrentAsset(asset);
@@ -33,7 +34,7 @@ const Game = () => {
 
       let response;
       try {
-        response = await axios.post('http://ec2-3-82-136-125.compute-1.amazonaws.com/api/mint-asset', currentAsset);
+        response = await axios.post(`${API_BASE_URL}/api/mint-asset`, currentAsset);
       } catch (error) {
           console.error('Error:', error);
       }
@@ -46,7 +47,7 @@ const Game = () => {
       await createSale( uri, price, rentPrice, isForSale, isForRent, true);
 
       try {
-        await axios.post('http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/', {
+        await axios.post(`${API_BASE_URL}/api/assets/`, {
           name,
           description,
           id,
@@ -55,7 +56,7 @@ const Game = () => {
           isForRent,
           price,
           rentPrice,
-          owner: '65b894f3900b82a068a6a5f8',
+          owner: '65bb956ef39ccec4c21fc2c2',
           seller: sellerId,
         });
       } catch (error) {

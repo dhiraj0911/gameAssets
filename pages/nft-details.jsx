@@ -107,8 +107,8 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 );
 
 const NFTDetails = () => {
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =
-    useContext(NFTContext);
+  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =useContext(NFTContext);
   const [nft, setNft] = useState({
     tokenId: "",
     name: "",
@@ -166,7 +166,7 @@ const NFTDetails = () => {
     try {
       await buyNft(nft);
       await axios.put(
-        `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${nft.id}`,
+        `${API_BASE_URL}/api/assets/${nft.id}`,
         {
           isForSale: false,
           owner: window.localStorage.getItem("objectId"),
@@ -184,10 +184,10 @@ const NFTDetails = () => {
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
       await rentNFT(nft, rentalPeriodInDays);
-      // const assetId = await axios.get(`http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${nft.id}`);
+      // const assetId = await axios.get(`http://localhost:5000/api/assets/${nft.id}`);
 
       // await axios.post(
-      //   `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/rental/`,
+      //   `http://localhost:5000/api/rental/`,
       //   {
       //     nftId: assetId.data._id,
       //     renter: window.localStorage.getItem("objectId"),

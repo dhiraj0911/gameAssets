@@ -9,6 +9,9 @@ export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) => new ethers.Contract(MarketAddress, MarketAddressABI, signerORProvider);
 
 export const NFTProvider = ({ children }) => {
+  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
+  const RPC_URL = process.env.TESTNET !== 'true'? process.env.RPC_URL: 'http://127.0.0.1:8545';
+
   const [currentAccount, setCurrentAccount] = useState('');
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   const nftCurrency = 'ETH';
@@ -26,7 +29,7 @@ export const NFTProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const response = await axios.post('http://ec2-3-82-136-125.compute-1.amazonaws.com/api/vendor/signin', {
+      const response = await axios.post(`${API_BASE_URL}/api/vendor/signin`, {
         email,
         password,
       });
@@ -50,7 +53,7 @@ export const NFTProvider = ({ children }) => {
 
   const signUp = async (email, password, name, ethAddress) => {
     try {
-      const response = await axios.post('http://ec2-3-82-136-125.compute-1.amazonaws.com/api/vendor/signup', {
+      const response = await axios.post(`${API_BASE_URL}/api/vendor/signup`, {
         email,
         password,
         name,
@@ -206,11 +209,9 @@ export const NFTProvider = ({ children }) => {
   const fetchNFTs = async () => {
     console.log("Fetching assets...");
     setIsLoadingNFT(false);
-    const mumbaiRPC = 'https://rpc-mumbai.maticvigil.com';
 
-    // Use provider directly for read-only operations
-    const provider = new ethers.providers.JsonRpcProvider(mumbaiRPC);
-    const contract = fetchContract(provider); // Use provider instead of signer
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const contract = fetchContract(provider);
 
     const data = await contract.fetchMarketItems();
     console.log(data);

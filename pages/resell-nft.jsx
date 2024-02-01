@@ -5,6 +5,7 @@ import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Input } from "../components";
 
 const ResellNFT = () => {
+  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
   const { reSale, isLoadingNFT } = useContext(NFTContext);
   const router = useRouter();
   const { tokenId, tokenURI } = router.query;
@@ -30,11 +31,11 @@ const ResellNFT = () => {
   const resell = async () => {
     await reSale(tokenId, price, rentPrice, isForRent, isForSale, true);
     await axios.put(
-      `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${id}`,
+      `${API_BASE_URL}/api/assets/${id}`,
       {
         isForSale,
         isForRent,
-        owner: "65b894f3900b82a068a6a5f8",
+        owner: "65bb956ef39ccec4c21fc2c2",
         seller: window.localStorage.getItem("objectId"),
       }
     );
