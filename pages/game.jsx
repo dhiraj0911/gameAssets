@@ -56,7 +56,7 @@ const Game = () => {
           isForRent,
           price,
           rentPrice,
-          owner: '65c0c662de983ab7d7e87a08',
+          owner: `${process.env.NEXT_PUBLIC_OBJECTID}`,
           seller: sellerId,
         });
       } catch (error) {
