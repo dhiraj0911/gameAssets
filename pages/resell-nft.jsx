@@ -5,7 +5,7 @@ import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Input } from "../components";
 
 const ResellNFT = () => {
-  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
   const { reSale, isLoadingNFT } = useContext(NFTContext);
   const router = useRouter();
   const { tokenId, tokenURI } = router.query;
@@ -35,7 +35,9 @@ const ResellNFT = () => {
       {
         isForSale,
         isForRent,
-        owner: "65bb956ef39ccec4c21fc2c2",
+        price,
+        rentPrice,
+        owner: "65c0c662de983ab7d7e87a08",
         seller: window.localStorage.getItem("objectId"),
       }
     );

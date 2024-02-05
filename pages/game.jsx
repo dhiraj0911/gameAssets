@@ -17,7 +17,7 @@ const Game = () => {
   const [isForRent, setIsForRent] = useState(false);
   const [price, setPrice] = useState('0');
   const [rentPrice, setRentPrice] = useState('0');
-  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
 
   const handleOpenModal = (asset) => {
     setCurrentAsset(asset);
@@ -56,7 +56,7 @@ const Game = () => {
           isForRent,
           price,
           rentPrice,
-          owner: '65bb956ef39ccec4c21fc2c2',
+          owner: '65c0c662de983ab7d7e87a08',
           seller: sellerId,
         });
       } catch (error) {
@@ -73,7 +73,6 @@ const Game = () => {
   
   const handleFetchAssets = async () => {
     try {
-      // Make sure the user has provided an endpoint
       if (!vendorEndpoint) {
         alert('Please provide a valid API endpoint');
         return;

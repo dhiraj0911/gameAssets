@@ -107,7 +107,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 );
 
 const NFTDetails = () => {
-  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
   const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =useContext(NFTContext);
   const [nft, setNft] = useState({
     tokenId: "",
@@ -184,19 +184,39 @@ const NFTDetails = () => {
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
       await rentNFT(nft, rentalPeriodInDays);
-      // const assetId = await axios.get(`http://localhost:5000/api/assets/${nft.id}`);
-
-      // await axios.post(
-      //   `http://localhost:5000/api/rental/`,
-      //   {
-      //     nftId: assetId.data._id,
-      //     renter: window.localStorage.getItem("objectId"),
-      //     rentPrice: nft.rentPrice,
-      //     rentStartDate: new Date(),
-      //     rentEndData: new Data + (rentalPeriodInDays * 24 * 60 * 60 * 1000),
-      //     status: "active",
-      //   }
-      // );
+      const response = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      
+      try {
+        await axios.get(
+          `${API_BASE_URL}/api/rental/${nft.id}`
+        );
+        await axios.put(
+          `${API_BASE_URL}/api/rental/${nft.id}`,
+          {
+            renter: window.localStorage.getItem("objectId"),
+            rentStartDate: new Date().toISOString(),
+            rentEndDate: new Date(Date.now() + 120).toISOString(),
+            rentalPeriod: rentalPeriodInDays,
+            rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
+            status: "ACTIVE" //ACTIVE or INACTIVE
+          }
+        );
+      }
+      catch {
+        await axios.post(
+          `${API_BASE_URL}/api/rental`,
+          {
+            id: nft.id,
+            nftId: response.data._id,
+            renter: window.localStorage.getItem("objectId"),
+            rentStartDate: new Date().toISOString(),
+            rentEndDate: new Date(Date.now() + rentalPeriodInDays * 24 * 60 * 60 * 1000).toISOString(),
+            rentalPeriod: rentalPeriodInDays,
+            rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
+            status: "ACTIVE" //ACTIVE or INACTIVE
+          }
+        );
+      }
 
       setRentPaymentModal(false);
       setRentSuccessModal(true);

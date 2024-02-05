@@ -9,9 +9,7 @@ export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) => new ethers.Contract(MarketAddress, MarketAddressABI, signerORProvider);
 
 export const NFTProvider = ({ children }) => {
-  const API_BASE_URL = process.env.PRODUCTION === 'true' ? process.env.BASE_URL : 'http://localhost:5000';
-  const RPC_URL = process.env.TESTNET !== 'true'? process.env.RPC_URL: 'http://127.0.0.1:8545';
-
+  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true'? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
   const [currentAccount, setCurrentAccount] = useState('');
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   const nftCurrency = 'ETH';
@@ -209,6 +207,7 @@ export const NFTProvider = ({ children }) => {
   const fetchNFTs = async () => {
     console.log("Fetching assets...");
     setIsLoadingNFT(false);
+    const RPC_URL = process.env.NEXT_PUBLIC_TESTNET === 'true'? process.env.NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_LOCAL_RPC_URL;
 
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const contract = fetchContract(provider);

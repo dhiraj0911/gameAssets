@@ -1,4 +1,4 @@
 import rentableMarketPlace from './RentableNFTMarketplace.json';
 
-export const MarketAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+export const MarketAddress = '0xE92aF57c09E6D06Bbd811CE203cf3328C05e79cD';
 export const MarketAddressABI = rentableMarketPlace.abi;
