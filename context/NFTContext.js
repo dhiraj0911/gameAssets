@@ -12,7 +12,7 @@ export const NFTProvider = ({ children }) => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true'? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
   const [currentAccount, setCurrentAccount] = useState('');
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
-  const nftCurrency = 'ETH';
+  const nftCurrency = 'MATIC';
 
   const [isSigned, setIsSigned] = useState(false);
 
@@ -133,7 +133,7 @@ export const NFTProvider = ({ children }) => {
     return items;
   };
 
-  const createSale = async (url, forminputPrice, forminputRentPrice, forSale, forRent, member) => {
+  const createSale = async (url, forminputPrice, forminputRentPrice, forSale, forRent) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -143,13 +143,13 @@ export const NFTProvider = ({ children }) => {
     const priceInWei = ethers.utils.parseUnits(forminputPrice, 'ether');
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
 
-    const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-    const transaction = await contract.createToken(url, priceInWei, rentPriceInWei, forSale, forRent, member, { value: listingPrice.toString() })
+    const listingPrice = ethers.utils.parseUnits('0.001', 'ether');
+    const transaction = await contract.createToken(url, priceInWei, rentPriceInWei, forSale, forRent,{ value: listingPrice.toString() })
     setIsLoadingNFT(true);
     await transaction.wait();
   };
 
-  const reSale = async (tokenId, forminputPrice, forminputRentPrice, forRent, forSale, member) => {
+  const reSale = async (tokenId, forminputPrice, forminputRentPrice, forRent, forSale) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -159,8 +159,8 @@ export const NFTProvider = ({ children }) => {
     const priceInWei = ethers.utils.parseUnits(forminputPrice, 'ether');
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, 'ether');
 
-    const listingPrice = ethers.utils.parseUnits('0.01', 'ether');
-    const transaction = await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, member, { value: listingPrice.toString() });
+    const listingPrice = ethers.utils.parseUnits('0.001', 'ether');
+    const transaction = await contract.resellToken(tokenId, priceInWei, rentPriceInWei, forRent, forSale, { value: listingPrice.toString() });
     setIsLoadingNFT(true);
     await transaction.wait();
   };
@@ -213,28 +213,25 @@ export const NFTProvider = ({ children }) => {
     const contract = fetchContract(provider);
 
     const data = await contract.fetchMarketItems();
-    console.log(data);
-    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
+    const items = await Promise.all(data.map(async ({ tokenId, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented}) => {
       const tokenURI = await contract.tokenURI(tokenId);
       const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
       const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
       const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
       return {
+        tokenId: tokenId.toNumber(),
+        owner,
         price,
         rentPrice,
         forRent,
         forSale,
-        tokenId: tokenId.toNumber(),
-        seller,
-        owner,
+        sold,
+        rented,
         name,
         id,
         description,
-        tokenURI,
-        sold,
-        rented,
-        expires
+        tokenURI
       };
     }));
     return items;
@@ -251,7 +248,7 @@ export const NFTProvider = ({ children }) => {
     const data = await contract.fetchMyNFTs();
     var i = 0;
     console.log(data.length);
-    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires }) => {
+    const items = await Promise.all(data.map(async ({ tokenId, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented }) => {
       console.log(tokenId)
       const tokenURI = await contract.tokenURI(tokenId);
 
@@ -261,20 +258,18 @@ export const NFTProvider = ({ children }) => {
       const rentPrice = ethers.utils.formatUnits(unformmattedRentPrice.toString(), 'ether');
 
       return {
+        tokenId: tokenId.toNumber(),
+        owner,
         price,
         rentPrice,
         forRent,
         forSale,
-        tokenId: tokenId.toNumber(),
-        seller,
-        owner,
+        sold,
+        rented,
         name,
         id,
         description,
-        tokenURI,
-        sold,
-        rented,
-        expires
+        tokenURI
       };
     }));
 
@@ -292,7 +287,7 @@ export const NFTProvider = ({ children }) => {
 
     const data = await contract.fetchMyRentedNFTs();
 
-    const items = await Promise.all(data.map(async ({ tokenId, seller, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, expires: unformmattedExpries }) => {
+    const items = await Promise.all(data.map(async ({ tokenId, owner, price: unformmattedPrice, rentPrice: unformmattedRentPrice, forRent, forSale, sold, rented, renter,expires: unformmattedExpries }) => {
       const tokenURI = await contract.tokenURI(tokenId);
       const { data: { name, id, description } } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
       const price = ethers.utils.formatUnits(unformmattedPrice.toString(), 'ether');
@@ -301,20 +296,20 @@ export const NFTProvider = ({ children }) => {
       const expires = new Date(unformmattedExpries * 1000).toLocaleString();
 
       return {
+        tokenId: tokenId.toNumber(),
+        owner,
         price,
         rentPrice,
         forRent,
         forSale,
-        tokenId: tokenId.toNumber(),
-        seller,
-        owner,
+        sold,
+        rented,
+        renter,
+        expires,
         name,
         id,
         description,
-        tokenURI,
-        sold,
-        rented,
-        expires
+        tokenURI
       };
     }));
 

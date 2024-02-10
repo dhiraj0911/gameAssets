@@ -29,19 +29,6 @@ const NFTCard = ({ nft, onProfilePage }) => {
 
     return () => clearInterval(interval);
   }, [nft.expires]);
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     try {
-  //       await returnNFT(nft.tokenId);
-  //     } catch (error) {
-  //       console.error("Error returning NFT:", error);
-  //     }
-  //   };
-  
-  //   init();
-  // }, [nft.tokenId]);
-
   
   return (
     <div className="flex flex-col rounded-3xl border-solid hover:border-dotted m-3" style={{ backgroundColor: '#011627 ' }}>

@@ -61,7 +61,7 @@ const Home = () => {
       items.forEach(item => {
         if (item.forRent) {
           itemsForRent.push(item);
-        } 
+        }
         if (item.forSale){
           itemsForSale.push(item);
         }
@@ -71,6 +71,15 @@ const Home = () => {
       setIsLoading(false);
     });
   }, []);
+
+  // useEffect(() => {
+  //   fetchNFTs().then((items) => {
+  //     setNfts(items);
+  //     console.log(items)
+  //     setNftsCopy(items);
+  //     setIsLoading(false);
+  //   });
+  // }, []);
 
 
 
@@ -93,13 +102,6 @@ const Home = () => {
       setHideButtons(true);
     }
   };
-  useEffect(() => {
-    fetchNFTs().then((items) => {
-      setNfts(items);
-      setNftsCopy(items);
-      setIsLoading(false);
-    });
-  }, []);
 
   useEffect(() => {
     const sortedNfts = [...nfts];
@@ -163,7 +165,7 @@ const Home = () => {
         </>
         ) : (
           <>
-            <div>
+            {/* <div>
               <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">
                 Top Sellers
               </h1>
@@ -218,18 +220,18 @@ const Home = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </div> */}
             <div className="mt-10">
               {/* <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
                 <h1 className="flex-1 font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold sm:mb-4">
-                  Hot NFTs
+                  Hot NFTs for Rent
                 </h1>
                 <div className="flex-2 sm:w-full flex flex-row sm:flex-col">
                   <SearchBar
-                    activeSelect={activeSelect}
-                    setActiveSelect={setActiveSelect}
-                    handleSearch={onHandleSearch}
-                    clearSearch={onClearSearch}
+                    activeSelect={sortOptionRent}
+                    setActiveSelect={setSortOptionRent}
+                    handleSearch={(value) => setSearchQueryRent(value)}
+                    clearSearch={() => setSearchQueryRent('')}
                   />
                 </div>
               </div> */}

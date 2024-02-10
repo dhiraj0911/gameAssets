@@ -110,30 +110,30 @@ const Game = () => {
           </div>
 
           {/* Cards container */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-7">
+          <div className="grid grid-cols-3 gap-4 mt-7">
             {fetchedAssets.map((asset, index) => (
-                <div key={index} className="max-w-sm p-6 bg-white bg-opacity-20 border border-gray-200 rounded-lg shadow dark:bg-black-800 dark:border-gray-700 dark:bg-opacity-10">
-                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{asset.name}</h5>
-                    <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Unique ID: {asset.id}</p>
-                    {mintedAssets[asset.id] ? (
-                      <button
-                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-green-700 rounded-lg"
-                        disabled
-                      >
-                        Minted
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleOpenModal(asset)}
-                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      >
-                        Mint
-                        <svg className="ml-2 w-3.5 h-3.5" aria-hidden="true" fill="none" viewBox="0 0 14 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                        </svg>
-                      </button>
-                    )}
-                </div>
+              <div key={index} className="max-w-sm p-6 bg-white bg-opacity-20 border border-gray-200 rounded-lg shadow dark:bg-black-800 dark:border-gray-700 dark:bg-opacity-10">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{asset.name}</h5>
+                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Unique ID: {asset.id}</p>
+                {mintedAssets[asset.id] ? (
+                  <button
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-green-700 rounded-lg"
+                    disabled
+                  >
+                    Minted
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleOpenModal(asset)}
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    Mint
+                    <svg className="ml-2 w-3.5 h-3.5" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
             ))}
             {isModalOpen && (
               <div id="mint-asset-modal" aria-hidden="true" className="overflow-y-auto overflow-x-hidden fixed inset-0 z-50 flex justify-center items-center">

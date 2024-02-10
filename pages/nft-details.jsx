@@ -110,15 +110,18 @@ const NFTDetails = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
   const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =useContext(NFTContext);
   const [nft, setNft] = useState({
-    tokenId: "",
-    name: "",
-    owner: "",
-    price: "",
-    seller: "",
-    forRent: "",
-    forSale: "",
-    tokenURI: "",
+    description: "",
     id: "",
+    name: "",
+    price: "",
+    rentPrice: "",
+    forSale: "",
+    forRent: "",
+    owner: "",
+    rented: "",
+    sold: "",
+    tokenId: "",
+    tokenURI: "",
   });
   const router = useRouter();
   const [paymentModal, setPaymentModal] = useState(false);
@@ -132,6 +135,7 @@ const NFTDetails = () => {
   useEffect(() => {
     if (!router.isReady) return;
     setNft(router.query);
+    console.log(nft);
     setIsLoading(false);
   }, [router.isReady]);
 
@@ -149,18 +153,6 @@ const NFTDetails = () => {
       fetchUser();
     }
   }, [nft, nft.tokenId, userOf]);
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     try {
-  //       await returnNFT(nft.tokenId);
-  //     } catch (error) {
-  //       console.error("Error returning NFT:", error);
-  //     }
-  //   };
-
-  //   init();
-  // }, [nft.tokenId]);
 
   const buyCheckout = async () => {
     try {
@@ -276,7 +268,7 @@ const NFTDetails = () => {
         </div>
         <div className="mt-10 ">
           <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-normal ">
-            Creator
+            Owner
           </p>
           <div className="flex flex-row items-center mt-3">
             <div className="relative w-12 h-12 minlg:w-20 minlg:h-20 mr-2">
@@ -288,7 +280,7 @@ const NFTDetails = () => {
             </div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-semibold ">
               {/* {shortenAddress(nft.seller)} */}
-              {nft.seller}
+              {nft.owner}
             </p>
           </div>
         </div>
@@ -300,7 +292,7 @@ const NFTDetails = () => {
             </p>
             {nft.forRent == "true" ? (
               <div className="flex flex-row sm:flex-col mt-5 ">
-                {currentAccount === nft.seller.toLowerCase() ? (
+                {currentAccount === nft.owner.toLowerCase() ? (
                   <p className="font-mono dark:text-white text-nft-black-1 text-xs border border-gray p-2">
                     You Cannot rent Your Own NFT
                   </p>
@@ -332,7 +324,7 @@ const NFTDetails = () => {
             </p>
             {nft.forSale == "true" ? (
               <div className="flex flex-row sm:flex-col mt-5 ">
-                {currentAccount === nft.seller.toLowerCase() ? (
+                {currentAccount === nft.owner.toLowerCase() ? (
                   <p className="font-mono dark:text-white text-nft-black-1 text-sm border border-gray p-2">
                     You Cannot Buy Your Own Asset
                   </p>
@@ -457,7 +449,7 @@ const NFTDetails = () => {
                 You successfully purchased{" "}
                 <span className="font-semibold">{nft.name}</span> from{" "}
                 <span className="font-semibold">
-                  {shortenAddress(nft.seller)}
+                  {shortenAddress(nft.owner)}
                 </span>
                 .
               </p>
@@ -504,7 +496,7 @@ const NFTDetails = () => {
                 You successfully rented{" "}
                 <span className="font-semibold">{nft.name}</span> from{" "}
                 <span className="font-semibold">
-                  {shortenAddress(nft.seller)}
+                  {shortenAddress(nft.owner)}
                 </span>
                 .
               </p>
