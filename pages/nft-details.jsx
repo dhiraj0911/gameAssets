@@ -30,7 +30,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         <div className="text-gray-300 uppercase tracking-widest">{nft.id}</div>
       </div>
       <div className="pt-5">
-        {nft.price} {nftCurrency}
+        {nft.price} {nftCurrency(nft)}
       </div>
     </div>
     <div className="flexBetween mt-10">
@@ -38,7 +38,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Total
       </p>
       <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-        {nft.price} <span className="font-semibold">{nftCurrency}</span>
+        {nft.price} <span className="font-semibold">{nftCurrency(nft)}</span>
       </p>
     </div>
   </div>
@@ -71,7 +71,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 
       <div>
         <div className="pt-5 ml-20 pl-20">
-          {nft.rentPrice} {nftCurrency} {"/ day"}
+          {nft.rentPrice} {nftCurrency(nft)} {"/ day"}
         </div>
         <div className="mt-8 px-10 pr-10">
           <input
@@ -98,7 +98,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
           : `${rentalPeriod} x ${nft.rentPrice} = `}
         {rentalPeriod !== 0 && rentalPeriod !== "" && (
           <span className="font-bold">
-            {`${calculateRentalCost(nft, rentalPeriod)} ${nftCurrency}`}
+            {`${calculateRentalCost(nft, rentalPeriod)} ${nftCurrency(nft)}`}
           </span>
         )}
       </p>
@@ -118,6 +118,7 @@ const NFTDetails = () => {
     forSale: "",
     forRent: "",
     owner: "",
+    isWETH: "",
     rented: "",
     sold: "",
     tokenId: "",
@@ -157,14 +158,14 @@ const NFTDetails = () => {
   const buyCheckout = async () => {
     try {
       await buyNft(nft);
-      await axios.put(
-        `${API_BASE_URL}/api/assets/${nft.id}`,
-        {
-          isForSale: false,
-          owner: window.localStorage.getItem("objectId"),
-          seller: null,
-        }
-      );
+      // await axios.put(
+      //   `${API_BASE_URL}/api/assets/${nft.id}`,
+      //   {
+      //     isForSale: false,
+      //     owner: window.localStorage.getItem("objectId"),
+      //     seller: null,
+      //   }
+      // );
 
       setPaymentModal(false);
       setBuySuccessModal(true);
@@ -176,39 +177,39 @@ const NFTDetails = () => {
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
       await rentNFT(nft, rentalPeriodInDays);
-      const response = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      // const response = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
       
-      try {
-        await axios.get(
-          `${API_BASE_URL}/api/rental/${nft.id}`
-        );
-        await axios.put(
-          `${API_BASE_URL}/api/rental/${nft.id}`,
-          {
-            renter: window.localStorage.getItem("objectId"),
-            rentStartDate: new Date().toISOString(),
-            rentEndDate: new Date(Date.now() + 120).toISOString(),
-            rentalPeriod: rentalPeriodInDays,
-            rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
-            status: "ACTIVE" //ACTIVE or INACTIVE
-          }
-        );
-      }
-      catch {
-        await axios.post(
-          `${API_BASE_URL}/api/rental`,
-          {
-            id: nft.id,
-            nftId: response.data._id,
-            renter: window.localStorage.getItem("objectId"),
-            rentStartDate: new Date().toISOString(),
-            rentEndDate: new Date(Date.now() + rentalPeriodInDays * 24 * 60 * 60 * 1000).toISOString(),
-            rentalPeriod: rentalPeriodInDays,
-            rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
-            status: "ACTIVE" //ACTIVE or INACTIVE
-          }
-        );
-      }
+      // try {
+      //   await axios.get(
+      //     `${API_BASE_URL}/api/rental/${nft.id}`
+      //   );
+      //   await axios.put(
+      //     `${API_BASE_URL}/api/rental/${nft.id}`,
+      //     {
+      //       renter: window.localStorage.getItem("objectId"),
+      //       rentStartDate: new Date().toISOString(),
+      //       rentEndDate: new Date(Date.now() + 120).toISOString(),
+      //       rentalPeriod: rentalPeriodInDays,
+      //       rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
+      //       status: "ACTIVE" //ACTIVE or INACTIVE
+      //     }
+      //   );
+      // }
+      // catch {
+      //   await axios.post(
+      //     `${API_BASE_URL}/api/rental`,
+      //     {
+      //       id: nft.id,
+      //       nftId: response.data._id,
+      //       renter: window.localStorage.getItem("objectId"),
+      //       rentStartDate: new Date().toISOString(),
+      //       rentEndDate: new Date(Date.now() + rentalPeriodInDays * 24 * 60 * 60 * 1000).toISOString(),
+      //       rentalPeriod: rentalPeriodInDays,
+      //       rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
+      //       status: "ACTIVE" //ACTIVE or INACTIVE
+      //     }
+      //   );
+      // }
 
       setRentPaymentModal(false);
       setRentSuccessModal(true);
@@ -298,7 +299,7 @@ const NFTDetails = () => {
                   </p>
                 ) : (
                   <Button
-                    btnName={`Rent for ${nft.rentPrice} ${nftCurrency}`}
+                    btnName={`Rent for ${nft.rentPrice} ${nftCurrency(nft)}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setRentPaymentModal(true)}
                   />
@@ -330,7 +331,7 @@ const NFTDetails = () => {
                   </p>
                 ) : (
                   <Button
-                    btnName={`Buy for ${nft.price} ${nftCurrency}`}
+                    btnName={`Buy for ${nft.price} ${nftCurrency(nft)}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setPaymentModal(true)}
                   />
@@ -361,7 +362,7 @@ const NFTDetails = () => {
       {paymentModal && (
         <Modal
           header="Check Out"
-          body={<PaymentBodyCmp nft={nft} nftCurrency={nftCurrency} />}
+          body={<PaymentBodyCmp nft={nft} nftCurrency={nftCurrency(nft)} />}
           footer={
             <div className="flex flex-row sm:flex-col">
               <Button
@@ -385,7 +386,7 @@ const NFTDetails = () => {
           body={
             <RentBobyCmp
               nft={nft}
-              nftCurrency={nftCurrency}
+              nftCurrency={nftCurrency(nft)}
               rentalPeriod={rentalPeriod}
               setRentalPeriod={setRentalPeriod}
             />

@@ -4,7 +4,6 @@ pragma solidity ^0.8.4;
 import "./ERC4907.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RentableNFTMarketplace is
     ERC4907,
@@ -18,9 +17,6 @@ contract RentableNFTMarketplace is
 
     uint256 listingPrice = 0.001 ether;
     address payable public owner;
-    address public constant WETH_ADDRESS = "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa";
-
-    IERC20 weth = IERC20(WETH_ADDRESS);
 
     mapping(uint256 => MarketItem) public idToMarketItem;
     mapping(uint256 => RentedItem) public idToRentedItem;
@@ -30,7 +26,7 @@ contract RentableNFTMarketplace is
     struct MarketItem {
         uint256 tokenId;
         address payable owner;
-        bool priceInWETH;
+        bool isWETH;
         uint256 price;
         uint256 rentPrice;
         bool forRent;
@@ -48,7 +44,7 @@ contract RentableNFTMarketplace is
     struct FullRentedItem {
         uint256 tokenId;
         address payable owner;
-        bool priceInWETH;
+        bool isWETH;
         uint256 price;
         uint256 rentPrice;
         bool forRent;
@@ -62,7 +58,7 @@ contract RentableNFTMarketplace is
     event MarketItemCreated(
         uint256 indexed tokenId,
         address owner,
-        bool priceInWETH,
+        bool isWETH,
         uint256 price,
         uint256 rentPrice,
         bool forRent,
@@ -90,30 +86,23 @@ contract RentableNFTMarketplace is
 
     function createToken(
         string memory _tokenURI,
-        bool priceInWETH,
+        bool isWETH,
         uint256 price,
         uint256 rentPrice,
         bool forSale,
         bool forRent
     ) public payable {
-        if (!priceInWETH) {
-            require(msg.value == listingPrice, "Price must be equal to listing price in MATIC");
-        }
-        else {
-            require(weth.transferFrom(msg.sender, address(this), listingPrice), "Failed to transfer listing fee in WETH");
-        }
-
+        require(msg.value == listingPrice, "Price must be equal to listing price");
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
         _mint(msg.sender, newTokenId);
         tokenURIs[newTokenId] = _tokenURI;
-
-        createMarketItem(newTokenId, priceInWETH, price, rentPrice, forSale, forRent);
+        createMarketItem(newTokenId, isWETH, price, rentPrice, forSale, forRent);
     }
 
     function createMarketItem(
         uint256 tokenId,
-        bool priceInWETH,
+        bool isWETH,
         uint256 price,
         uint256 rentPrice,
         bool forSale,
@@ -126,7 +115,7 @@ contract RentableNFTMarketplace is
         idToMarketItem[tokenId] = MarketItem(
             tokenId,
             payable(msg.sender),
-            priceInWETH,
+            isWETH
             price,
             rentPrice,
             forRent,
@@ -137,7 +126,7 @@ contract RentableNFTMarketplace is
         emit MarketItemCreated(
             tokenId,
             msg.sender,
-            priceInWETH,
+            isWETH,
             price,
             rentPrice,
             forRent,
@@ -149,52 +138,35 @@ contract RentableNFTMarketplace is
 
     function resellToken(
         uint256 tokenId,
-        bool priceInWETH,
+        bool isWETH,
         uint256 price,
         uint256 rentPrice,
         bool forRent,
         bool forSale
     ) public payable {
-        MarketItem storage item = idToMarketItem[tokenId];
-        require(item.owner == msg.sender, "Only item owner can resell");
-
-        if (!priceInWETH) {
-            require(msg.value == listingPrice, "Price must be equal to listing price in MATIC");
-        } else {
-            require(weth.transferFrom(msg.sender, address(this), listingPrice), "Failed to transfer listing fee in WETH");
-        }
-
-        item.priceInWETH = priceInWETH;
-        item.price = price;
-        item.rentPrice = rentPrice;
-        item.forRent = forRent;
-        item.forSale = forSale;
-        item.sold = false;
-        item.rented = false;
+        require(idToMarketItem[tokenId].owner == msg.sender, "Only item owner can resell");
+        require(msg.value == listingPrice, "Price must be equal to listing price");
+        idToMarketItem[tokenId].isWETH = isWETH;
+        idToMarketItem[tokenId].price = price;
+        idToMarketItem[tokenId].rentPrice = rentPrice;
+        idToMarketItem[tokenId].forRent = forRent;
+        idToMarketItem[tokenId].forSale = forSale;
+        idToMarketItem[tokenId].sold = false;
+        idToMarketItem[tokenId].rented = false;
         _itemsSold.decrement();
     }
 
     function createMarketSale(uint256 tokenId) public payable {
-        MarketItem storage item = idToMarketItem[tokenId];
-        uint price = item.price;
-        address currOwner = item.owner;
-        bool priceInWETH = item.priceInWETH;
-
-        if (!priceInWETH) {
-            require(msg.value == price, "Please pay the asking price in MATIC to complete the purchase");
-            payable(currOwner).transfer(msg.value);
-        } else {
-            require(msg.value == 0, "Please make payment in WETH, not MATIC");
-            require(weth.transferFrom(msg.sender, currOwner, price), "Failed to transfer WETH to seller");
-        }
-
-        item.owner = payable(msg.sender);
-        item.priceInWETH = false;
-        item.sold = true;
-        item.forSale = false;
-        item.forRent = false;
+        uint price = idToMarketItem[tokenId].price;
+        address currOwner = idToMarketItem[tokenId].owner;
+        require(msg.value == price, "Please pay the asking price in order to complete the purchase");
+        idToMarketItem[tokenId].owner = payable(msg.sender);
+        idToMarketItem[tokenId].sold = true;
+        idToMarketItem[tokenId].forSale = false;
+        idToMarketItem[tokenId].forRent = false;
         _itemsSold.increment();
         _transfer(currOwner, msg.sender, tokenId);
+        payable(currOwner).transfer(msg.value);
     }
 
     function rentOutToken(uint256 _tokenId, uint64 _expires) public payable {

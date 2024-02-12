@@ -88,7 +88,7 @@ const NFTCard = ({ nft, onProfilePage }) => {
                     <span className="text-5xl font-light tracking-tight text-white">
                       {nft.rentPrice}
                     </span>
-                    <span className="text-base font-medium text-white"> {nftCurrency} /day </span>
+                    <span className="text-base font-medium text-white"> {nftCurrency(nft)} /day </span>
                   </p>
                 </div>
               ) : (
@@ -97,7 +97,7 @@ const NFTCard = ({ nft, onProfilePage }) => {
                     <span className="text-5xl font-light tracking-tight text-white">
                       {nft.price}
                     </span>
-                    <span className="text-base font-medium text-white"> {nftCurrency}</span>
+                    <span className="text-base font-medium text-white"> {nftCurrency(nft)}</span>
                   </p>
                 </div>
               )}
