@@ -55,15 +55,12 @@ export const NFTProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, password, name, ethAddress) => {
+  const signUp = async (email, password) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/vendor/signup`, {
         email,
-        password,
-        name,
-        ethAddress,
+        password
       });
-
       if (response.status) {
         setIsSingedUp(true);
       } else {
