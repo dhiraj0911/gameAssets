@@ -109,18 +109,9 @@ const checkActive = (active, setActive, router) => {
     case '/':
       if (active !== 'Explore NFTs') setActive('Explore NFTs');
       break;
-    case '/listed-nfts':
-      if (active !== 'Listed NFTs') setActive('Listed NFTs');
-      break;
     case '/my-nfts':
       if (active !== 'My NFTs') setActive('My NFTs');
       break;
-    // case '/create-nft':
-    //   if (active !== '') setActive('');
-    //   break;
-      case '/gameAssets':
-        if (active !== '') setActive('');
-        break;
     default:
       setActive('');
   }
