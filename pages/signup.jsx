@@ -1,16 +1,15 @@
 import React, { useState, useContext } from "react";
 import { NFTContext } from "../context/NFTContext";
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
+import Verify from "./verify";
 
 const SignUp = () => {
-  const { signUp } = useContext(NFTContext);
+  const { signUp, isSingedUp } = useContext(NFTContext);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [ethAddress, setEthAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const router = useRouter();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -18,10 +17,12 @@ const SignUp = () => {
       alert("Passwords do not match");
       return;
     }
-    
     signUp( email, name, ethAddress, password );
-    router.push('/signin');
   };
+
+  if (isSingedUp) {
+    return <Verify email={email} />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 mx-auto md:h-screen lg:py-0">
