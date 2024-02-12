@@ -133,47 +133,6 @@ export const NFTProvider = ({ children }) => {
     return user;
   };
 
-  const fetchMyNFTsOrListedNFTs = async (type) => {
-    setIsLoadingNFT(false);
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-
-    const contract = fetchContract(signer);
-
-    const data =
-      type === "fetchItemsListed"
-        ? await contract.fetchItemsListed()
-        : await contract.fetchMyNFTs();
-
-    const items = await Promise.all(
-      data.map(async ({ tokenId, seller, owner, price: unformmattedPrice }) => {
-        const tokenURI = await contract.tokenURI(tokenId);
-        const {
-          data: { image, name, description },
-        } = await axios.get(`https://gateway.pinata.cloud/ipfs/${tokenURI}`);
-        const price = ethers.utils.formatUnits(
-          unformmattedPrice.toString(),
-          "ether"
-        );
-
-        return {
-          price,
-          tokenId: tokenId.toNumber(),
-          seller,
-          owner,
-          image,
-          name,
-          description,
-          tokenURI,
-        };
-      })
-    );
-
-    return items;
-  };
-
   const createSale = async (
     url,
     forminputPrice,
@@ -319,7 +278,6 @@ export const NFTProvider = ({ children }) => {
             unformmattedRentPrice.toString(),
             "ether"
           );
-
           return {
             tokenId: tokenId.toNumber(),
             owner,
@@ -474,7 +432,6 @@ export const NFTProvider = ({ children }) => {
         connectWallet,
         currentAccount,
         fetchNFTs,
-        fetchMyNFTsOrListedNFTs,
         buyNft,
         createSale,
         rentNFT,
