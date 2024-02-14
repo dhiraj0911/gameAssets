@@ -117,6 +117,9 @@ export const NFTProvider = ({ children }) => {
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       setCurrentAccount(accounts[0]);
+      if (process.env.NEXT_PUBLIC_TESTNET === "true") {
+        await switchToPolygonMumbaiTestnet();
+      }
     } else {
       console.log("No accounts found");
     }
@@ -128,8 +131,52 @@ export const NFTProvider = ({ children }) => {
       method: "eth_requestAccounts",
     });
     setCurrentAccount(accounts[0]);
+    if (process.env.NEXT_PUBLIC_TESTNET === "true") {
+      await switchToPolygonMumbaiTestnet();
+    }
     window.location.reload();
   };
+  
+  const switchToPolygonMumbaiTestnet = async () => {
+    const chainId = '0x13881'; // Polygon Mumbai Testnet
+    const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+    
+    if (currentChainId !== chainId) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: chainId }]
+        });
+      } catch (err) {
+        if (err.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: chainId,
+                  chainName: 'Matic(Polygon) Mumbai Testnet',
+                  nativeCurrency: {
+                    name: 'MATIC',
+                    symbol: 'MATIC',
+                    decimals: 18
+                  },
+                  rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
+                  blockExplorerUrls: ['https://mumbai.polygonscan.com/']
+                }
+              ]
+            });
+          } catch (addError) {
+            console.error('Error adding the Polygon Mumbai testnet:', addError);
+          }
+        } else {
+          console.error('Error switching to the Polygon Mumbai testnet:', err);
+        }
+      }
+    } else {
+      console.log('Already connected to the Polygon Mumbai testnet.');
+    }
+  };  
 
   const userOf = async (id) => {
     const web3Modal = new Web3Modal();
