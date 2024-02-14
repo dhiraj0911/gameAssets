@@ -13,12 +13,10 @@ export const NFTProvider = ({ children }) => {
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_PRODUCTION === "true"
       ? process.env.NEXT_PUBLIC_BASE_URL
-      : "http://localhost:5000";
+      : "http://3.83.254.105:5000";
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   // const nftCurrency = "MATIC";
-
-
 
   const [isSigned, setIsSigned] = useState(false);
   const [isSingedUp, setIsSingedUp] = useState(false);
@@ -579,6 +577,7 @@ export const NFTProvider = ({ children }) => {
   return (
     <NFTContext.Provider
       value={{
+        checkIfWalletIsConnected,
         nftCurrency,
         connectWallet,
         currentAccount,
