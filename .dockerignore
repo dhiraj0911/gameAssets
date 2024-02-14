@@ -1,0 +1,13 @@
+cache
+.next
+artifacts
+node_modules
+.env
+.git/
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+nginx/     
+package-lock.json
+yarn.lock
