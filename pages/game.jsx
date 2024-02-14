@@ -60,22 +60,22 @@ const Game = () => {
         true
       );
 
-      try {
-        await axios.post(`${API_BASE_URL}/api/assets/`, {
-          name,
-          description,
-          id,
-          uri,
-          isForSale,
-          isForRent,
-          price,
-          rentPrice,
-          owner: `${process.env.NEXT_PUBLIC_OBJECTID}`,
-          seller: sellerId,
-        });
-      } catch (error) {
-        console.error("Error in storing asset in backend", error);
-      }
+      // try {
+      //   await axios.post(`${API_BASE_URL}/api/assets/`, {
+      //     name,
+      //     description,
+      //     id,
+      //     uri,
+      //     isForSale,
+      //     isForRent,
+      //     price,
+      //     rentPrice,
+      //     owner: `${process.env.NEXT_PUBLIC_OBJECTID}`,
+      //     seller: sellerId,
+      //   });
+      // } catch (error) {
+      //   console.error("Error in storing asset in backend", error);
+      // }
       setMintedAssets((prev) => ({ ...prev, [currentAsset.id]: true }));
       setPrice("0");
       setRentPrice("0");

@@ -30,7 +30,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         <div className="text-gray-300 uppercase tracking-widest">{nft.id}</div>
       </div>
       <div className="pt-5">
-        {nft.price} {nftCurrency(nft)}
+        {nft.price} {nftCurrency}
       </div>
     </div>
     <div className="flexBetween mt-10">
@@ -38,7 +38,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Total
       </p>
       <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-        {nft.price} <span className="font-semibold">{nftCurrency(nft)}</span>
+        {nft.price} <span className="font-semibold">{nftCurrency}</span>
       </p>
     </div>
   </div>
@@ -71,7 +71,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 
       <div>
         <div className="pt-5 ml-20 pl-20">
-          {nft.rentPrice} {nftCurrency(nft)} {"/ day"}
+          {nft.rentPrice} {nftCurrency} {"/ day"}
         </div>
         <div className="mt-8 px-10 pr-10">
           <input
@@ -98,7 +98,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
           : `${rentalPeriod} x ${nft.rentPrice} = `}
         {rentalPeriod !== 0 && rentalPeriod !== "" && (
           <span className="font-bold">
-            {`${calculateRentalCost(nft, rentalPeriod)} ${nftCurrency(nft)}`}
+            {`${calculateRentalCost(nft, rentalPeriod)} ${nftCurrency}`}
           </span>
         )}
       </p>
