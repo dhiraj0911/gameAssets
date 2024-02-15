@@ -13,7 +13,7 @@ export const NFTProvider = ({ children }) => {
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_PRODUCTION === "true"
       ? process.env.NEXT_PUBLIC_BASE_URL
-      : "http://3.83.254.105:5000";
+      : "http://localhost:5000";
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   // const nftCurrency = "MATIC";
@@ -32,7 +32,7 @@ export const NFTProvider = ({ children }) => {
   }, []);
 
   const nftCurrency = (nft) => {
-    if(nft.isWETH) {
+    if(nft.isWETH === 'true') {
       return "WETH";
     }
     else 
@@ -237,7 +237,7 @@ export const NFTProvider = ({ children }) => {
     const priceInWei = ethers.utils.parseUnits(forminputPrice, "ether");
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, "ether");
 
-    const listingPrice = ethers.utils.parseUnits("0.001", "ether");
+    const listingPrice = ethers.utils.parseUnits("0.01", "ether");
     const transaction = await contract.resellToken(
       tokenId,
       isWETH,
@@ -286,10 +286,7 @@ export const NFTProvider = ({ children }) => {
     console.log(nft)
     let transaction;
     const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-
-    if (nft.isWETH) {
-      console.log("Hit 1");
-
+    if (nft.isWETH === 'true') {
       const wethContract = new ethers.Contract(
         WETHAddress,
         WETHAddressABI,

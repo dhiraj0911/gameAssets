@@ -136,7 +136,6 @@ const NFTDetails = () => {
   useEffect(() => {
     if (!router.isReady) return;
     setNft(router.query);
-    console.log(nft);
     setIsLoading(false);
   }, [router.isReady]);
 
@@ -157,6 +156,7 @@ const NFTDetails = () => {
 
   const buyCheckout = async () => {
     try {
+      console.log(nftCurrency)
       await buyNft(nft);
       // await axios.put(
       //   `${API_BASE_URL}/api/assets/${nft.id}`,
