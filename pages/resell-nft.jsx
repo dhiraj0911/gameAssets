@@ -33,15 +33,16 @@ const ResellNFT = () => {
   }, []);
 
   const resell = async () => {
-    await reSale(tokenId, isWETH, price, rentPrice, isForRent, isForSale, true);
-    // await axios.put(`${API_BASE_URL}/api/assets/${id}`, {
-    //   isForSale,
-    //   isForRent,
-    //   price,
-    //   rentPrice,
-    //   owner: `${process.env.NEXT_PUBLIC_OBJECTID}`,
-    //   seller: window.localStorage.getItem("objectId"),
-    // });
+    await reSale(tokenId, isWETH, price, rentPrice, isForRent, isForSale);
+    // await axios.put(
+    //   `http://ec2-3-82-136-125.compute-1.amazonaws.com/api/assets/${id}`,
+    //   {
+    //     isForSale,
+    //     isForRent,
+    //     owner: "65b894f3900b82a068a6a5f8",
+    //     seller: window.localStorage.getItem("objectId"),
+    //   }
+    // );
     router.push("/");
   };
 
@@ -54,148 +55,139 @@ const ResellNFT = () => {
   }
 
   return (
-    <div className="flex justify-center items-center p-4 lg:p-12">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-2xl font-semibold text-center text-nft-black-1 dark:text-white">
+    <div className="flex justify-center sm:px-4 p-12">
+      <div className="w-3/5 md:w-full">
+        <h1 className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl">
           Sell/Lease Asset
         </h1>
 
-        {/* Asset Card */}
-        <div className="my-6">
-          <div className="card bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 rounded-lg overflow-hidden shadow-lg transition-all hover:brightness-90">
-            <div className="p-8">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <span className="bg-pink-500 w-10 h-10 rounded-full mb-4 mr-4"></span>
-                  <div>
-                    <div className="text-xl font-bold">{name}</div>
-                    <div className="text-gray-300 uppercase tracking-widest">{id}</div>
-                  </div>
+        <div className="relative flex-1 flexCenter sm:px-0 p-0 border-r md:border-r-0 md:border-b dark:border-nft-black-1 border-nft-gray-1 ">
+          <div className="relative  h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
+            <div className="card m-auto text-gray-300 w-[clamp(400px,80%,10px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+              <div className="px-8 py-8 mr-10 pr-20">
+                <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
+                <div className="uppercase font-bold text-xl">{name}</div>
+                <div className="text-gray-300 uppercase tracking-widest">
+                  {id}
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold">{price}</p>
-                  <p className="text-gray-400">Perfect everywhere</p>
+                <div className="text-gray-400 mt-8">
+                  <p className="font-bold">{price}</p>
+                  <p>Perfect everywhere</p>
                 </div>
+              </div>
+              <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>
+              <div className="h-0.5 group-hover:w-full bg-gradient-to-l  via-yellow-950 group-hover:via-pink-500 w-[70%] m-auto rounded transition-all"></div>
+            </div>
+          </div>
+        </div>
+        {isForSale || isForRent ? (
+          <div className="flex justify-center m-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Choose Currency
+            </h3>
+            <div className="flex space-x-4 ml-5">
+              {/* MATIC Radio Button */}
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="MATIC"
+                  name="currency"
+                  checked={!isWETH}
+                  onChange={() => setIsWETH(false)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  MATIC
+                </span>
+              </label>
+
+              {/* WETH Radio Button */}
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  value="WETH"
+                  name="currency"
+                  checked={isWETH}
+                  onChange={() => setIsWETH(true)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  WETH
+                </span>
+              </label>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="flex justify-center sm:px-4 p-12">
+          <div className="w-3/5 md:w-full">
+            <div className="flex justify-between">
+              <div className="flex-1 mr-2">
+                <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+                  <input
+                    id="bordered-checkbox-sale"
+                    type="checkbox"
+                    checked={isForSale}
+                    onChange={(e) => setIsForSale(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label
+                    htmlFor="bordered-checkbox-sale"
+                    className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    For Sale
+                  </label>
+                </div>
+                {isForSale && (
+                  <Input
+                    inputType="number"
+                    title="Sale Price"
+                    placeholder="Sale Price"
+                    handleClick={(e) => setPrice(e.target.value)}
+                    classStyles="mt-2"
+                  />
+                )}
+              </div>
+              <div className="flex-1 ml-2">
+                <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+                  <input
+                    id="bordered-checkbox-rent"
+                    type="checkbox"
+                    checked={isForRent}
+                    onChange={(e) => setIsForRent(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label
+                    htmlFor="bordered-checkbox-rent"
+                    className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    For Rent
+                  </label>
+                </div>
+                {isForRent && (
+                  <Input
+                    inputType="number"
+                    title="Rent Price"
+                    placeholder="Rent Price per day"
+                    handleClick={(e) => setRentPrice(e.target.value)}
+                    classStyles="mt-2"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="mt-7 w-full flex justify-end">
+              <div className="w-full flex justify-center mt-7">
+                <Button
+                  btnName="List NFT"
+                  btnType="primary"
+                  classStyles="rounded-xl"
+                  handleClick={resell}
+                />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Form Section */}
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* For Rent Checkbox */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="rentCheckbox"
-                checked={isForRent}
-                onChange={(e) => setIsForRent(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
-              />
-              <label htmlFor="rentCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                For Rent
-              </label>
-            </div>
-
-            {/* For Sale Checkbox */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="saleCheckbox"
-                checked={isForSale}
-                onChange={(e) => setIsForSale(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
-              />
-              <label htmlFor="saleCheckbox" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                For Sale
-              </label>
-            </div>
-          </div>
-
-          {/* Currency Selection */}
-          {isForSale || isForRent ? (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Choose Currency
-              </h3>
-              <div className="flex space-x-4 mt-2">
-                {/* MATIC Radio Button */}
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    value="MATIC"
-                    name="currency"
-                    checked={!isWETH}
-                    onChange={() => setIsWETH(false)}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">MATIC</span>
-                </label>
-
-                {/* WETH Radio Button */}
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    value="WETH"
-                    name="currency"
-                    checked={isWETH}
-                    onChange={() => setIsWETH(true)}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">WETH</span>
-                </label>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Price Input */}
-          {isForSale && (
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Price
-              </label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                placeholder="Enter price"
-                onChange={(e) => setPrice(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              />
-            </div>
-          )}
-
-          {/* Rent Price Input */}
-          {isForRent && (
-            <div>
-              <label htmlFor="rentPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Rent Price per day
-              </label>
-              <input
-                type="number"
-                id="rentPrice"
-                name="rentPrice"
-                placeholder="Enter rent price"
-                onChange={(e) => setRentPrice(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                required
-              />
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              onClick={resell}
-              className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              List NFT
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
