@@ -26,16 +26,14 @@ export const NFTProvider = ({ children }) => {
     const jwt = window.localStorage.getItem("token");
     if (jwt) {
       setIsSigned(true);
-    } else {
-      setIsSigned(false);
     }
   }, []);
 
   const nftCurrency = (nft) => {
-    if(nft.isWETH === 'true') {
+    if (nft.isWETH || nft.isWETH === 'true') {
       return "WETH";
     }
-    else 
+    else
       return "MATIC";
   }
 
@@ -45,14 +43,13 @@ export const NFTProvider = ({ children }) => {
         email,
         password,
       });
-      window.localStorage.setItem("objectId", response.data.vendorId);
-
+      window.localStorage.setItem("vendor", response.data.vendorId);
       if (response.status === 200) {
-        const token = window.localStorage.setItem("token", response.data.token);
+        const token = response.data.token;
         if (token) {
+          window.localStorage.setItem("token", response.data.token)
           setIsSigned(true);
-        } else {
-          setIsSigned(false);
+          
         }
         window.location.href = "/";
       } else {
@@ -86,14 +83,12 @@ export const NFTProvider = ({ children }) => {
         otp,
       });
       console.log(response)
-      window.localStorage.setItem("objectId", response.data.vendorId);
+      window.localStorage.setItem("vendor", response.data.vendorId);
 
       if (response.status === 200) {
         const token = window.localStorage.setItem("token", response.data.token);
         if (token) {
           setIsSigned(true);
-        } else {
-          setIsSigned(false);
         }
         setWrongOTP(false);
         window.location.href = "/";
@@ -109,38 +104,63 @@ export const NFTProvider = ({ children }) => {
 
   const signOut = async () => {
     window.localStorage.clear();
+    setIsSigned(false);
+    setIsSingedUp(false);
+    setCurrentAccount("");
     window.location.href = "/";
   };
 
   const checkIfWalletIsConnected = async () => {
     if (!window.ethereum) return alert("Please install Metamask wallet");
+    if(window.localStorage.getItem("vendor") === null) return;
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       setCurrentAccount(accounts[0]);
-      if (process.env.NEXT_PUBLIC_TESTNET === "true") {
-        await switchToPolygonMumbaiTestnet();
+      try {
+        let vendorId = window.localStorage.getItem("vendor");
+        await axios.post(`${API_BASE_URL}/api/address/`, {
+          vendorId,
+          address: accounts[0]
+        })
       }
+      catch (error) {
+        console.error("Not signed In:", error);
+      }
+    }
+    if (process.env.NEXT_PUBLIC_TESTNET === "true") {
+      await switchToPolygonMumbaiTestnet();
     } else {
       console.log("No accounts found");
     }
   };
-  
+
   const connectWallet = async () => {
     if (!window.ethereum) return alert("Please install Metamask wallet");
+    if(window.localStorage.getItem("vendor") === null) return;
     const accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
     setCurrentAccount(accounts[0]);
+    try {
+      let vendorId = window.localStorage.getItem("vendor");
+      await axios.post(`${API_BASE_URL}/api/address/`, {
+        vendorId,
+        address: accounts[0]
+      })
+    }
+    catch (error) {
+      console.error("Not signed In:", error);
+    }
     if (process.env.NEXT_PUBLIC_TESTNET === "true") {
       await switchToPolygonMumbaiTestnet();
     }
     window.location.reload();
   };
-  
+
   const switchToPolygonMumbaiTestnet = async () => {
     const chainId = '0x13881'; // Polygon Mumbai Testnet
     const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-    
+
     if (currentChainId !== chainId) {
       try {
         await window.ethereum.request({
@@ -176,7 +196,7 @@ export const NFTProvider = ({ children }) => {
     } else {
       console.log('Already connected to the Polygon Mumbai testnet.');
     }
-  };  
+  };
 
   const userOf = async (id) => {
     const web3Modal = new Web3Modal();
@@ -282,8 +302,6 @@ export const NFTProvider = ({ children }) => {
       MarketAddressABI,
       signer
     );
-    console.log("Hit 0");
-    console.log(nft)
     let transaction;
     const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
     if (nft.isWETH === 'true') {
@@ -568,7 +586,7 @@ export const NFTProvider = ({ children }) => {
   };
 
   useEffect(async () => {
-    checkIfWalletIsConnected();
+      checkIfWalletIsConnected();
   }, []);
 
   return (

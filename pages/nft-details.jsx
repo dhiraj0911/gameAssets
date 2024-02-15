@@ -71,7 +71,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 
       <div>
         <div className="pt-5 ml-20 pl-20">
-          {nft.rentPrice} {nftCurrency} {"/ day"}
+          {nft.rentPrice} {nftCurrency(nft)} {"/ day"}
         </div>
         <div className="mt-8 px-10 pr-10">
           <input
@@ -158,14 +158,18 @@ const NFTDetails = () => {
     try {
       console.log(nftCurrency)
       await buyNft(nft);
-      // await axios.put(
-      //   `${API_BASE_URL}/api/assets/${nft.id}`,
-      //   {
-      //     isForSale: false,
-      //     owner: window.localStorage.getItem("objectId"),
-      //     seller: null,
-      //   }
-      // );
+      await axios.put(
+        `${API_BASE_URL}/api/assets/${nft.id}`,
+        {
+          sold: true,
+          isForSale: false,
+          isForRent: false,
+          isWETH: false,
+          price: null,
+          rentPrice: null,
+          owner: window.localStorage.getItem("vendor"),
+        }
+      );
 
       setPaymentModal(false);
       setBuySuccessModal(true);
