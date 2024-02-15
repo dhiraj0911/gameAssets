@@ -71,7 +71,7 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 
       <div>
         <div className="pt-5 ml-20 pl-20">
-          {nft.rentPrice} {nftCurrency(nft)} {"/ day"}
+          {nft.rentPrice} {nftCurrency} {"/ day"}
         </div>
         <div className="mt-8 px-10 pr-10">
           <input
@@ -107,8 +107,12 @@ const RentBobyCmp = ({ nft, nftCurrency, rentalPeriod, setRentalPeriod }) => (
 );
 
 const NFTDetails = () => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === 'true' ? process.env.NEXT_PUBLIC_BASE_URL : 'http://localhost:5000';
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =useContext(NFTContext);
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_PRODUCTION === "true"
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : "http://localhost:5000";
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =
+    useContext(NFTContext);
   const [nft, setNft] = useState({
     description: "",
     id: "",
@@ -156,21 +160,24 @@ const NFTDetails = () => {
 
   const buyCheckout = async () => {
     try {
-      console.log(nftCurrency)
+      console.log(nftCurrency);
       await buyNft(nft);
-      await axios.put(
-        `${API_BASE_URL}/api/assets/${nft.id}`,
-        {
-          sold: true,
-          isForSale: false,
-          isForRent: false,
-          isWETH: false,
-          price: null,
-          rentPrice: null,
-          owner: window.localStorage.getItem("vendor"),
-        }
-      );
-
+      await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
+        sold: true,
+        isForSale: false,
+        isForRent: false,
+        isWETH: false,
+        price: null,
+        rentPrice: null,
+        owner: window.localStorage.getItem("vendor"),
+      });
+      const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      const vendorId = window.localStorage.getItem("vendor");
+      await axios.post(`${API_BASE_URL}/api/transaction`, {
+        assetId: asset.data._id,
+        vendorId,
+        transactionType: "Buy",
+      });
       setPaymentModal(false);
       setBuySuccessModal(true);
     } catch (error) {
@@ -180,46 +187,27 @@ const NFTDetails = () => {
 
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
+      // console.log(nft)
       await rentNFT(nft, rentalPeriodInDays);
-      // const response = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
-      
-      // try {
-      //   await axios.get(
-      //     `${API_BASE_URL}/api/rental/${nft.id}`
-      //   );
-      //   await axios.put(
-      //     `${API_BASE_URL}/api/rental/${nft.id}`,
-      //     {
-      //       renter: window.localStorage.getItem("objectId"),
-      //       rentStartDate: new Date().toISOString(),
-      //       rentEndDate: new Date(Date.now() + 120).toISOString(),
-      //       rentalPeriod: rentalPeriodInDays,
-      //       rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
-      //       status: "ACTIVE" //ACTIVE or INACTIVE
-      //     }
-      //   );
-      // }
-      // catch {
-      //   await axios.post(
-      //     `${API_BASE_URL}/api/rental`,
-      //     {
-      //       id: nft.id,
-      //       nftId: response.data._id,
-      //       renter: window.localStorage.getItem("objectId"),
-      //       rentStartDate: new Date().toISOString(),
-      //       rentEndDate: new Date(Date.now() + rentalPeriodInDays * 24 * 60 * 60 * 1000).toISOString(),
-      //       rentalPeriod: rentalPeriodInDays,
-      //       rentPrice: calculateRentalCost(nft, rentalPeriodInDays),
-      //       status: "ACTIVE" //ACTIVE or INACTIVE
-      //     }
-      //   );
-      // }
 
+      await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
+        rented: true,
+        rentStart: Math.floor(Date.now() / 1000),
+        rentEnd:
+          Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60,
+        renter: window.localStorage.getItem("vendor"),
+      });
+      const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      const vendorId = window.localStorage.getItem("vendor");
+      await axios.post(`${API_BASE_URL}/api/transaction`, {
+        assetId: asset.data._id,
+        vendorId,
+        transactionType: "Rent",
+      });
       setRentPaymentModal(false);
       setRentSuccessModal(true);
-  
     } catch (error) {
-      console.error("Error renting NFT:", error);      
+      console.error("Error renting NFT:", error);
     }
   };
 
