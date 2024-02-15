@@ -147,7 +147,8 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && !currentAccount) {
+  if ((isSigned || isSingedUp) && currentAccount === '') {
+    console.log(currentAccount);
     return (
       <Connectwallet />
     )

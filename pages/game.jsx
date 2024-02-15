@@ -45,37 +45,34 @@ const Game = () => {
         console.error("Error:", error);
       }
 
-      const sellerId = window.localStorage.getItem("objectId");
+      const ownerId = window.localStorage.getItem("vendor");
 
       const uri = response.data.ipfsResult.IpfsHash;
-      const { name, id, description } = currentAsset;
+      const { id } = currentAsset;
 
-      await createSale(
-        uri,
-        isWETH,
-        price,
-        rentPrice,
-        isForSale,
-        isForRent,
-        true
-      );
+      await createSale(uri, isWETH, price, rentPrice, isForSale, isForRent);
 
-      // try {
-      //   await axios.post(`${API_BASE_URL}/api/assets/`, {
-      //     name,
-      //     description,
-      //     id,
-      //     uri,
-      //     isForSale,
-      //     isForRent,
-      //     price,
-      //     rentPrice,
-      //     owner: `${process.env.NEXT_PUBLIC_OBJECTID}`,
-      //     seller: sellerId,
-      //   });
-      // } catch (error) {
-      //   console.error("Error in storing asset in backend", error);
-      // }
+      try {
+        const assets = await axios.post(`${API_BASE_URL}/api/assets/`, {
+          id,
+          uri,
+          isForSale,
+          isForRent,
+          isWETH,
+          price,
+          rentPrice,
+          owner: ownerId,
+        });
+        const assetId = assets.data.id;
+        const vendorId = window.localStorage.getItem("vendor");
+        await axios.post(`${API_BASE_URL}/api/transaction`, {
+          assetId,
+          vendorId,
+          transactionType: "Create",
+        });
+      } catch (error) {
+        console.error("Error in storing asset in backend", error);
+      }
       setMintedAssets((prev) => ({ ...prev, [currentAsset.id]: true }));
       setPrice("0");
       setRentPrice("0");

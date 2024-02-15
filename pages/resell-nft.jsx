@@ -43,6 +43,17 @@ const ResellNFT = () => {
     //     seller: window.localStorage.getItem("objectId"),
     //   }
     // );
+    await axios.put(
+      `${API_BASE_URL}/api/assets/${id}`,
+      {
+        sold: false,
+        isForSale,
+        isForRent,
+        isWETH,
+        price,
+        rentPrice,  
+      }
+    );
     router.push("/");
   };
 
