@@ -6,7 +6,7 @@ const ConnectWallet = () => {
 
 
     return (
-        <div class="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="max-w mx-auto rounded-xl shadow-md flex items-center space-x-4">
                 <div>
                     <p className="flex items-center justify-center text-white-500 text-5 font-small tracking-tighter text-white lg:text-l">Please connect your wallet to continue.</p>
