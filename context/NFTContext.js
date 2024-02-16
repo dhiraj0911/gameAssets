@@ -304,7 +304,7 @@ export const NFTProvider = ({ children }) => {
     );
     let transaction;
     const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-    if (nft.isWETH === 'true') {
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
       const wethContract = new ethers.Contract(
         WETHAddress,
         WETHAddressABI,
@@ -377,7 +377,7 @@ export const NFTProvider = ({ children }) => {
     const expiry = Math.floor(Date.now() / 1000) + 120;
     let transaction;
 
-    if (nft.isWETH) {
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
       const wethContract = new ethers.Contract(
         WETHAddress,
         WETHAddressABI,

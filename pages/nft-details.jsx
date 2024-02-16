@@ -14,7 +14,7 @@ const calculateRentalCost = (nft, rentalPeriodInDays) => {
   return dailyRate * rentalPeriodInDays;
 };
 
-const PaymentBodyCmp = ({ nft, nftCurrency }) => (
+const PaymentBodyCmp = ({ nft, currency }) => (
   <div className="flex flex-col">
     <div className="flexBetween">
       <p className="font-poppins dark:text-white text-nft-black-1 minlg:text-xl text-base font-semibold ">
@@ -30,7 +30,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         <div className="text-gray-300 uppercase tracking-widest">{nft.id}</div>
       </div>
       <div className="pt-5">
-        {nft.price} {nftCurrency}
+        {nft.price} {currency}
       </div>
     </div>
     <div className="flexBetween mt-10">
@@ -38,7 +38,7 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
         Total
       </p>
       <p className="font-poppins dark:text-white text-nft-black-1 font-normal  text-sm minlg:text-xl">
-        {nft.price} <span className="font-semibold">{nftCurrency}</span>
+        {nft.price} <span className="font-semibold">{currency}</span>
       </p>
     </div>
   </div>
@@ -113,6 +113,8 @@ const NFTDetails = () => {
       : "http://localhost:5000";
   const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =
     useContext(NFTContext);
+  const [currency, setCurrency] = useState("MATIC");
+
   const [nft, setNft] = useState({
     description: "",
     id: "",
@@ -152,7 +154,10 @@ const NFTDetails = () => {
         console.error("Error fetching user:", error);
       }
     };
-
+    // setCurrency(nftCurrency(nft));
+    if(nft.isWETH || nft.isWETH === "true") {
+      setCurrency("ETH");
+    }
     if (nft && nft.tokenId) {
       fetchUser();
     }
@@ -160,7 +165,7 @@ const NFTDetails = () => {
 
   const buyCheckout = async () => {
     try {
-      console.log(nftCurrency);
+      console.log(currency);
       await buyNft(nft);
       await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
         sold: true,
@@ -291,7 +296,7 @@ const NFTDetails = () => {
                   </p>
                 ) : (
                   <Button
-                    btnName={`Rent for ${nft.rentPrice} ${nftCurrency(nft)}`}
+                    btnName={`Rent for ${nft.rentPrice} ${currency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setRentPaymentModal(true)}
                   />
@@ -323,7 +328,7 @@ const NFTDetails = () => {
                   </p>
                 ) : (
                   <Button
-                    btnName={`Buy for ${nft.price} ${nftCurrency(nft)}`}
+                    btnName={`Buy for ${nft.price} ${currency}`}
                     classStyles="mr-5 sm:mr-0 rounded-xl"
                     handleClick={() => setPaymentModal(true)}
                   />
@@ -354,7 +359,7 @@ const NFTDetails = () => {
       {paymentModal && (
         <Modal
           header="Check Out"
-          body={<PaymentBodyCmp nft={nft} nftCurrency={nftCurrency(nft)} />}
+          body={<PaymentBodyCmp nft={nft} nftCurrency={currency} />}
           footer={
             <div className="flex flex-row sm:flex-col">
               <Button
@@ -378,7 +383,7 @@ const NFTDetails = () => {
           body={
             <RentBobyCmp
               nft={nft}
-              nftCurrency={nftCurrency(nft)}
+              nftCurrency={currency}
               rentalPeriod={rentalPeriod}
               setRentalPeriod={setRentalPeriod}
             />
