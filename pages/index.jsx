@@ -8,15 +8,15 @@ import { Banner, CreatorCard, Loader, NFTCard, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
-import Connectwallet from './connectwallet'
-
+import Connectwallet from "./connectwallet";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, currentAccount, isSigned, isSingedUp } = useContext(NFTContext);
+  const { fetchNFTs, currentAccount, isSigned, isSingedUp } =
+    useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
@@ -147,11 +147,9 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && currentAccount === '') {
+  if ((isSigned || isSingedUp) && currentAccount === "") {
     console.log(currentAccount);
-    return (
-      <Connectwallet />
-    )
+    return <Connectwallet />;
   } else {
     const creators = getTopCreators(nftsCopy);
 
@@ -285,9 +283,10 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
-                      {filteredRentNfts.map((nft) => (
-                        <NFTCard key={nft.tokenId} nft={nft} />
-                      ))}
+                      {filteredRentNfts.map(
+                        (nft) =>
+                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -315,9 +314,10 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
-                      {filteredSaleNfts.map((nft) => (
-                        <NFTCard key={nft.tokenId} nft={nft} />
-                      ))}
+                      {filteredSaleNfts.map(
+                        (nft) =>
+                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -329,10 +329,7 @@ const Home = () => {
         </div>
       </div>
     );
-
   }
-
-
 };
 
 export default Home;
