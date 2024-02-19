@@ -1,7 +1,8 @@
 import React, { useState, useContext } from "react";
 import { NFTContext } from "../context/NFTContext";
 import toast from "react-hot-toast";
-import Verify from "./verify";
+// import { useRouter } from 'next/router';
+import Verify from "../components/Verify";
 
 const SignUp = () => {
   const { signUp, isSingedUp } = useContext(NFTContext);

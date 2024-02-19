@@ -49,7 +49,6 @@ export const NFTProvider = ({ children }) => {
         if (token) {
           window.localStorage.setItem("token", response.data.token)
           setIsSigned(true);
-          
         }
         window.location.href = "/";
       } else {
