@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - lc_dev
     tags:
       - v*
   pull_request:
