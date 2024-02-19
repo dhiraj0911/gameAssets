@@ -1,9 +1,9 @@
-import Script from 'next/script';
-import { ThemeProvider } from 'next-themes';
-
-import { Navbar, Footer } from '../components';
-import '../styles/globals.css';
-import { NFTProvider } from '../context/NFTContext';
+import Script from "next/script";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "react-hot-toast";
+import { Navbar, Footer } from "../components";
+import "../styles/globals.css";
+import { NFTProvider } from "../context/NFTContext";
 
 const MyApp = ({ Component, pageProps }) => (
   <NFTProvider>
@@ -12,11 +12,14 @@ const MyApp = ({ Component, pageProps }) => (
         <Navbar />
         <div className="pt-65">
           <Component {...pageProps} />
+          <Toaster position="top-right" />
         </div>
         <Footer />
       </div>
-
-      <Script src="https://kit.fontawesome.com/a9d6f93c97.js" crossorigin="anonymous" />
+      <Script
+        src="https://kit.fontawesome.com/a9d6f93c97.js"
+        crossorigin="anonymous"
+      />
     </ThemeProvider>
   </NFTProvider>
 );
