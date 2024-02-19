@@ -43,5 +43,5 @@ jobs:
       - name: Push image
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            docker push navachar/$IMAGE_NAME:$IMAGE_TAG
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
           fi
