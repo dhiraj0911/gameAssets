@@ -1,5 +1,4 @@
 cache
-.next
 artifacts
 node_modules
 .env
@@ -10,4 +9,3 @@ Dockerfile
 docker-compose.yml
 nginx/     
 package-lock.json
-yarn.lock
