@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { NFTContext } from "../context/NFTContext";
-// import { useRouter } from 'next/router';
+import toast from "react-hot-toast";
 import Verify from "./verify";
 
 const SignUp = () => {
@@ -8,14 +8,49 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+
+    // Simple regex for basic email validation
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.", {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      });
       return;
     }
-    signUp( email, password );
+
+    if (!acceptedTerms) {
+      toast.error("You must accept the terms and conditions.", {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match", {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      });
+      return;
+    }
+
+    toast.promise(
+      signUp(email, password), // This is the promise the toast is tracking
+      {
+        loading: 'Saving...',
+        success: <b>Sign Up Successful! Verification code sent.</b>,
+        error: (err) => <b>Sign Up Failed: {err.message}</b>,
+      },
+      {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      }
+    );
   };
 
   if (isSingedUp) {
@@ -83,13 +118,17 @@ const SignUp = () => {
             </div>
             <div className="flex items-start">
               <div className="flex items-center h-5">
+              <div className="flex items-center h-5">
                 <input
                   id="terms"
                   aria-describedby="terms"
                   type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={() => setAcceptedTerms(!acceptedTerms)}
                   className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
                   required=""
                 />
+              </div>
               </div>
               <div className="ml-3 text-sm">
                 <label
@@ -116,7 +155,7 @@ const SignUp = () => {
             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
               <a
-                href="#"
+                href="/signin"
                 className="font-medium text-primary-600 hover:underline dark:text-primary-500"
               >
                 Login here
