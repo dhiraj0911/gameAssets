@@ -20,10 +20,10 @@ const Verify = ({ email }) => {
     <div className="flex flex-col items-center justify-center h-screen dark">
       <div className="max-w-md bg-gray-800 rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-200 mb-4">Check your email</h2>
-        {wrongOTP && <p className="text-red-500">Invalid OTP. Please try again.</p>}
+        {wrongOTP && <p className="text-red-500">Invalid Verification Code. Please try again.</p>}
         <form className="flex flex-col">
           <input
-            placeholder="OTP"
+            placeholder="Verification Code"
             className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
             type="number"
             onChange={(e) => setOtp(e.target.value)}
