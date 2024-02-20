@@ -1,34 +1,69 @@
 import React, { useState, useContext } from "react";
 import { NFTContext } from "../context/NFTContext";
-import { useRouter } from 'next/router';
-
+import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 const SignIn = () => {
   const { signIn } = useContext(NFTContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inputError, setInputError] = useState(false);
 
   const router = useRouter();
-  
+
   const handleSignIn = async (e) => {
     e.preventDefault();
-    signIn(email, password);
+    setInputError(false);
+
+    if (!email.trim() || !password.trim()) {
+      toast.error("Please enter both email and password.", {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      });
+      setInputError(true);
+      return;
+    }
+
+    try {
+      await toast.promise(
+        signIn(email, password),
+        {
+          loading: "Logging in...",
+          success: "Login Successful!",
+        },
+        {
+          position: "top-right",
+          style: { marginTop: "50px" },
+        }
+      );
+      router.push("/");
+    } catch (err) {
+      setInputError(true);
+      toast.error("Invalid email or password", {
+        position: "top-right",
+        style: { marginTop: "50px" },
+      });
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen dark">
       <div className="max-w-md bg-gray-800 rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-200 mb-4">Login</h2>
-        <form className="flex flex-col">
+        <form className="flex flex-col" onSubmit={handleSignIn}>
           <input
             placeholder="Email address"
-            className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+            className={`bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150 ${
+              inputError ? "ring-1 ring-red-500" : ""
+            }`}
             type="email"
-            onChange= {(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <input
             placeholder="Password"
-            className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+            className={`bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150 ${
+              inputError ? "ring-1 ring-red-500" : ""
+            }`}
             type="password"
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -47,10 +82,9 @@ const SignIn = () => {
               Forgot password?
             </a>
             <p className="text-white mt-4">
-              {" "}
-              Don&apos;t have an account?{" "}
+              Don't have an account?
               <a
-                className="text-sm text-blue-500 -200 hover:underline mt-4"
+                className="text-sm text-blue-500 hover:underline mt-4"
                 href="/signup"
               >
                 Sign up
@@ -60,7 +94,6 @@ const SignIn = () => {
           <button
             className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
             type="submit"
-            onClick={handleSignIn}
           >
             Login
           </button>
