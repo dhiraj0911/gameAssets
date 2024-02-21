@@ -7,7 +7,7 @@ import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount } =
+  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount, avatar } =
     useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
@@ -86,10 +86,9 @@ const MyNFTs = () => {
 
         <div className="flexCenter flex-col -mt-20 z-0">
           <div className="flexCenter w-40 h-40 sm:w-36 sm:h-36 p-1 bg-nft-black-2 rounded-full">
-            <Image
-              src={images.creator1}
-              className="rounded-full object-cover"
-              objectFit="cover"
+            <img
+              src={avatar ? avatar : "https://vendorsprofile.s3.amazonaws.com/creator1.png"}
+              className="h-40 w-40 rounded-full object-cover"
             />
           </div>
           <p className="font-poppins dark:text-white text-nft-black-1 font-semibold text-2xl mt-6">

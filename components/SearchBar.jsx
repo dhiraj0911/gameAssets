@@ -29,7 +29,6 @@ const SearchBar = ({ activeSelect, setActiveSelect, handleSearch, clearSearch })
       <div className="flex-1 flexCenter dark:bg-nft-black-2 bg-white border dark:border-nft-black-2 border-nft-gray-2 py-3 px-4 rounded-md">
         <Image
           src={images.search}
-          objectFit="contain"
           width={20}
           height={20}
           alt="search"

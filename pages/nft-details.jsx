@@ -273,7 +273,6 @@ const NFTDetails = () => {
               <Image
                 src={images.creator1}
                 className="rounded-full"
-                objectFit="cover"
               />
             </div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-semibold ">

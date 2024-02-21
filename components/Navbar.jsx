@@ -1,12 +1,16 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, Fragment, useRef } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
+import { Menu, Transition } from '@headlessui/react'
+import { Modal } from 'antd';
 import { NFTContext } from "../context/NFTContext";
 import Button from "./Button";
-import images from "../assets";
+import images from "../assets"
+import AvatarEditor from 'react-avatar-editor';
+import axios from "axios";
+import FormData from 'form-data';
 
 const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   const generateLink = (i) => {
@@ -21,9 +25,8 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   };
   return (
     <ul
-      className={`list-none flexCenter flex-row ${
-        isMobile ? "flex-col h-full" : undefined
-      }`}
+      className={`list-none flexCenter flex-row ${isMobile ? "flex-col h-full" : undefined
+        }`}
     >
       {["Explore NFTs", "My NFTs"].map((item, i) => (
         <li
@@ -32,11 +35,10 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
             setActive(item);
             if (isMobile) setIsOpen(false);
           }}
-          className={`flex flex-row items-center font-poppins text-base font-semibold dark:hover:text-white hover:text-nft-dark mx-3 ${
-            active === item
-              ? "dark:text-white text-nft-black-1"
-              : "dark:text-nft-gray-3 text-nft-gray-2"
-          }`}
+          className={`flex flex-row items-center font-poppins text-base font-semibold dark:hover:text-white hover:text-nft-dark mx-3 ${active === item
+            ? "dark:text-white text-nft-black-1"
+            : "dark:text-nft-gray-3 text-nft-gray-2"
+            }`}
         >
           <Link href={generateLink(i)}>{item}</Link>
         </li>
@@ -46,8 +48,57 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
 };
 
 const ButtonGroup = ({ setActive, router, setIsOpen }) => {
-  const { connectWallet, currentAccount, signOut, isSigned } =
+  const { connectWallet, currentAccount, signOut, isSigned, avatar, setAvatar } =
     useContext(NFTContext);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [image, setImage] = useState(null);
+  const [scale, setScale] = useState(1);
+  const editorRef = useRef(null);
+
+  const handleScaleChange = (e) => {
+    setScale(parseFloat(e.target.value));
+  };
+
+  const handleImageChange = async (e) => {
+    setImage(e.target.files[0]);
+  };
+
+  const handleChangeAvatar = () => {
+    setModalIsOpen(true);
+  };
+
+  const saveAvatar = async () => {
+    setModalIsOpen(false);
+    try {
+      let vendorId = window.localStorage.getItem("vendor");
+      const canvas = editorRef.current.getImageScaledToCanvas();
+      canvas.toBlob(async (blob) => {
+       const newImageFile = new File([blob], "resizedImage.png", { type: "image/png" });
+        if(vendorId){
+          const formData = new FormData();
+          formData.append('file', newImageFile);
+          formData.append('vendorId', vendorId);
+          const response = await axios.post(`${API_BASE_URL}/api/upload`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          const avatarurl = response.data.location
+          setAvatar(avatarurl);
+          const userdata = window.localStorage.getItem("userdata");
+          if (userdata) {
+            let parsedData = JSON.parse(userdata);
+            parsedData.avatarurl = avatarurl;
+            window.localStorage.setItem("userdata", JSON.stringify(parsedData))
+          }
+        }
+      }, 'image/png');
+    } catch (err) {
+      console.log("error", err);
+    }
+    setImage(null);
+    setScale(1);
+  };
 
   return (
     <>
@@ -73,11 +124,11 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
           />
         </>
       ) : (
-        <>
+        <div className="flex flex-row">
           {currentAccount ? (
             <Button
               btnName="Create"
-              classStyles="mx-2 rounded-xl"
+              classStyles="mx-2 mt-1 h-10 rounded-xl"
               handleClick={() => {
                 setActive("");
                 setIsOpen(false);
@@ -87,17 +138,98 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
           ) : (
             <Button
               btnName="Connect"
-              classStyles="mx-2 rounded-xl"
+              classStyles="mx-2 h-8 mt-2 rounded-xl"
               handleClick={connectWallet}
             />
           )}
-          <Button
-            btnName="Sign Out"
-            classStyles="mx-2 rounded-xl"
-            handleClick={signOut}
-          />
-        </>
+          <Menu as="div" className="relative">
+            <div>
+              <Menu.Button className="mx-2">
+                <img
+                  src={avatar ? avatar : "https://vendorsprofile.s3.amazonaws.com/creator1.png"}
+                  className="h-12 w-12 rounded-full cursor-pointer"
+                  alt="Avatar"
+                />
+              </Menu.Button >
+            </div>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md py-2">
+                <div className="py-2 font-medium">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                        onClick={handleChangeAvatar}
+                      >
+                        Change Avatar
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+
+                      <button
+                        className="px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full"
+                        onClick={signOut}
+                      >
+                        Sign Out
+                      </button>
+                    )}
+
+                  </Menu.Item>
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
       )}
+      <Modal
+        title="Choose Image"
+        open={modalIsOpen}
+        onOk={saveAvatar}
+        onCancel={() => setModalIsOpen(false)}
+        okButtonProps={{
+          children: "Custom OK",
+          style: { backgroundColor: 'black', color: 'white' },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="text-black mb-4">Select and adjust your new Avatar</h2>
+          <input type="file" onChange={handleImageChange} className="mb-4" />
+          {image && (
+            <div className="mb-4">
+              <AvatarEditor
+                ref={editorRef}
+                image={image}
+                width={250}
+                height={250}
+                border={50}
+                color={[255, 255, 255, 0.6]} // RGBA
+                scale={scale}
+                rotate={0}
+                className="mx-auto"
+              />
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.01"
+                value={scale}
+                onChange={handleScaleChange}
+                className="mx-auto"
+              />
+            </div>
+          )}
+        </div>
+      </Modal>
     </>
   );
 };
@@ -137,7 +269,6 @@ const Navbar = () => {
           >
             <Image
               src={images.logo02}
-              objectFit="contain"
               width={32}
               height={32}
               alt="logo"
@@ -157,7 +288,6 @@ const Navbar = () => {
           >
             <Image
               src={images.logo02}
-              objectFit="contain"
               width={32}
               height={32}
               alt="logo"
@@ -198,7 +328,6 @@ const Navbar = () => {
         {isOpen ? (
           <Image
             src={images.cross}
-            objectFit="contain"
             width={20}
             height={20}
             alt="cross"
@@ -210,7 +339,6 @@ const Navbar = () => {
         ) : (
           <Image
             src={images.menu}
-            objectFit="contain"
             width={25}
             height={25}
             alt="menu"
