@@ -25,12 +25,11 @@ const MyNFTs = () => {
       setNftsCopy(ownedNfts);
       setRentedNfts(rentedNFTs);
       
-      const listedItems = ownedNfts.filter((item) => item.forSale || item.forRent);
-      const ownedNotListed = ownedNfts.filter(
-        (item) => !item.forSale && !item.forRent
-      );
-      setNfts(ownedNotListed);
-      setListedNfts(listedItems);
+      // const listedItems = ownedNfts.filter((item) => item.forSale || item.forRent);
+      // const ownedNotListed = ownedNfts.filter(
+      //   (item) => !item.forSale && !item.forRent
+      // );
+      setNfts(ownedNfts);
       setIsLoading(false);
     };
 
@@ -44,8 +43,6 @@ const MyNFTs = () => {
         return nfts;
       case 'rentedNfts':
         return rentedNfts;
-      case 'listedNfts':
-        return listedNfts;
       default:
         return nfts;
     }
@@ -109,12 +106,6 @@ const MyNFTs = () => {
           onClick={() => setActiveTab('rentedNfts')}
         >
           Rented NFTs
-        </button>
-        <button
-          className={`py-2 px-4 border ${activeTab === 'listedNfts' ? 'border-blue-500' : 'border-transparent'}`}
-          onClick={() => setActiveTab('listedNfts')}
-        >
-          Listed NFTs
         </button>
       </div>
 

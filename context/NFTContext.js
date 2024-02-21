@@ -47,22 +47,27 @@ export const NFTProvider = ({ children }) => {
         email,
         password,
       });
-      window.localStorage.setItem("vendor", response.data.vendorId);
+  
       if (response.status === 200) {
         const token = response.data.token;
         if (token) {
           window.localStorage.setItem("userdata", JSON.stringify(response.data))
+          window.localStorage.setItem("vendor", response.data.vendorId);
+          window.localStorage.setItem("token", response.data.token);
           setIsSigned(true);
+          // window.location.href = "/";
+        } else {
+          throw new Error("Authentication failed");
         }
-        window.location.href = "/";
       } else {
-        console.log("Authentication failed");
+        throw new Error("Authentication failed");
       }
     } catch (error) {
       console.error("Error during sign-in:", error);
+      throw error; // This will reject the promise returned by signIn
     }
   };
-
+  
   const signUp = async (email, password) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/vendor/signup`, {
