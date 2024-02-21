@@ -55,6 +55,10 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
   const [scale, setScale] = useState(1);
   const editorRef = useRef(null);
 
+  const API_BASE_URL =
+  process.env.NEXT_PUBLIC_PRODUCTION === "true"
+    ? process.env.NEXT_PUBLIC_BASE_URL
+    : "http://localhost:5000";
   const handleScaleChange = (e) => {
     setScale(parseFloat(e.target.value));
   };

@@ -31,6 +31,7 @@
     "@openzeppelin/contracts": "4.5.0",
     "autoprefixer": "10.4.2",
     "chai": "^4.3.7",
+    "eslint": "^8.56.0",
     "hardhat": "^2.12.4"
   }
 }
