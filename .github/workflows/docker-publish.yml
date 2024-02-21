@@ -25,6 +25,12 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Dependencies
+        run: yarn install
+      
+      - name: Build
+        run: yarn build
+        
       - name: Build docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG .
 
