@@ -12,15 +12,15 @@ import Connectwallet from "./connectwallet";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
-  const [nfts, setNfts] = useState([]);
-  const [nftsCopy, setNftsCopy] = useState([]);
+  // const [nfts, setNfts] = useState([]);
+  // const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, currentAccount, isSigned, isSingedUp } =
-    useContext(NFTContext);
+  const { fetchNFTs, currentAccount, isSigned, isSingedUp } = useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
   const { theme } = useTheme();
+  const [myListings, setMyListings] = useState([]);
   const [rentNfts, setRentNfts] = useState([]);
   const [saleNfts, setSaleNfts] = useState([]);
 
@@ -28,6 +28,8 @@ const Home = () => {
   const [sortOptionRent, setSortOptionRent] = useState("Recently added");
   const [searchQuerySale, setSearchQuerySale] = useState("");
   const [sortOptionSale, setSortOptionSale] = useState("Recently added");
+  const [searchQueryListed, setSearchQueryListed] = useState("");
+  const [sortOptionListed, setSortOptionListed] = useState("Recently added");
 
   const filteredRentNfts = useMemo(() => {
     let filtered = rentNfts.filter((nft) =>
@@ -53,24 +55,45 @@ const Home = () => {
     return filtered;
   }, [saleNfts, searchQuerySale, sortOptionSale]);
 
-  useEffect(() => {
-    fetchNFTs().then((items) => {
-      const itemsForRent = [];
-      const itemsForSale = [];
+  const filteredListedNfts = useMemo(() => {
+    let filtered = myListings.filter((nft) =>
+      nft.name.toLowerCase().includes(searchQueryListed.toLowerCase())
+    );
 
-      items.forEach((item) => {
-        if (item.forRent) {
-          itemsForRent.push(item);
-        }
-        if (item.forSale) {
-          itemsForSale.push(item);
-        }
+    if (sortOptionListed === "Recently added") {
+      filtered.sort((a, b) => b.tokenId - a.tokenId);
+    }
+
+    return filtered;
+  }, [myListings, searchQueryListed, sortOptionListed]);
+
+  useEffect(() => {
+    if (currentAccount) { // Ensure currentAccount is not null or undefined
+      fetchNFTs().then((items) => {
+        const itemsForRent = [];
+        const itemsForSale = [];
+        const myItem = [];
+  
+        items.forEach((item) => {
+          if (item.owner.toLowerCase() === currentAccount.toLowerCase()) {
+            myItem.push(item);
+            return;
+          }
+          if (item.forRent) {
+            itemsForRent.push(item);
+          }
+          if (item.forSale) {
+            itemsForSale.push(item);
+          }
+        });
+        setMyListings(myItem);
+        setRentNfts(itemsForRent);
+        setSaleNfts(itemsForSale);
+        setIsLoading(false);
       });
-      setRentNfts(itemsForRent);
-      setSaleNfts(itemsForSale);
-      setIsLoading(false);
-    });
-  }, []);
+    }
+  }, [currentAccount]);
+  
 
   // useEffect(() => {
   //   fetchNFTs().then((items) => {
@@ -101,42 +124,42 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    const sortedNfts = [...nfts];
+  // useEffect(() => {
+  //   const sortedNfts = [...nfts];
 
-    switch (activeSelect) {
-      case "Price (low to high)":
-        setNfts(sortedNfts.sort((a, b) => a.price - b.price));
-        break;
-      case "Price (high to low)":
-        setNfts(sortedNfts.sort((a, b) => b.price - a.price));
-        break;
-      case "Recently added":
-        setNfts(sortedNfts.sort((a, b) => b.tokenId - a.tokenId));
-        break;
-      default:
-        setNfts(nfts);
-        break;
-    }
-  }, [activeSelect]);
+  //   switch (activeSelect) {
+  //     case "Price (low to high)":
+  //       setNfts(sortedNfts.sort((a, b) => a.price - b.price));
+  //       break;
+  //     case "Price (high to low)":
+  //       setNfts(sortedNfts.sort((a, b) => b.price - a.price));
+  //       break;
+  //     case "Recently added":
+  //       setNfts(sortedNfts.sort((a, b) => b.tokenId - a.tokenId));
+  //       break;
+  //     default:
+  //       setNfts(nfts);
+  //       break;
+  //   }
+  // }, [activeSelect]);
 
-  const onHandleSearch = (value) => {
-    const filteredNfts = nfts.filter(({ name }) =>
-      name.toLowerCase().includes(value.toLowerCase())
-    );
+  // const onHandleSearch = (value) => {
+  //   const filteredNfts = nfts.filter(({ name }) =>
+  //     name.toLowerCase().includes(value.toLowerCase())
+  //   );
 
-    if (filteredNfts.length) {
-      setNfts(filteredNfts);
-    } else {
-      setNfts(nftsCopy);
-    }
-  };
+  //   if (filteredNfts.length) {
+  //     setNfts(filteredNfts);
+  //   } else {
+  //     setNfts(nftsCopy);
+  //   }
+  // };
 
-  const onClearSearch = () => {
-    if (nfts.length && nftsCopy.length) {
-      setNfts(nftsCopy);
-    }
-  };
+  // const onClearSearch = () => {
+  //   if (nfts.length && nftsCopy.length) {
+  //     setNfts(nftsCopy);
+  //   }
+  // };
 
   useEffect(() => {
     isScrollable();
@@ -151,7 +174,7 @@ const Home = () => {
     console.log(currentAccount);
     return <Connectwallet />;
   } else {
-    const creators = getTopCreators(nftsCopy);
+    // const creators = getTopCreators(nftsCopy);
 
     return (
       <div className="flex justify-center ms:px-4 p-12">
@@ -261,6 +284,37 @@ const Home = () => {
                 ))} */}
 
                 {/* </div> */}
+                {myListings.length > 0 ? (
+                  <div className="mt-10 mb-10">
+                    <div className="flex items-center">
+                      <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">
+                        My Listings
+                      </h1>
+                      <div
+                        className=""
+                        style={{ width: "700px", marginLeft: "100px" }}
+                      >
+                        {" "}
+                        {/* Adjust the width as needed */}
+                        {/* Search and Sort for Rent NFTs */}
+                        <SearchBar
+                          activeSelect={sortOptionRent}
+                          setActiveSelect={setSortOptionListed}
+                          handleSearch={(value) => setSearchQueryListed(value)}
+                          clearSearch={() => setSearchQueryListed("")}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
+                      {filteredListedNfts.map(
+                        (nft) =>
+                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <></>
+                )}
                 {rentNfts.length > 0 ? (
                   <div className="mt-10 mb-10">
                     <div className="flex items-center">
