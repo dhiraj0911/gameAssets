@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 
 import { NFTContext } from "../context/NFTContext";
-import { Loader, NFTCard, Banner, SearchBar } from "../components";
+import { Loader, BuyCard, RentCard, Banner, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
@@ -14,7 +14,7 @@ const MyNFTs = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [rentedNfts, setRentedNfts] = useState([]);
   const [listedNfts, setListedNfts] = useState([]);
-  const [activeTab, setActiveTab] = useState('ownedNfts'); // Added for tab selection
+  const [activeTab, setActiveTab] = useState("ownedNfts"); // Added for tab selection
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +24,7 @@ const MyNFTs = () => {
 
       setNftsCopy(ownedNfts);
       setRentedNfts(rentedNFTs);
-      
+
       // const listedItems = ownedNfts.filter((item) => item.forSale || item.forRent);
       // const ownedNotListed = ownedNfts.filter(
       //   (item) => !item.forSale && !item.forRent
@@ -39,9 +39,9 @@ const MyNFTs = () => {
   // Determine which NFTs to display based on the active tab
   const displayedNfts = () => {
     switch (activeTab) {
-      case 'ownedNfts':
+      case "ownedNfts":
         return nfts;
-      case 'rentedNfts':
+      case "rentedNfts":
         return rentedNfts;
       default:
         return nfts;
@@ -84,7 +84,11 @@ const MyNFTs = () => {
         <div className="flexCenter flex-col -mt-20 z-0">
           <div className="flexCenter w-40 h-40 sm:w-36 sm:h-36 p-1 bg-nft-black-2 rounded-full">
             <img
-              src={avatar ? avatar : "https://vendorsprofile.s3.amazonaws.com/creator1.png"}
+              src={
+                avatar
+                  ? avatar
+                  : "https://vendorsprofile.s3.amazonaws.com/creator1.png"
+              }
               className="h-40 w-40 rounded-full object-cover"
             />
           </div>
@@ -96,23 +100,32 @@ const MyNFTs = () => {
 
       <div className="w-full p-4 flex justify-center gap-x-4">
         <button
-          className={`py-2 px-4 border ${activeTab === 'ownedNfts' ? 'border-blue-500' : 'border-transparent'}`}
-          onClick={() => setActiveTab('ownedNfts')}
+          className={`py-2 px-4 border ${
+            activeTab === "ownedNfts" ? "border-blue-500" : "border-transparent"
+          }`}
+          onClick={() => setActiveTab("ownedNfts")}
         >
           Owned NFTs
         </button>
         <button
-          className={`py-2 px-4 border ${activeTab === 'rentedNfts' ? 'border-blue-500' : 'border-transparent'}`}
-          onClick={() => setActiveTab('rentedNfts')}
+          className={`py-2 px-4 border ${
+            activeTab === "rentedNfts"
+              ? "border-blue-500"
+              : "border-transparent"
+          }`}
+          onClick={() => setActiveTab("rentedNfts")}
         >
           Rented NFTs
         </button>
       </div>
-
       <div className="mt-3 w-full flex flex-wrap">
-        {displayedNfts().map((nft) => (
-          <NFTCard key={nft.token} nft={nft} onProfilePage />
-        ))}
+        {displayedNfts().map((nft) =>
+          activeTab === "ownedNfts" ? (
+            <BuyCard nft={nft} key={nft.id} />
+          ) : (
+            <RentCard nft={nft} key={nft.id} />
+          )
+        )}
       </div>
     </div>
   );

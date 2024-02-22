@@ -3,11 +3,13 @@ import Navbar from './Navbar';
 import Button from './Button';
 import Banner from './Banner';
 import CreatorCard from './CreatorCard';
-import NFTCard from './NFTCard';
+import RentCard from './RentCard';
+import BuyCard from './BuyCard';
 import Input from './Input';
 import Loader from './Loader';
 import Modal from './Modal';
 import SearchBar from './SearchBar';
+import { from } from 'form-data';
 
 export {
   Button,
@@ -15,7 +17,8 @@ export {
   Footer,
   Banner,
   CreatorCard,
-  NFTCard,
+  RentCard,
+  BuyCard,
   Input,
   Loader,
   Modal,

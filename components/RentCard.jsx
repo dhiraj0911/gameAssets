@@ -1,8 +1,8 @@
-import React, { useContext, useState, useEffect } from 'react';
-import Link from 'next/link';
-import { NFTContext } from '../context/NFTContext';
+import React, { useContext, useState, useEffect } from "react";
+import Link from "next/link";
+import { NFTContext } from "../context/NFTContext";
 
-const NFTCard = ({ nft, onProfilePage }) => {
+const RentCard = ({ nft, onProfilePage }) => {
   const { nftCurrency, currentAccount } = useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
   const currentAccountAddress = currentAccount.toLowerCase();
@@ -29,7 +29,7 @@ const NFTCard = ({ nft, onProfilePage }) => {
 
     return () => clearInterval(interval);
   }, [nft.expires]);
-  
+
   return (
     <div className="flex flex-col rounded-3xl border-solid hover:border-dotted m-3" style={{ backgroundColor: '#011627 ' }}>
       <div className="px-4 py-7 sm:p-10 sm:pb-6">
@@ -40,12 +40,9 @@ const NFTCard = ({ nft, onProfilePage }) => {
             </h2>
             <p className="mt-6 text-sm text-gray-100">ID: {nft.id}</p>
           </div>
-          {ownerAddress === currentAccountAddress ? (
-              // <span className="mt-5 ml-7 text-base font-medium text-white">
-              //   List It on marketPlace
-              // </span>
+          {(ownerAddress === currentAccountAddress && !nft.rented) ? (
               <></>
-          ): nft.rented ? (
+          ): (ownerAddress === currentAccountAddress && nft.rented) ? (
             <div className="flex gap-5 mt-4 text-center">
               <div className="flex flex-col">
                 <span className="countdown font-mono text-4xl">
@@ -72,10 +69,6 @@ const NFTCard = ({ nft, onProfilePage }) => {
                 sec
               </div>
             </div>
-          ) : nft.sold ? (
-              <>
-                This NFT is already sold.
-              </>
           ) : nft.rented ? (
               <>
                 This NFT is already rented.
@@ -113,7 +106,7 @@ const NFTCard = ({ nft, onProfilePage }) => {
         </div>
       </Link>
     </div>
-  );
+  )
 };
 
-export default NFTCard;
+export default RentCard;
