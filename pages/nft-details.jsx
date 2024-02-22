@@ -1,12 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import axios from "axios";
 
 import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Modal } from "../components";
 
-import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const calculateRentalCost = (nft, rentalPeriodInDays) => {
@@ -129,6 +127,7 @@ const NFTDetails = () => {
     sold: "",
     tokenId: "",
     tokenURI: "",
+    avatar:""
   });
   const router = useRouter();
   const [paymentModal, setPaymentModal] = useState(false);
@@ -162,6 +161,26 @@ const NFTDetails = () => {
       fetchUser();
     }
   }, [nft, nft.tokenId, userOf]);
+
+  const fetchNftOwnerDetails = async (address) =>{
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/address/vendorinfo/${address}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (nft.owner) {
+      fetchNftOwnerDetails(nft.owner.toLowerCase()).then((res) => {
+        console.log(res);
+        if(res && res.avatarurl){
+          setNft({...nft, avatar: res.avatarurl})
+        }
+      });
+    }
+  }, [nft.owner])
 
   const buyCheckout = async () => {
     try {
@@ -228,7 +247,7 @@ const NFTDetails = () => {
     <div className="relative flex justify-center md:flex-col mb-10 pb-20">
       <div className="relative flex-1 flexCenter sm:px-0 p-0 border-r md:border-r-0 md:border-b dark:border-nft-black-1 border-nft-gray-1 ">
         <div className="relative  h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
-          <div className="card m-auto text-gray-300 w-[clamp(400px,80%,10px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+          <div className="cardtext-gray-300 w-[clamp(400px,80%,10px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
             <div className="px-8 py-8 mr-10 pr-20">
               <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
               <div className="uppercase font-bold text-xl">{nft.name}</div>
@@ -270,8 +289,8 @@ const NFTDetails = () => {
           </p>
           <div className="flex flex-row items-center mt-3">
             <div className="relative w-12 h-12 minlg:w-20 minlg:h-20 mr-2">
-              <Image
-                src={images.creator1}
+              <img
+                src={nft.avatar ? nft.avatar : "https://vendorsprofile.s3.amazonaws.com/creator1.png"}
                 className="rounded-full"
               />
             </div>
@@ -423,7 +442,7 @@ const NFTDetails = () => {
           body={
             <div className="flexCenter flex-col text-center">
               <div className="relative w-87 h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
-                <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+                <div className="card text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
                   <div className="px-8 py-10">
                     <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
                     <div className="uppercase font-bold text-xl">
@@ -470,7 +489,7 @@ const NFTDetails = () => {
           body={
             <div className="flexCenter flex-col text-center">
               <div className="relative w-87 h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
-                <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+                <div className="card text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
                   <div className="px-8 py-10">
                     <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
                     <div className="uppercase font-bold text-xl">
