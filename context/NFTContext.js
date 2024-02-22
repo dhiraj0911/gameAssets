@@ -15,6 +15,7 @@ export const NFTProvider = ({ children }) => {
       ? process.env.NEXT_PUBLIC_BASE_URL
       : "http://localhost:5000";
   const [currentAccount, setCurrentAccount] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   // const nftCurrency = "MATIC";
 
@@ -23,8 +24,11 @@ export const NFTProvider = ({ children }) => {
   const [wrongOTP, setWrongOTP] = useState(false);
 
   useEffect(() => {
-    const jwt = window.localStorage.getItem("token");
-    if (jwt) {
+    const userdata = window.localStorage.getItem("userdata");
+    if (userdata) {
+      let parsedData = JSON.parse(userdata);
+      let avatarurl = parsedData.avatarurl;
+      setAvatar(avatarurl);
       setIsSigned(true);
     }
   }, []);
@@ -47,6 +51,7 @@ export const NFTProvider = ({ children }) => {
       if (response.status === 200) {
         const token = response.data.token;
         if (token) {
+          window.localStorage.setItem("userdata", JSON.stringify(response.data))
           window.localStorage.setItem("vendor", response.data.vendorId);
           window.localStorage.setItem("token", response.data.token);
           setIsSigned(true);
@@ -89,7 +94,7 @@ export const NFTProvider = ({ children }) => {
       window.localStorage.setItem("vendor", response.data.vendorId);
 
       if (response.status === 200) {
-        const token = window.localStorage.setItem("token", response.data.token);
+        const token = window.localStorage.setItem("userdata", JSON.stringify(response.data));
         if (token) {
           setIsSigned(true);
         }
@@ -614,7 +619,9 @@ export const NFTProvider = ({ children }) => {
         isLoadingNFT,
         verify,
         isSingedUp,
-        wrongOTP
+        wrongOTP,
+        avatar, 
+        setAvatar
       }}
     >
       {children}
