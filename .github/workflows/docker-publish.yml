@@ -16,6 +16,15 @@ jobs:
   build-service:
     runs-on: ubuntu-latest
     
+    env:
+      NEXT_PUBLIC_PRODUCTION: ${{ env.NEXT_PUBLIC_PRODUCTION }}
+      NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
+      NEXT_PUBLIC_TESTNET: ${{ env.NEXT_PUBLIC_TESTNET }}
+      NEXT_PUBLIC_RPC_URL: ${{ env.NEXT_PUBLIC_RPC_URL }}
+      NEXT_PUBLIC_LOCAL_RPC_URL: ${{ env.NEXT_PUBLIC_LOCAL_RPC_URL }}
+      NEXT_PUBLIC_CONTRACT_ADDRESS: ${{ secrets.NEXT_PUBLIC_CONTRACT_ADDRESS }}
+      NEXT_PUBLIC_WETH_ADDRESS: ${{ secrets.NEXT_PUBLIC_WETH_ADDRESS }}
+
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
