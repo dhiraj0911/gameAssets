@@ -4,7 +4,14 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 
 import { NFTContext } from "../context/NFTContext";
-import { Banner, CreatorCard, Loader, RentCard, BuyCard, SearchBar } from "../components";
+import {
+  Banner,
+  CreatorCard,
+  Loader,
+  RentCard,
+  BuyCard,
+  SearchBar,
+} from "../components";
 
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
@@ -16,7 +23,8 @@ const Home = () => {
   // const [nfts, setNfts] = useState([]);
   // const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, currentAccount, isSigned, isSingedUp } = useContext(NFTContext);
+  const { fetchNFTs, currentAccount, isSigned, isSingedUp } =
+    useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
@@ -69,12 +77,13 @@ const Home = () => {
   }, [myListings, searchQueryListed, sortOptionListed]);
 
   useEffect(() => {
-    if (currentAccount) { // Ensure currentAccount is not null or undefined
+    if (currentAccount) {
+      // Ensure currentAccount is not null or undefined
       fetchNFTs().then((items) => {
         const itemsForRent = [];
         const itemsForSale = [];
         const myItem = [];
-  
+
         items.forEach((item) => {
           if (item.owner.toLowerCase() === currentAccount.toLowerCase()) {
             myItem.push(item);
@@ -92,18 +101,25 @@ const Home = () => {
         setSaleNfts(itemsForSale);
         setIsLoading(false);
       });
-    }
-  }, [currentAccount]);
-  
+    } else {
+      fetchNFTs().then((items) => {
+        const itemsForRent = [];
+        const itemsForSale = [];
 
-  // useEffect(() => {
-  //   fetchNFTs().then((items) => {
-  //     setNfts(items);
-  //     console.log(items)
-  //     setNftsCopy(items);
-  //     setIsLoading(false);
-  //   });
-  // }, []);
+        items.forEach((item) => {
+          if (item.forRent) {
+            itemsForRent.push(item);
+          }
+          if (item.forSale) {
+            itemsForSale.push(item);
+          }
+        });
+        setRentNfts(itemsForRent);
+        setSaleNfts(itemsForSale);
+        setIsLoading(false);
+      });
+    }
+  }, [!currentAccount ? null : currentAccount]);
 
   const handleScroll = (direction) => {
     const { current } = scrollRef;
@@ -172,11 +188,8 @@ const Home = () => {
   });
 
   if ((isSigned || isSingedUp) && currentAccount === "") {
-    console.log(currentAccount);
     return <Connectwallet />;
   } else {
-    // const creators = getTopCreators(nftsCopy);
-
     return (
       <div className="flex justify-center ms:px-4 p-12">
         <div className="w-full minmd:w-4/5">
@@ -340,7 +353,9 @@ const Home = () => {
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
                       {filteredRentNfts.map(
                         (nft) =>
-                          !nft.rented && <RentCard key={nft.tokenId} nft={nft} />
+                          !nft.rented && (
+                            <RentCard key={nft.tokenId} nft={nft} />
+                          )
                       )}
                     </div>
                   </div>
