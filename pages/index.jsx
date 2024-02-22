@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 
 import { NFTContext } from "../context/NFTContext";
-import { Banner, CreatorCard, Loader, NFTCard, SearchBar } from "../components";
+import { Banner, CreatorCard, Loader, RentCard, BuyCard, SearchBar } from "../components";
+
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
@@ -308,7 +309,7 @@ const Home = () => {
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
                       {filteredListedNfts.map(
                         (nft) =>
-                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                          !nft.rented && <BuyCard key={nft.tokenId} nft={nft} />
                       )}
                     </div>
                   </div>
@@ -339,7 +340,7 @@ const Home = () => {
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
                       {filteredRentNfts.map(
                         (nft) =>
-                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                          !nft.rented && <RentCard key={nft.tokenId} nft={nft} />
                       )}
                     </div>
                   </div>
@@ -370,7 +371,7 @@ const Home = () => {
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
                       {filteredSaleNfts.map(
                         (nft) =>
-                          !nft.rented && <NFTCard key={nft.tokenId} nft={nft} />
+                          !nft.rented && <BuyCard key={nft.tokenId} nft={nft} />
                       )}
                     </div>
                   </div>

@@ -3,14 +3,14 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Menu, Transition } from '@headlessui/react'
-import { Modal } from 'antd';
+import { Menu, Transition } from "@headlessui/react";
+import { Modal } from "antd";
 import { NFTContext } from "../context/NFTContext";
 import Button from "./Button";
-import images from "../assets"
-import AvatarEditor from 'react-avatar-editor';
+import images from "../assets";
+import AvatarEditor from "react-avatar-editor";
 import axios from "axios";
-import FormData from 'form-data';
+import FormData from "form-data";
 
 const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   const generateLink = (i) => {
@@ -25,8 +25,9 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   };
   return (
     <ul
-      className={`list-none flexCenter flex-row ${isMobile ? "flex-col h-full" : undefined
-        }`}
+      className={`list-none flexCenter flex-row ${
+        isMobile ? "flex-col h-full" : undefined
+      }`}
     >
       {["Explore NFTs", "My NFTs"].map((item, i) => (
         <li
@@ -35,10 +36,11 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
             setActive(item);
             if (isMobile) setIsOpen(false);
           }}
-          className={`flex flex-row items-center font-poppins text-base font-semibold dark:hover:text-white hover:text-nft-dark mx-3 ${active === item
-            ? "dark:text-white text-nft-black-1"
-            : "dark:text-nft-gray-3 text-nft-gray-2"
-            }`}
+          className={`flex flex-row items-center font-poppins text-base font-semibold dark:hover:text-white hover:text-nft-dark mx-3 ${
+            active === item
+              ? "dark:text-white text-nft-black-1"
+              : "dark:text-nft-gray-3 text-nft-gray-2"
+          }`}
         >
           <Link href={generateLink(i)}>{item}</Link>
         </li>
@@ -48,17 +50,23 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
 };
 
 const ButtonGroup = ({ setActive, router, setIsOpen }) => {
-  const { connectWallet, currentAccount, signOut, isSigned, avatar, setAvatar } =
-    useContext(NFTContext);
+  const {
+    connectWallet,
+    currentAccount,
+    signOut,
+    isSigned,
+    avatar,
+    setAvatar,
+  } = useContext(NFTContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [image, setImage] = useState(null);
   const [scale, setScale] = useState(1);
   const editorRef = useRef(null);
 
   const API_BASE_URL =
-  process.env.NEXT_PUBLIC_PRODUCTION === "true"
-    ? process.env.NEXT_PUBLIC_BASE_URL
-    : "http://localhost:5000";
+    process.env.NEXT_PUBLIC_PRODUCTION === "true"
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : "http://localhost:5000";
   const handleScaleChange = (e) => {
     setScale(parseFloat(e.target.value));
   };
@@ -77,26 +85,32 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
       let vendorId = window.localStorage.getItem("vendor");
       const canvas = editorRef.current.getImageScaledToCanvas();
       canvas.toBlob(async (blob) => {
-       const newImageFile = new File([blob], "resizedImage.png", { type: "image/png" });
-        if(vendorId){
+        const newImageFile = new File([blob], "resizedImage.png", {
+          type: "image/png",
+        });
+        if (vendorId) {
           const formData = new FormData();
-          formData.append('file', newImageFile);
-          formData.append('vendorId', vendorId);
-          const response = await axios.post(`${API_BASE_URL}/api/upload`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-          const avatarurl = response.data.location
+          formData.append("file", newImageFile);
+          formData.append("vendorId", vendorId);
+          const response = await axios.post(
+            `${API_BASE_URL}/api/upload`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          const avatarurl = response.data.location;
           setAvatar(avatarurl);
           const userdata = window.localStorage.getItem("userdata");
           if (userdata) {
             let parsedData = JSON.parse(userdata);
             parsedData.avatarurl = avatarurl;
-            window.localStorage.setItem("userdata", JSON.stringify(parsedData))
+            window.localStorage.setItem("userdata", JSON.stringify(parsedData));
           }
         }
-      }, 'image/png');
+      }, "image/png");
     } catch (err) {
       console.log("error", err);
     }
@@ -150,11 +164,15 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
             <div>
               <Menu.Button className="mx-2">
                 <img
-                  src={avatar ? avatar : "https://vendorsprofile.s3.amazonaws.com/creator1.png"}
+                  src={
+                    avatar
+                      ? avatar
+                      : "https://vendorsprofile.s3.amazonaws.com/creator1.png"
+                  }
                   className="h-12 w-12 rounded-full cursor-pointer"
                   alt="Avatar"
                 />
-              </Menu.Button >
+              </Menu.Button>
             </div>
             <Transition
               as={Fragment}
@@ -165,12 +183,12 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md py-2">
+              <Menu.Items className="absolute right-0 mt-2 w-40 bg-white text-white dark:bg-gray-800 shadow-lg rounded-md py-2">
                 <div className="py-2 font-medium">
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                        className="px-4 py-2 text-sm text-white hover:text-black hover:bg-gray-100 w-full"
                         onClick={handleChangeAvatar}
                       >
                         Change Avatar
@@ -179,15 +197,13 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
                   </Menu.Item>
                   <Menu.Item>
                     {({ active }) => (
-
                       <button
-                        className="px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full"
+                        className="px-4 py-2 text-sm text-red-500 hover:font-semibold hover:bg-gray-100 w-full"
                         onClick={signOut}
                       >
                         Sign Out
                       </button>
                     )}
-
                   </Menu.Item>
                 </div>
               </Menu.Items>
@@ -202,7 +218,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
         onCancel={() => setModalIsOpen(false)}
         okButtonProps={{
           children: "Custom OK",
-          style: { backgroundColor: 'black', color: 'white' },
+          style: { backgroundColor: "black", color: "white" },
         }}
       >
         <div className="text-center">
@@ -262,43 +278,26 @@ const Navbar = () => {
   }, [router.pathname]);
   return (
     <nav className="flexBetween w-full fixed z-10 p-4 flex-row border-b dark:bg-nft-dark bg-white dark:border-nft-black-1 border-nft-gray-1">
-      <div className="flex flex-1 flex-row justify-start">
+      <div className="flex flex-1 flex-row justify-start items-center">
         <Link href="/">
-          <div
-            className="flexCenter md:hidden cursor-pointer"
+          <a
+            className="flex items-center cursor-pointer"
             onClick={() => {
               setActive("Explore NFTs");
               setIsOpen(false);
             }}
           >
-            <Image
-              src={images.logo02}
-              width={32}
-              height={32}
-              alt="logo"
-            />
+            <Image src={images.logo02} width={32} height={32} alt="logo" />
             <p className="dark:text-white text-nft-black-1 font-semibold text-lg ml-1">
               GameAsset
             </p>
-          </div>
+          </a>
         </Link>
-        <Link href="/">
-          <div
-            className="hidden md:flex cursor-pointer"
-            onClick={() => {
-              setActive("Explore NFTs");
-              setIsOpen(false);
-            }}
-          >
-            <Image
-              src={images.logo02}
-              width={32}
-              height={32}
-              alt="logo"
-            />
-          </div>
-        </Link>
+        <div className="mx-4 h-[50px] min-h-[1em] w-px bg-gradient-to-tr from-transparent via-neutral-500 to-transparent opacity-20 dark:opacity-100"></div>
+
+        <MenuItems active={active} setActive={setActive} />
       </div>
+
       <div className="flex flex-initial flex-row justify-end">
         <div className="flex items-center mr-2">
           <input
@@ -318,7 +317,6 @@ const Navbar = () => {
           </label>
         </div>
         <div className="md:hidden flex">
-          <MenuItems active={active} setActive={setActive} />
           <div className="ml-4">
             <ButtonGroup
               setActive={setActive}
