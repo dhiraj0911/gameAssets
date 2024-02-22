@@ -53,7 +53,6 @@ export const NFTProvider = ({ children }) => {
         if (token) {
           window.localStorage.setItem("userdata", JSON.stringify(response.data))
           window.localStorage.setItem("vendor", response.data.vendorId);
-          window.localStorage.setItem("token", response.data.token);
           setIsSigned(true);
           // window.location.href = "/";
         } else {
