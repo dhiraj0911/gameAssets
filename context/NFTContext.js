@@ -42,7 +42,7 @@ export const NFTProvider = ({ children }) => {
   }, []);
 
   const nftCurrency = (nft) => {
-    if (nft.isWETH || nft.isWETH === 'true') {
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
       return "WETH";
     }
     else

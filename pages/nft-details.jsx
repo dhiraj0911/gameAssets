@@ -3,8 +3,6 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import axios from "axios";
 import {
-  useConnectionStatus,
-  useDisconnect,
   useAddress,
 } from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
@@ -115,7 +113,7 @@ const NFTDetails = () => {
     process.env.NEXT_PUBLIC_PRODUCTION === "true"
       ? process.env.NEXT_PUBLIC_BASE_URL
       : "http://localhost:5000";
-  const { isLoadingNFT, nftCurrency, buyNft, rentNFT, userOf } =
+  const { isLoadingNFT, buyNft, rentNFT, userOf } =
     useContext(NFTContext);
   const [currency, setCurrency] = useState("MATIC");
   const currentAccount = useAddress();
@@ -159,9 +157,8 @@ const NFTDetails = () => {
         console.error("Error fetching user:", error);
       }
     };
-    // setCurrency(nftCurrency(nft));
-    if (nft.isWETH || nft.isWETH === "true") {
-      setCurrency("ETH");
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
+      setCurrency("WETH");
     }
     if (nft && nft.tokenId) {
       fetchUser();
@@ -275,7 +272,6 @@ const NFTDetails = () => {
               <Image src={images.creator1} className="rounded-full" />
             </div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-semibold ">
-              {/* {shortenAddress(nft.seller)} */}
               {nft.owner}
             </p>
           </div>
