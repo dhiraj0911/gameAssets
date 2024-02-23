@@ -16,7 +16,7 @@ import {
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
-import Connectwallet from "./connectwallet";
+import Wallet from "./wallet";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
@@ -187,8 +187,8 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && currentAccount === "") {
-    return <Connectwallet />;
+  if ((isSigned || isSingedUp)) {
+    return <Wallet />;
   } else {
     return (
       <div className="flex justify-center ms:px-4 p-12">

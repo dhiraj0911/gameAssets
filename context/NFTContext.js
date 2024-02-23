@@ -124,16 +124,16 @@ export const NFTProvider = ({ children }) => {
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       setCurrentAccount(accounts[0]);
-      try {
-        let vendorId = window.localStorage.getItem("vendor");
-        await axios.post(`${API_BASE_URL}/api/address/`, {
-          vendorId,
-          address: accounts[0]
-        })
-      }
-      catch (error) {
-        console.error("Not signed In:", error);
-      }
+      // try {
+      //   let vendorId = window.localStorage.getItem("vendor");
+      //   await axios.post(`${API_BASE_URL}/api/address/`, {
+      //     vendorId,
+      //     address: accounts[0]
+      //   })
+      // }
+      // catch (error) {
+      //   console.error("Not signed In:", error);
+      // }
     }
     if (process.env.NEXT_PUBLIC_TESTNET === "true") {
       await switchToPolygonMumbaiTestnet();
@@ -142,28 +142,28 @@ export const NFTProvider = ({ children }) => {
     }
   };
 
-  const connectWallet = async () => {
-    if (!window.ethereum) return alert("Please install Metamask wallet");
-    if(window.localStorage.getItem("vendor") === null) return;
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
-    setCurrentAccount(accounts[0]);
-    try {
-      let vendorId = window.localStorage.getItem("vendor");
-      await axios.post(`${API_BASE_URL}/api/address/`, {
-        vendorId,
-        address: accounts[0]
-      })
-    }
-    catch (error) {
-      console.error("Not signed In:", error);
-    }
-    if (process.env.NEXT_PUBLIC_TESTNET === "true") {
-      await switchToPolygonMumbaiTestnet();
-    }
-    window.location.reload();
-  };
+  // const connectWallet = async () => {
+  //   if (!window.ethereum) return alert("Please install Metamask wallet");
+  //   if(window.localStorage.getItem("vendor") === null) return;
+  //   const accounts = await window.ethereum.request({
+  //     method: "eth_requestAccounts",
+  //   });
+  //   setCurrentAccount(accounts[0]);
+  //   try {
+  //     let vendorId = window.localStorage.getItem("vendor");
+  //     await axios.post(`${API_BASE_URL}/api/address/`, {
+  //       vendorId,
+  //       address: accounts[0]
+  //     })
+  //   }
+  //   catch (error) {
+  //     console.error("Not signed In:", error);
+  //   }
+  //   if (process.env.NEXT_PUBLIC_TESTNET === "true") {
+  //     await switchToPolygonMumbaiTestnet();
+  //   }
+  //   window.location.reload();
+  // };
 
   const switchToPolygonMumbaiTestnet = async () => {
     const chainId = '0x13881'; // Polygon Mumbai Testnet
@@ -602,8 +602,9 @@ export const NFTProvider = ({ children }) => {
       value={{
         checkIfWalletIsConnected,
         nftCurrency,
-        connectWallet,
+        // connectWallet,
         currentAccount,
+        setCurrentAccount,
         fetchNFTs,
         buyNft,
         createSale,

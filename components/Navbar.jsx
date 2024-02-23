@@ -11,6 +11,9 @@ import images from "../assets";
 import AvatarEditor from "react-avatar-editor";
 import axios from "axios";
 import FormData from "form-data";
+import {
+  ConnectWallet
+} from "@thirdweb-dev/react";
 
 const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   const generateLink = (i) => {
@@ -154,11 +157,12 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
               }}
             />
           ) : (
-            <Button
-              btnName="Connect"
-              classStyles="mx-2 h-8 mt-2 rounded-xl"
-              handleClick={connectWallet}
-            />
+            // <Button
+            //   btnName="Connect"
+            //   classStyles="mx-2 h-8 mt-2 rounded-xl"
+            //   handleClick={connectWallet}
+            // />
+            <ConnectWallet/>
           )}
           <Menu as="div" className="relative">
             <div>
