@@ -55,13 +55,13 @@ const ResellNFT = () => {
     setBuySuccessModal(true);
   };
 
-  if (isLoadingNFT) {
-    return (
-      <div className="flexStart min-h-screen">
-        <Loader />
-      </div>
-    );
-  }
+  // if (isLoadingNFT) {
+  //   return (
+  //     <div className="flexStart min-h-screen">
+  //       <Loader />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex justify-center sm:px-4 p-12">
@@ -137,10 +137,10 @@ const ResellNFT = () => {
                     <div className="px-8 py-10">
                       <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
                       <div className="uppercase font-bold text-xl">
-                        {nft.name}
+                        {name}
                       </div>
                       <div className="text-gray-300 uppercase tracking-widest">
-                        {nft.id}
+                        {id}
                       </div>
                       <div className="text-gray-400 mt-8">
                         <p className="font-bold">39.00 MLC</p>
@@ -154,10 +154,10 @@ const ResellNFT = () => {
                 <p className="font-poppins dark:text-white text-nft-black-1 text-sm minlg:text-xl font-normal mt-10">
                   {" "}
                   You successfully listed{" "}
-                  <span className="font-semibold">{nft.name}</span> from{" "}
-                  <span className="font-semibold">
-                    {shortenAddress(nft.owner)}
-                  </span>
+                  <span className="font-semibold">{name}</span> from{" "}
+                  {/* <span className="font-semibold">
+                    {shortenAddress(owner)}
+                  </span> */}
                   .
                 </p>
               </div>

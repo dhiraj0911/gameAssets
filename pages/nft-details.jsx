@@ -116,7 +116,7 @@ const NFTDetails = () => {
   const { isLoadingNFT, buyNft, rentNFT, userOf } =
     useContext(NFTContext);
   const [currency, setCurrency] = useState("MATIC");
-  const currentAccount = useAddress();
+  const currentAccount = useAddress() ? useAddress().toLowerCase() : "";
 
   const [nft, setNft] = useState({
     description: "",
