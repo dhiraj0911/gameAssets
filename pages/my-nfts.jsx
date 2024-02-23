@@ -1,13 +1,17 @@
 import { useState, useEffect, useContext } from "react";
 import Image from "next/image";
-
+import {
+  useConnectionStatus,
+  useDisconnect,
+  useAddress,
+} from "@thirdweb-dev/react"; 
 import { NFTContext } from "../context/NFTContext";
 import { Loader, BuyCard, RentCard, Banner, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, currentAccount, avatar } =
+  const { fetchMyNFTs, fetchMyRentedNFT, avatar } =
     useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
@@ -15,7 +19,7 @@ const MyNFTs = () => {
   const [rentedNfts, setRentedNfts] = useState([]);
   const [listedNfts, setListedNfts] = useState([]);
   const [activeTab, setActiveTab] = useState("ownedNfts"); // Added for tab selection
-
+  const currentAccount = useAddress();
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);

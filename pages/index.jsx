@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
-
+import { useConnectionStatus, useDisconnect, useAddress } from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
 import {
   Banner,
@@ -17,13 +17,14 @@ import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
 import Wallet from "./wallet";
+import { use } from "chai";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
   // const [nfts, setNfts] = useState([]);
   // const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, currentAccount, isSigned, isSingedUp } =
+  const { fetchNFTs, isSigned, isSingedUp } =
     useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
@@ -39,6 +40,11 @@ const Home = () => {
   const [sortOptionSale, setSortOptionSale] = useState("Recently added");
   const [searchQueryListed, setSearchQueryListed] = useState("");
   const [sortOptionListed, setSortOptionListed] = useState("Recently added");
+
+  const disconnect = useDisconnect();
+  const currentAccount = useAddress();
+  const connectionStatus = useConnectionStatus();
+
 
   const filteredRentNfts = useMemo(() => {
     let filtered = rentNfts.filter((nft) =>
@@ -187,7 +193,7 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp)) {
+  if ((isSigned || isSingedUp) && connectionStatus !== "connected") {
     return <Wallet />;
   } else {
     return (

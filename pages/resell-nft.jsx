@@ -21,6 +21,9 @@ const ResellNFT = () => {
   const [isForSale, setIsForSale] = useState(false);
   const [isForRent, setIsForRent] = useState(false);
 
+  const [paymentModal, setPaymentModal] = useState(false);
+  const [buySuccessModal, setBuySuccessModal] = useState(false);
+
   useEffect(async () => {
     if (!tokenURI) return;
     const {
@@ -34,22 +37,24 @@ const ResellNFT = () => {
 
   const resell = async () => {
     await reSale(tokenId, isWETH, price, rentPrice, isForRent, isForSale);
-    await axios.put(`${API_BASE_URL}/api/assets/${id}`, {
-      sold: false,
-      isForSale,
-      isForRent,
-      isWETH,
-      price,
-      rentPrice,
-    });
-    const asset = await axios.get(`${API_BASE_URL}/api/assets/${id}`);
-    const vendorId = window.localStorage.getItem("vendor");
-    await axios.post(`${API_BASE_URL}/api/transaction`, {
-      assetId: asset.data._id,
-      vendorId,
-      transactionType: "Resell",
-    });
-    router.push("/");
+    // await axios.put(`${API_BASE_URL}/api/assets/${id}`, {
+    //   sold: false,
+    //   isForSale,
+    //   isForRent,
+    //   isWETH,
+    //   price,
+    //   rentPrice,
+    // });
+    // const asset = await axios.get(`${API_BASE_URL}/api/assets/${id}`);
+    // const vendorId = window.localStorage.getItem("vendor");
+    // await axios.post(`${API_BASE_URL}/api/transaction`, {
+    //   assetId: asset.data._id,
+    //   vendorId,
+    //   transactionType: "Resell",
+    // });
+    // router.push("/");
+    setPaymentModal(false);
+    setBuySuccessModal(true);
   };
 
   if (isLoadingNFT) {
@@ -124,6 +129,20 @@ const ResellNFT = () => {
             </div>
           </div>
         ) : null}
+
+        {isLoadingNFT && (
+          <Modal
+            header="Listing NFT..."
+            body={
+              <div className="flexCenter flex-col text-center">
+                <div className="relative w-52 h-52">
+                  <Loader />
+                </div>
+              </div>
+            }
+            handleClose={() => setPaymentModal(false)}
+          />
+        )}
 
         <div className="flex justify-center sm:px-4 p-12">
           <div className="w-3/5 md:w-full">

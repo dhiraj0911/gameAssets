@@ -2,7 +2,11 @@ import { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import axios from "axios";
-
+import {
+  useConnectionStatus,
+  useDisconnect,
+  useAddress,
+} from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Modal } from "../components";
 
@@ -111,9 +115,10 @@ const NFTDetails = () => {
     process.env.NEXT_PUBLIC_PRODUCTION === "true"
       ? process.env.NEXT_PUBLIC_BASE_URL
       : "http://localhost:5000";
-  const { isLoadingNFT, currentAccount, nftCurrency, buyNft, rentNFT, userOf } =
+  const { isLoadingNFT, nftCurrency, buyNft, rentNFT, userOf } =
     useContext(NFTContext);
   const [currency, setCurrency] = useState("MATIC");
+  const currentAccount = useAddress();
 
   const [nft, setNft] = useState({
     description: "",
@@ -155,7 +160,7 @@ const NFTDetails = () => {
       }
     };
     // setCurrency(nftCurrency(nft));
-    if(nft.isWETH || nft.isWETH === "true") {
+    if (nft.isWETH || nft.isWETH === "true") {
       setCurrency("ETH");
     }
     if (nft && nft.tokenId) {
@@ -165,24 +170,23 @@ const NFTDetails = () => {
 
   const buyCheckout = async () => {
     try {
-      console.log(currency);
       await buyNft(nft);
-      await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
-        sold: true,
-        isForSale: false,
-        isForRent: false,
-        isWETH: false,
-        price: null,
-        rentPrice: null,
-        owner: window.localStorage.getItem("vendor"),
-      });
-      const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
-      const vendorId = window.localStorage.getItem("vendor");
-      await axios.post(`${API_BASE_URL}/api/transaction`, {
-        assetId: asset.data._id,
-        vendorId,
-        transactionType: "Buy",
-      });
+      // await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
+      //   sold: true,
+      //   isForSale: false,
+      //   isForRent: false,
+      //   isWETH: false,
+      //   price: null,
+      //   rentPrice: null,
+      //   owner: window.localStorage.getItem("vendor"),
+      // });
+      // const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      // const vendorId = window.localStorage.getItem("vendor");
+      // await axios.post(`${API_BASE_URL}/api/transaction`, {
+      //   assetId: asset.data._id,
+      //   vendorId,
+      //   transactionType: "Buy",
+      // });
       setPaymentModal(false);
       setBuySuccessModal(true);
     } catch (error) {
@@ -192,23 +196,21 @@ const NFTDetails = () => {
 
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
-      // console.log(nft)
       await rentNFT(nft, rentalPeriodInDays);
-
-      await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
-        rented: true,
-        rentStart: Math.floor(Date.now() / 1000),
-        rentEnd:
-          Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60,
-        renter: window.localStorage.getItem("vendor"),
-      });
-      const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
-      const vendorId = window.localStorage.getItem("vendor");
-      await axios.post(`${API_BASE_URL}/api/transaction`, {
-        assetId: asset.data._id,
-        vendorId,
-        transactionType: "Rent",
-      });
+      // await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
+      //   rented: true,
+      //   rentStart: Math.floor(Date.now() / 1000),
+      //   rentEnd:
+      //     Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60,
+      //   renter: window.localStorage.getItem("vendor"),
+      // });
+      // const asset = await axios.get(`${API_BASE_URL}/api/assets/${nft.id}`);
+      // const vendorId = window.localStorage.getItem("vendor");
+      // await axios.post(`${API_BASE_URL}/api/transaction`, {
+      //   assetId: asset.data._id,
+      //   vendorId,
+      //   transactionType: "Rent",
+      // });
       setRentPaymentModal(false);
       setRentSuccessModal(true);
     } catch (error) {
@@ -270,10 +272,7 @@ const NFTDetails = () => {
           </p>
           <div className="flex flex-row items-center mt-3">
             <div className="relative w-12 h-12 minlg:w-20 minlg:h-20 mr-2">
-              <Image
-                src={images.creator1}
-                className="rounded-full"
-              />
+              <Image src={images.creator1} className="rounded-full" />
             </div>
             <p className="font-poppins dark:text-white text-nft-black-1 text-xs minlg:text-base font-semibold ">
               {/* {shortenAddress(nft.seller)} */}
@@ -462,6 +461,19 @@ const NFTDetails = () => {
             </div>
           }
           handleClose={() => setBuySuccessModal(false)}
+        />
+      )}
+      {isLoadingNFT && (
+        <Modal
+          header="Renting NFT..."
+          body={
+            <div className="flexCenter flex-col text-center">
+              <div className="relative w-52 h-52">
+                <Loader />
+              </div>
+            </div>
+          }
+          handleClose={() => setRentPaymentModal(false)}
         />
       )}
       {rentSuccessModal && (

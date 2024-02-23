@@ -6,7 +6,7 @@ import {
   metamaskWallet,
   coinbaseWallet,
   walletConnect,
-  trustWallet,
+  trustWallet
 } from "@thirdweb-dev/react";
 import Script from "next/script";
 import { ThemeProvider } from "next-themes";

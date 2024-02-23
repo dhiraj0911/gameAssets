@@ -11,7 +11,7 @@ const Game = () => {
   const [deployedAssets, setDeployedAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(null);
-  const { isLoadingNFT, createSale, currentAccount } = useContext(NFTContext);
+  const { isLoadingNFT, createSale } = useContext(NFTContext);
   const [mintedAssets, setMintedAssets] = useState({});
   const [isForSale, setIsForSale] = useState(false);
   const [isForRent, setIsForRent] = useState(false);
