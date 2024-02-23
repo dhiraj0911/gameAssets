@@ -474,6 +474,7 @@ export const NFTProvider = ({ children }) => {
         }
       )
     );
+    setIsLoadingNFT(false);
     return items;
   };
 

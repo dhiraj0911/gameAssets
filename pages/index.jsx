@@ -2,30 +2,24 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useConnectionStatus, useDisconnect, useAddress } from "@thirdweb-dev/react";
-import { NFTContext } from "../context/NFTContext";
 import {
-  Banner,
-  CreatorCard,
-  Loader,
-  RentCard,
-  BuyCard,
-  SearchBar,
-} from "../components";
+  useConnectionStatus,
+  useAddress,
+} from "@thirdweb-dev/react"; 
+import { NFTContext } from "../context/NFTContext";
+import { Banner, CreatorCard, Loader, RentCard, BuyCard, SearchBar } from "../components";
 
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
 import Wallet from "./wallet";
-import { use } from "chai";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
   // const [nfts, setNfts] = useState([]);
   // const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, isSigned, isSingedUp } =
-    useContext(NFTContext);
+  const { fetchNFTs, isSigned, isSingedUp, isLoadingNFT } = useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
@@ -40,11 +34,7 @@ const Home = () => {
   const [sortOptionSale, setSortOptionSale] = useState("Recently added");
   const [searchQueryListed, setSearchQueryListed] = useState("");
   const [sortOptionListed, setSortOptionListed] = useState("Recently added");
-
-  const disconnect = useDisconnect();
   const currentAccount = useAddress();
-  const connectionStatus = useConnectionStatus();
-
 
   const filteredRentNfts = useMemo(() => {
     let filtered = rentNfts.filter((nft) =>
@@ -83,13 +73,12 @@ const Home = () => {
   }, [myListings, searchQueryListed, sortOptionListed]);
 
   useEffect(() => {
-    if (currentAccount) {
-      // Ensure currentAccount is not null or undefined
+    if (currentAccount) { // Ensure currentAccount is not null or undefined
       fetchNFTs().then((items) => {
         const itemsForRent = [];
         const itemsForSale = [];
         const myItem = [];
-
+  
         items.forEach((item) => {
           if (item.owner.toLowerCase() === currentAccount.toLowerCase()) {
             myItem.push(item);
@@ -123,9 +112,8 @@ const Home = () => {
         setRentNfts(itemsForRent);
         setSaleNfts(itemsForSale);
         setIsLoading(false);
-      });
-    }
-  }, [!currentAccount ? null : currentAccount]);
+      })};
+  }, [currentAccount ? currentAccount : ""]);
 
   const handleScroll = (direction) => {
     const { current } = scrollRef;
@@ -193,9 +181,12 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && connectionStatus !== "connected") {
+  if ((isSigned || isSingedUp) && currentAccount === "") {
+    console.log(currentAccount);
     return <Wallet />;
   } else {
+    // const creators = getTopCreators(nftsCopy);
+
     return (
       <div className="flex justify-center ms:px-4 p-12">
         <div className="w-full minmd:w-4/5">
@@ -209,11 +200,19 @@ const Home = () => {
             childStyles="md:text-4xl sm:text-2xl xs:text-xl text-left"
           />
 
-          {rentNfts.length === 0 && saleNfts.length === 0 ? (
-            <>
-              <Loader />
-            </>
-          ) : (
+        {isLoadingNFT && (
+          <Modal
+            header="Loading NFTs..."
+            body={
+              <div className="flexCenter flex-col text-center">
+                <div className="relative w-52 h-52">
+                  <Loader />
+                </div>
+              </div>
+            }
+            handleClose={() => setPaymentModal(false)}
+          />
+          )}
             <>
               {/* <div>
                   <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">
@@ -359,9 +358,7 @@ const Home = () => {
                     <div className="mt-3 w-full flex flex-wrap justify-start md:justify-center">
                       {filteredRentNfts.map(
                         (nft) =>
-                          !nft.rented && (
-                            <RentCard key={nft.tokenId} nft={nft} />
-                          )
+                          !nft.rented && <RentCard key={nft.tokenId} nft={nft} />
                       )}
                     </div>
                   </div>
@@ -401,7 +398,6 @@ const Home = () => {
                 )}
               </div>
             </>
-          )}
         </div>
       </div>
     );
