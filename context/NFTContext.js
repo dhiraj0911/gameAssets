@@ -255,6 +255,7 @@ export const NFTProvider = ({ children }) => {
     );
     setIsLoadingNFT(true);
     await transaction.wait();
+    setIsLoadingNFT(false);
   };
 
   const reSale = async (
@@ -286,6 +287,7 @@ export const NFTProvider = ({ children }) => {
     );
     setIsLoadingNFT(true);
     await transaction.wait();
+    setIsLoadingNFT(false);
   };
 
   // const buyNft = async (nft) => {
