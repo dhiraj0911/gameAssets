@@ -10,7 +10,7 @@ import {
 const BuyCard = ({ nft, onProfilePage }) => {
   const { nftCurrency } = useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
-  const currentAccountAddress = useAddress();
+  const currentAccountAddress = useConnectionStatus() === 'connected'? useAddress().toLowerCase(): null;
 
   return (
     <div

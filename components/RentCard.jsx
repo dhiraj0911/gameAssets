@@ -10,7 +10,7 @@ import {
 const RentCard = ({ nft, onProfilePage }) => {
   const { nftCurrency } = useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
-  const currentAccountAddress = useAddress().toLowerCase();
+  const currentAccountAddress = useConnectionStatus() === 'connected'? useAddress().toLowerCase(): null;
   const renterAddress =
     nft.rented === true || nft.rented === "true"
       ? nft.renter.toLowerCase()

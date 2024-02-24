@@ -34,6 +34,7 @@ const Home = () => {
   const [sortOptionSale, setSortOptionSale] = useState("Recently added");
   const [searchQueryListed, setSearchQueryListed] = useState("");
   const [sortOptionListed, setSortOptionListed] = useState("Recently added");
+  const status = useConnectionStatus();
   const currentAccount = useAddress();
 
   const filteredRentNfts = useMemo(() => {
@@ -181,8 +182,7 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && currentAccount === "") {
-    console.log(currentAccount);
+  if ((isSigned || isSingedUp) && status !== 'connected') {
     return <Wallet />;
   } else {
     // const creators = getTopCreators(nftsCopy);
