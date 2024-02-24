@@ -129,7 +129,7 @@ const Home = () => {
           console.error("Error sending address:", error);
         }
       }
-  }, [currentAccount ? currentAccount : ""]);
+  }, [currentAccount ? currentAccount : "", status]);
 
   const handleScroll = (direction) => {
     const { current } = scrollRef;
