@@ -270,7 +270,7 @@ const Home = () => {
                     </div>
                   </div>
                 </div> */}
-              <div className="mt-10">
+            <div className="mt-10 flex flex-col items-center justify-center">
                 {/* <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
                     <h1 className="flex-1 font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold sm:mb-4">
                       Hot NFTs for Rent

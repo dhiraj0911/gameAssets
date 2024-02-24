@@ -8,6 +8,7 @@ import {
   useAddress,
 } from "@thirdweb-dev/react"; 
 import { MarketAddress, MarketAddressABI, WETHAddress, WETHAddressABI } from "./constants";
+import toast from "react-hot-toast";
 
 export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) =>
@@ -222,7 +223,7 @@ export const NFTProvider = ({ children }) => {
     const signer = provider.getSigner();
     const contract = fetchContract(signer);
 
-    const user = await contract.userOf(id);
+    const user = await contract.getUserOf(id);
     return user;
   };
 
@@ -607,6 +608,13 @@ export const NFTProvider = ({ children }) => {
 
   useEffect(async () => {
       // checkIfWalletIsConnected();
+      if(!window.ethereum) {
+        toast.error("Please Install Ethereum wallet first!", {
+          position: "top-right",
+          style: { marginTop: "70px" },
+        });
+        return;
+      }
   }, []);
 
   return (
