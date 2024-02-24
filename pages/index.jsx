@@ -8,6 +8,7 @@ import {
 } from "@thirdweb-dev/react"; 
 import { NFTContext } from "../context/NFTContext";
 import { Banner, CreatorCard, Loader, RentCard, BuyCard, SearchBar } from "../components";
+import axios from "axios";
 
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
@@ -36,6 +37,8 @@ const Home = () => {
   const [sortOptionListed, setSortOptionListed] = useState("Recently added");
   const status = useConnectionStatus();
   const currentAccount = useAddress();
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION === "true" ? process.env.NEXT_PUBLIC_BASE_URL : "http://localhost:5000";
 
   const filteredRentNfts = useMemo(() => {
     let filtered = rentNfts.filter((nft) =>
@@ -73,7 +76,7 @@ const Home = () => {
     return filtered;
   }, [myListings, searchQueryListed, sortOptionListed]);
 
-  useEffect(() => {
+  useEffect(async () => {
     if (currentAccount) { // Ensure currentAccount is not null or undefined
       fetchNFTs().then((items) => {
         const itemsForRent = [];
@@ -114,6 +117,18 @@ const Home = () => {
         setSaleNfts(itemsForSale);
         setIsLoading(false);
       })};
+      if (status === "connected") {
+        try {
+          const vendorId = window.localStorage.getItem("vendor");
+          const lowerCaseAddress = currentAccount.toLowerCase();
+          await axios.post(`${API_BASE_URL}/api/address`, {
+            vendorId,
+            address: lowerCaseAddress,
+          });
+        } catch (error) {
+          console.error("Error sending address:", error);
+        }
+      }
   }, [currentAccount ? currentAccount : ""]);
 
   const handleScroll = (direction) => {

@@ -16,19 +16,14 @@ const Wallet = () => {
       ? process.env.NEXT_PUBLIC_BASE_URL
       : "http://localhost:5000";
 
-  const address = useAddress();
-  const connectionStatus = useConnectionStatus();
+  const address = useConnectionStatus() === "connected" ? useAddress().toLowerCase() : null;
 
   const handleConnect = async () => {
-    // if (connectionStatus === "connected") {
-    //   console.log(address);
-    // }
-    // console.log(connectionStatus)
     // try {
     //   let vendorId = window.localStorage.getItem("vendor");
-    //   await axios.post(`${API_BASE_URL}/api/address/`, {
+    //   await axios.post(`${API_BASE_URL}/api/address`, {
     //     vendorId,
-    //     address: accounts[0],
+    //     address: address,
     //   });
     // } catch (error) {
     //   console.error("Not signed In:", error);

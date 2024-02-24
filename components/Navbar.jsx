@@ -91,7 +91,9 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
         const newImageFile = new File([blob], "resizedImage.png", {
           type: "image/png",
         });
+        console.log("hit 1")
         if (vendorId) {
+          console.log("hit 2")
           const formData = new FormData();
           formData.append("file", newImageFile);
           formData.append("vendorId", vendorId);
@@ -104,6 +106,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
               },
             }
           );
+          console.log("hit 3")
           const avatarurl = response.data.location;
           setAvatar(avatarurl);
           const userdata = window.localStorage.getItem("userdata");

@@ -19,7 +19,7 @@ const SignUp = () => {
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address.", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
       return;
     }
@@ -27,7 +27,7 @@ const SignUp = () => {
     if (!acceptedTerms) {
       toast.error("You must accept the terms and conditions.", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
       return;
     }
@@ -35,7 +35,7 @@ const SignUp = () => {
     if (password !== confirmPassword) {
       toast.error("Passwords do not match", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
       return;
     }
@@ -49,7 +49,7 @@ const SignUp = () => {
       },
       {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       }
     );
   };

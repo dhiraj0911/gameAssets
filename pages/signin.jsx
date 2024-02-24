@@ -18,7 +18,7 @@ const SignIn = () => {
     if (!email.trim() || !password.trim()) {
       toast.error("Please enter both email and password.", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
       setInputError(true);
       return;
@@ -33,7 +33,7 @@ const SignIn = () => {
         },
         {
           position: "top-right",
-          style: { marginTop: "50px" },
+          style: { marginTop: "70px" },
         }
       );
       router.push("/");
@@ -41,7 +41,7 @@ const SignIn = () => {
       setInputError(true);
       toast.error("Invalid email or password", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
     }
   };

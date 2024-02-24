@@ -28,7 +28,7 @@ const ForgotPassword = () => {
         },
         {
           position: "top-right",
-          style: { marginTop: "50px" },
+          style: { marginTop: "70px" },
         }
       );
       setVerify(true);
@@ -44,7 +44,7 @@ const ForgotPassword = () => {
     if (password !== confirmPassword) {
       toast.error("Passwords do not match", {
         position: "top-right",
-        style: { marginTop: "50px" },
+        style: { marginTop: "70px" },
       });
       return;
     }
@@ -63,7 +63,7 @@ const ForgotPassword = () => {
         },
         {
           position: "top-right",
-          style: { marginTop: "50px" },
+          style: { marginTop: "70px" },
         }
       );
       window.location.href = "/signin";
