@@ -1,11 +1,16 @@
 import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
 import { NFTContext } from "../context/NFTContext";
+import {
+  useConnectionStatus,
+  useDisconnect,
+  useAddress,
+} from "@thirdweb-dev/react"; 
 
 const BuyCard = ({ nft, onProfilePage }) => {
-  const { nftCurrency, currentAccount } = useContext(NFTContext);
+  const { nftCurrency } = useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
-  const currentAccountAddress = currentAccount.toLowerCase();
+  const currentAccountAddress = useConnectionStatus() === 'connected'? useAddress().toLowerCase(): null;
 
   return (
     <div

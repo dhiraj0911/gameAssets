@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import { NFTContext } from "../context/NFTContext";
-import { Loader, Button, Input } from "../components";
+import { Loader, Button, Input, Modal } from "../components";
 
 const ResellNFT = () => {
   const API_BASE_URL =
@@ -21,6 +21,8 @@ const ResellNFT = () => {
   const [isForSale, setIsForSale] = useState(false);
   const [isForRent, setIsForRent] = useState(false);
 
+  const [buySuccessModal, setBuySuccessModal] = useState(false);
+
   useEffect(async () => {
     if (!tokenURI) return;
     const {
@@ -34,31 +36,32 @@ const ResellNFT = () => {
 
   const resell = async () => {
     await reSale(tokenId, isWETH, price, rentPrice, isForRent, isForSale);
-    await axios.put(`${API_BASE_URL}/api/assets/${id}`, {
-      sold: false,
-      isForSale,
-      isForRent,
-      isWETH,
-      price,
-      rentPrice,
-    });
-    const asset = await axios.get(`${API_BASE_URL}/api/assets/${id}`);
-    const vendorId = window.localStorage.getItem("vendor");
-    await axios.post(`${API_BASE_URL}/api/transaction`, {
-      assetId: asset.data._id,
-      vendorId,
-      transactionType: "Resell",
-    });
-    router.push("/");
+    // await axios.put(`${API_BASE_URL}/api/assets/${id}`, {
+    //   sold: false,
+    //   isForSale,
+    //   isForRent,
+    //   isWETH,
+    //   price,
+    //   rentPrice,
+    // });
+    // const asset = await axios.get(`${API_BASE_URL}/api/assets/${id}`);
+    // const vendorId = window.localStorage.getItem("vendor");
+    // await axios.post(`${API_BASE_URL}/api/transaction`, {
+    //   assetId: asset.data._id,
+    //   vendorId,
+    //   transactionType: "Resell",
+    // });
+    // router.push("/");
+    setBuySuccessModal(true);
   };
 
-  if (isLoadingNFT) {
-    return (
-      <div className="flexStart min-h-screen">
-        <Loader />
-      </div>
-    );
-  }
+  // if (isLoadingNFT) {
+  //   return (
+  //     <div className="flexStart min-h-screen">
+  //       <Loader />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex justify-center sm:px-4 p-12">
@@ -124,6 +127,66 @@ const ResellNFT = () => {
             </div>
           </div>
         ) : null}
+        {buySuccessModal && (
+          <Modal
+            header="Listing NFT Successfull"
+            body={
+              <div className="flexCenter flex-col text-center">
+                <div className="relative w-87 h- minmd:w-2/3 sm:w-full sm:h-300 h-100">
+                  <div className="card m-auto text-gray-300 w-[clamp(260px,80%,300px)] hover:brightness-90 transition-all group bg-gradient-to-tl from-gray-900 to-gray-950 hover:from-gray-800 hover:to-gray-950 border-2 border-gray-900 m-4 rounded-lg overflow-hidden relative">
+                    <div className="px-8 py-10">
+                      <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
+                      <div className="uppercase font-bold text-xl">
+                        {name}
+                      </div>
+                      <div className="text-gray-300 uppercase tracking-widest">
+                        {id}
+                      </div>
+                      <div className="text-gray-400 mt-8">
+                        <p className="font-bold">39.00 MLC</p>
+                        <p>Perfect everywhere</p>
+                      </div>
+                    </div>
+                    <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>
+                    <div className="h-0.5 group-hover:w-full bg-gradient-to-l  via-yellow-950 group-hover:via-pink-500 w-[70%] m-auto rounded transition-all"></div>
+                  </div>
+                </div>
+                <p className="font-poppins dark:text-white text-nft-black-1 text-sm minlg:text-xl font-normal mt-10">
+                  {" "}
+                  You successfully listed{" "}
+                  <span className="font-semibold">{name}</span> from{" "}
+                  {/* <span className="font-semibold">
+                    {shortenAddress(owner)}
+                  </span> */}
+                  .
+                </p>
+              </div>
+            }
+            footer={
+              <div className="flexCenter flex-col">
+                <Button
+                  btnName="Check it out"
+                  classStyles="sm:mr-0 sm:mb-5 rounded-xl"
+                  handleClick={() => router.push("/")}
+                />
+              </div>
+            }
+            handleClose={() => setBuySuccessModal(false)}
+          />
+        )}
+        {isLoadingNFT && (
+          <Modal
+            header="Listing NFT..."
+            body={
+              <div className="flexCenter flex-col text-center">
+                <div className="relative w-52 h-52">
+                  <Loader />
+                </div>
+              </div>
+            }
+            handleClose={() => setPaymentModal(false)}
+          />
+        )}
 
         <div className="flex justify-center sm:px-4 p-12">
           <div className="w-3/5 md:w-full">

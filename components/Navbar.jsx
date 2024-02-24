@@ -11,6 +11,10 @@ import images from "../assets";
 import AvatarEditor from "react-avatar-editor";
 import axios from "axios";
 import FormData from "form-data";
+import {
+  ConnectWallet,
+  useAddress
+} from "@thirdweb-dev/react";
 
 const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
   const generateLink = (i) => {
@@ -51,8 +55,6 @@ const MenuItems = ({ isMobile, active, setActive, setIsOpen }) => {
 
 const ButtonGroup = ({ setActive, router, setIsOpen }) => {
   const {
-    connectWallet,
-    currentAccount,
     signOut,
     isSigned,
     avatar,
@@ -62,6 +64,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
   const [image, setImage] = useState(null);
   const [scale, setScale] = useState(1);
   const editorRef = useRef(null);
+  const currentAccount = useAddress();
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_PRODUCTION === "true"
@@ -154,11 +157,12 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
               }}
             />
           ) : (
-            <Button
-              btnName="Connect"
-              classStyles="mx-2 h-8 mt-2 rounded-xl"
-              handleClick={connectWallet}
-            />
+            // <Button
+            //   btnName="Connect"
+            //   classStyles="mx-2 h-8 mt-2 rounded-xl"
+            //   handleClick={connectWallet}
+            // />
+            <ConnectWallet/>
           )}
           <Menu as="div" className="relative">
             <div>
