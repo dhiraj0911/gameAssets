@@ -2,21 +2,24 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
-
+import {
+  useConnectionStatus,
+  useAddress,
+} from "@thirdweb-dev/react"; 
 import { NFTContext } from "../context/NFTContext";
 import { Banner, CreatorCard, Loader, RentCard, BuyCard, SearchBar } from "../components";
 
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 import { getTopCreators } from "../utils/getTopCreators";
-import Connectwallet from "./connectwallet";
+import Wallet from "./wallet";
 
 const Home = () => {
   const [hideButtons, setHideButtons] = useState(false);
   // const [nfts, setNfts] = useState([]);
   // const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchNFTs, currentAccount, isSigned, isSingedUp } = useContext(NFTContext);
+  const { fetchNFTs, isSigned, isSingedUp, isLoadingNFT } = useContext(NFTContext);
   const [activeSelect, setActiveSelect] = useState("Recently added");
   const parentRef = useRef(null);
   const scrollRef = useRef(null);
@@ -31,6 +34,8 @@ const Home = () => {
   const [sortOptionSale, setSortOptionSale] = useState("Recently added");
   const [searchQueryListed, setSearchQueryListed] = useState("");
   const [sortOptionListed, setSortOptionListed] = useState("Recently added");
+  const status = useConnectionStatus();
+  const currentAccount = useAddress();
 
   const filteredRentNfts = useMemo(() => {
     let filtered = rentNfts.filter((nft) =>
@@ -92,18 +97,24 @@ const Home = () => {
         setSaleNfts(itemsForSale);
         setIsLoading(false);
       });
-    }
-  }, [currentAccount]);
-  
+    } else {
+      fetchNFTs().then((items) => {
+        const itemsForRent = [];
+        const itemsForSale = [];
 
-  // useEffect(() => {
-  //   fetchNFTs().then((items) => {
-  //     setNfts(items);
-  //     console.log(items)
-  //     setNftsCopy(items);
-  //     setIsLoading(false);
-  //   });
-  // }, []);
+        items.forEach((item) => {
+          if (item.forRent) {
+            itemsForRent.push(item);
+          }
+          if (item.forSale) {
+            itemsForSale.push(item);
+          }
+        });
+        setRentNfts(itemsForRent);
+        setSaleNfts(itemsForSale);
+        setIsLoading(false);
+      })};
+  }, [currentAccount ? currentAccount : ""]);
 
   const handleScroll = (direction) => {
     const { current } = scrollRef;
@@ -171,9 +182,8 @@ const Home = () => {
     };
   });
 
-  if ((isSigned || isSingedUp) && currentAccount === "") {
-    console.log(currentAccount);
-    return <Connectwallet />;
+  if ((isSigned || isSingedUp) && status !== 'connected') {
+    return <Wallet />;
   } else {
     // const creators = getTopCreators(nftsCopy);
 
@@ -190,11 +200,19 @@ const Home = () => {
             childStyles="md:text-4xl sm:text-2xl xs:text-xl text-left"
           />
 
-          {rentNfts.length === 0 && saleNfts.length === 0 ? (
-            <>
-              <Loader />
-            </>
-          ) : (
+        {isLoadingNFT && (
+          <Modal
+            header="Loading NFTs..."
+            body={
+              <div className="flexCenter flex-col text-center">
+                <div className="relative w-52 h-52">
+                  <Loader />
+                </div>
+              </div>
+            }
+            handleClose={() => setPaymentModal(false)}
+          />
+          )}
             <>
               {/* <div>
                   <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold ml-4 xs:ml-0">
@@ -252,7 +270,7 @@ const Home = () => {
                     </div>
                   </div>
                 </div> */}
-              <div className="mt-10">
+            <div className="mt-10 flex flex-col items-center justify-center">
                 {/* <div className="flexBetween mx-4 xs:mx-0 minlg:mx-8 sm:flex-col sm:items-start">
                     <h1 className="flex-1 font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold sm:mb-4">
                       Hot NFTs for Rent
@@ -380,7 +398,6 @@ const Home = () => {
                 )}
               </div>
             </>
-          )}
         </div>
       </div>
     );
