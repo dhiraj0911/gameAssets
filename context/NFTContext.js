@@ -29,8 +29,7 @@ export const NFTProvider = ({ children }) => {
   const [wrongOTP, setWrongOTP] = useState(false);
 
   const disconnect = useDisconnect();
-  const address = useAddress();
-  const connectionStatus = useConnectionStatus();
+  const currentAddress = useConnectionStatus() === "connected" ? useAddress() : "";
 
   useEffect(() => {
     const userdata = window.localStorage.getItem("userdata");
@@ -540,6 +539,54 @@ export const NFTProvider = ({ children }) => {
     return items;
   };
 
+  //fetch nft from my digital wallet using https://testnets-api.opensea.io/api/v2/chain/mumbai/account/0x158f65db710824CE337c91efC379FEBc985Cf59E/nfts
+  const fetchMyAllNFTs = async () => {
+    try {
+      const response = await axios.get(
+        `https://testnets-api.opensea.io/api/v2/chain/mumbai/account/${currentAddress}/nfts`
+      );
+      console.log(response.data.nfts);
+  
+      const items = await Promise.all(
+        response.data.nfts.map(async (nft) => {
+  
+          const tokenId = parseInt(nft.identifier);
+          const owner = currentAddress; // This might be different based on your implementation
+          const tokenURI = nft.metadata_url;
+          const isWETH = false;
+          const price = "0";
+          const rentPrice = "0";
+          const forRent = false;
+          const forSale = false;
+          const sold = false;
+          const rented = false;
+
+          return {
+            tokenId,
+            owner,
+            isWETH,
+            price,
+            rentPrice,
+            forRent,
+            forSale,
+            sold,
+            rented,
+            name: nft.name,
+            id: tokenId, // Assuming the id is the same as tokenId
+            description: nft.description,
+            tokenURI,
+          };
+        })
+      );
+
+      return items;
+    } catch (error) {
+      console.error("Error during fetching NFTs:", error);
+    }
+  };
+  
+
+
   const fetchMyRentedNFT = async () => {
     setIsLoadingNFT(false);
 
@@ -629,6 +676,7 @@ export const NFTProvider = ({ children }) => {
         createSale,
         rentNFT,
         fetchMyNFTs,
+        fetchMyAllNFTs,
         fetchMyRentedNFT,
         userOf,
         reSale,

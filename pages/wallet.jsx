@@ -28,7 +28,7 @@ const Wallet = () => {
     // } catch (error) {
     //   console.error("Not signed In:", error);
     // }
-    window.location.reload();
+    // window.location.reload();
   };
 
   return (

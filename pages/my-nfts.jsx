@@ -4,14 +4,14 @@ import {
   useConnectionStatus,
   useDisconnect,
   useAddress,
-} from "@thirdweb-dev/react"; 
+} from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
 import { Loader, BuyCard, RentCard, Banner, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, avatar } =
+  const { fetchMyNFTs, fetchMyAllNFTs, fetchMyRentedNFT, avatar } =
     useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
@@ -19,26 +19,37 @@ const MyNFTs = () => {
   const [rentedNfts, setRentedNfts] = useState([]);
   const [listedNfts, setListedNfts] = useState([]);
   const [activeTab, setActiveTab] = useState("ownedNfts"); // Added for tab selection
-  const currentAccount = useAddress();
+  const currentAccount =
+    useConnectionStatus() === "connected" ? useAddress() : null;
+
   useEffect(() => {
+    let isMounted = true; // Flag to track mounted state
+
     const fetchData = async () => {
-      setIsLoading(true);
-      const ownedNfts = await fetchMyNFTs();
-      const rentedNFTs = await fetchMyRentedNFT();
+      if (isMounted) {
+        setIsLoading(true);
+      }
+      if (currentAccount) {
+        const ownedNfts = await fetchMyAllNFTs();
+        const rentedNFTs = await fetchMyRentedNFT();
 
-      setNftsCopy(ownedNfts);
-      setRentedNfts(rentedNFTs);
-
-      // const listedItems = ownedNfts.filter((item) => item.forSale || item.forRent);
-      // const ownedNotListed = ownedNfts.filter(
-      //   (item) => !item.forSale && !item.forRent
-      // );
-      setNfts(ownedNfts);
-      setIsLoading(false);
+        if (isMounted) {
+          setNftsCopy(ownedNfts);
+          setRentedNfts(rentedNFTs);
+          setNfts(ownedNfts);
+          setIsLoading(false);
+          console.log("test")
+        }
+      }
     };
 
     fetchData();
-  }, [fetchMyNFTs, fetchMyRentedNFT]);
+
+    // Cleanup function to set isMounted to false when component unmounts
+    return () => {
+      isMounted = false;
+    };
+  }, [currentAccount]);
 
   // Determine which NFTs to display based on the active tab
   const displayedNfts = () => {
