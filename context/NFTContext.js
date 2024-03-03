@@ -201,6 +201,32 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
   };
 
+  const importNFT = async (
+    collection,
+    tokenId,
+    isWETH,
+    rentPrice,
+  ) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
+
+    const rentPriceInWei = ethers.utils.parseUnits(rentPrice, "ether");
+    const listingPrice = ethers.utils.parseUnits("0.00001", "ether");
+
+    const transaction = await contract.importToken(
+      collection,
+      tokenId,
+      isWETH,
+      rentPriceInWei,
+      { value: listingPrice.toString() }
+    );
+    setIsLoadingNFT(true);
+    await transaction.wait();
+    setIsLoadingNFT(false);
+  }
 
   const buyNft = async (nft) => {
     const web3Modal = new Web3Modal();
@@ -234,6 +260,50 @@ export const NFTProvider = ({ children }) => {
     await transaction.wait();
     setIsLoadingNFT(false);
   };
+
+  const rentImportedNFT = async (nft, rentalPeriodInDays) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      MarketAddress,
+      MarketAddressABI,
+      signer
+    );
+
+    const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
+    const rentPrice = ethers.utils.parseUnits(
+      totalRentPrice.toString(),
+      "ether"
+    );
+
+    // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
+    //for 2 minute
+    const expiry = Math.floor(Date.now() / 1000) + 120;
+    let transaction;
+
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
+      const wethContract = new ethers.Contract(
+        WETHAddress,
+        WETHAddressABI,
+        signer
+      );
+
+      const approvalTx = await wethContract.approve(MarketAddress, rentPrice);
+      await approvalTx.wait();
+      transaction = await contract.rentImportedNFT(nft.tokenId, nft.collection, expiry);
+
+    } else {
+      transaction = await contract.rentImportedNFT(nft.tokenId, nft.collection, expiry, {
+        value: rentPrice,
+      });
+    }
+
+    setIsLoadingNFT(true);
+    await transaction.wait();
+    setIsLoadingNFT(false);
+  }
 
   const rentNFT = async (nft, rentalPeriodInDays) => {
     const web3Modal = new Web3Modal();
@@ -339,6 +409,100 @@ export const NFTProvider = ({ children }) => {
     return items;
   };
 
+  const fetchImportedNFTs = async () => {
+    console.log("Fetching imported assets...");
+    setIsLoadingNFT(false);
+    const RPC_URL =
+      process.env.NEXT_PUBLIC_TESTNET === "true"
+        ? process.env.NEXT_PUBLIC_RPC_URL
+        : process.env.NEXT_PUBLIC_LOCAL_RPC_URL;
+
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const contract = fetchContract(provider);
+
+    const data = await contract.fetchImportedMarketItems();
+    const items = await Promise.all(
+      data.map(
+        async ({
+          tokenId,
+          collection,
+          owner,
+          rentalPrice,
+          isWETH
+        }) => {
+          const tokenURI = await contract.getTokenURLFromImportedNFT(collection, tokenId);
+          const {
+            data: { name, description },
+          } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+          const rentPrice = ethers.utils.formatUnits(
+            rentalPrice.toString(),
+            "ether"
+          );
+          return {
+            tokenId: tokenId.toNumber(),
+            owner,
+            isWETH,
+            rentPrice,
+            collection,
+            name,
+            description,
+            tokenURI,
+          };
+        }
+      )
+    );
+    setIsLoadingNFT(false);
+    return items;
+  }
+
+  const fetchMyRentedImportedNFTs = async () => {
+    setIsLoadingNFT(false);
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
+
+    const data = await contract.fetchMyRentedImportedNFTs();
+    const items = await Promise.all(
+      data.map(
+        async ({
+          tokenId,
+          collection,
+          owner,
+          rentalPrice,
+          isWETH,
+          expiry,
+          renter,
+          rented
+        }) => {
+          const tokenURI = await contract.getTokenURLFromImportedNFT(collection, tokenId);
+          const {
+            data: { name, description },
+          } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+          const rentPrice = ethers.utils.formatUnits(
+            rentalPrice.toString(),
+            "ether"
+          );
+          return {
+            tokenId: tokenId.toNumber(),
+            owner,
+            rentPrice,
+            collection,
+            name,
+            description,
+            tokenURI,
+            isWETH,
+            expiry,
+            renter,
+            rented
+          };
+        }
+      )
+    );
+    setIsLoadingNFT(false);
+    return items;
+  }
   const fetchMyNFTs = async () => {
     setIsLoadingNFT(false);
     const web3Modal = new Web3Modal();
@@ -348,8 +512,6 @@ export const NFTProvider = ({ children }) => {
     const contract = fetchContract(signer);
 
     const data = await contract.fetchMyNFTs();
-    var i = 0;
-    console.log(data.length);
     const items = await Promise.all(
       data.map(
         async ({
@@ -366,7 +528,6 @@ export const NFTProvider = ({ children }) => {
           console.log(tokenId);
           const tokenURI = await contract.tokenURI(tokenId);
 
-          console.log(tokenURI, i++, tokenId._hex);
           const {
             data: { name, id, description },
           } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
@@ -528,13 +689,12 @@ export const NFTProvider = ({ children }) => {
   return (
     <NFTContext.Provider
       value={{
-        // checkIfWalletIsConnected,
         nftCurrency,
-        // connectWallet,
-        // currentAccount,
-        // setCurrentAccount,
         fetchNFTs,
         buyNft,
+        fetchImportedNFTs,
+        importNFT,
+        rentImportedNFT,
         createSale,
         rentNFT,
         fetchMyNFTs,

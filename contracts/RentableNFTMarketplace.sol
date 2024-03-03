@@ -2,9 +2,10 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IWETH {
     function transferFrom(address sender, address recipient, uint amount) external returns (bool);
@@ -472,7 +473,6 @@ contract RentableNFTMarketplace is
         return items;
     }
 
-    //fetchMyRentedImportedNFTs
     function fetchMyRentedImportedNFTs() public view returns (ImportedItem[] memory) {
         uint totalItemCount = _itemsImported.current();
         uint itemCount = 0;
@@ -501,6 +501,11 @@ contract RentableNFTMarketplace is
     ) public view override returns (string memory) {
         // return string(abi.encodePacked("ipfs://",tokenURIs[_tokenId],"/metadata.json"));
         return string(abi.encodePacked(tokenURIs[_tokenId]));
+    }
+
+    function getTokenURLFromImportedNFT(address _nftContract, uint256 _tokenId) public view returns (string memory) {
+        IERC721Metadata nftContract = IERC721Metadata(_nftContract);
+        return nftContract.tokenURI(_tokenId);
     }
 
     function withdraw() public {
