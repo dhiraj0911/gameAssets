@@ -117,15 +117,17 @@ contract RentableNFTMarketplace is
     function getImportedRentedKeys() public view returns (bytes32[] memory) {
         uint itemCount = 0;
         for (uint i = 0; i < _itemsImported.current(); i++) {
-            if (idToImportedItem[i].rented) {
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented) {
                 itemCount++;
             }
         }
         bytes32[] memory rentedKeys = new bytes32[](itemCount);
         uint currentIndex = 0;
         for (uint i = 0; i < _itemsImported.current(); i++) {
-            if (idToImportedItem[i].rented) {
-                bytes32 rentalId = keccak256(abi.encodePacked(idToImportedItem[i].collection, idToImportedItem[i].tokenId));
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented) {
+                bytes32 rentalId = keccak256(abi.encodePacked(idToImportedItem[key].collection, idToImportedItem[key].tokenId));
                 rentedKeys[currentIndex] = rentalId;
                 currentIndex++;
             }
@@ -210,7 +212,7 @@ contract RentableNFTMarketplace is
         uint256 _tokenId, 
         bool _isWETH, 
         uint256 _rentalPrice
-    ) public {
+    ) public payable{
         require(_rentalPrice > 0, "Rental price must be greater than 0");
         require(IERC721(_collection).ownerOf(_tokenId) == msg.sender, "You are not the owner of this NFT");
         require(msg.value == listingPrice, "Price must be equal to listing price");
@@ -395,15 +397,17 @@ contract RentableNFTMarketplace is
         uint itemCount = 0;
         uint currentIndex = 0;
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToImportedItem[i].rented == false) {
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented == false) {
                 itemCount += 1;
             }
         }
 
         ImportedItem[] memory items = new ImportedItem[](itemCount);
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToImportedItem[i].rented == false) {
-                ImportedItem storage currentItem = idToImportedItem[i];
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented == false) {
+                ImportedItem storage currentItem = idToImportedItem[key];
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }
@@ -475,14 +479,16 @@ contract RentableNFTMarketplace is
         uint currentIndex = 0;
 
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToImportedItem[i].rented && idToImportedItem[i].renter == msg.sender) {
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented && idToImportedItem[key].renter == msg.sender) {
                 itemCount += 1;
             }
         }
         ImportedItem[] memory items = new ImportedItem[](itemCount);
         for (uint i = 0; i < totalItemCount; i++) {
-            if (idToImportedItem[i].rented && idToImportedItem[i].renter == msg.sender) {
-                ImportedItem storage currentItem = idToImportedItem[i];
+            bytes32 key = bytes32(i);
+            if (idToImportedItem[key].rented && idToImportedItem[key].renter == msg.sender) {
+                ImportedItem storage currentItem = idToImportedItem[key];
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }
