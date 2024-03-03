@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./ERC4907.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -11,21 +11,23 @@ interface IWETH {
 }
 
 contract RentableNFTMarketplace is
-    ERC4907,
+    ERC721,
     KeeperCompatibleInterface
 {
     using Counters for Counters.Counter;
     Counters.Counter public _tokenIds;
     Counters.Counter public _itemsSold;
     Counters.Counter public _itemsRented;
+    Counters.Counter public _itemsImported;
     mapping(uint256 => string) public tokenURIs;
 
-    uint256 listingPrice = 0.01 ether;
+    uint256 listingPrice = 0.00001 ether;
     address payable public owner;
     address public WETH_ADDRESS;
 
     mapping(uint256 => MarketItem) public idToMarketItem;
     mapping(uint256 => RentedItem) public idToRentedItem;
+    mapping(bytes32 => ImportedItem) public idToImportedItem;
 
     uint256[] public rentedTokenIds;
     IERC20 weth;
@@ -46,6 +48,20 @@ contract RentableNFTMarketplace is
         uint256 tokenId;
         address renter;
         uint64 expires;
+    }
+
+    struct ImportedItem {
+        uint256 tokenId;
+        address collection;
+        address owner;
+        bool isWETH;
+        // uint256 price;
+        uint256 rentalPrice;
+        // bool forSale;
+        // bool forRent;
+        uint256 expiry;
+        address renter;
+        bool rented;
     }
 
     struct FullRentedItem {
@@ -79,7 +95,7 @@ contract RentableNFTMarketplace is
         _;
     }
 
-    constructor(address _wethAddress) ERC4907("Rentable", "RT") {
+    constructor(address _wethAddress) ERC721("Rentable", "RT") {
         owner = payable(msg.sender);
         WETH_ADDRESS = _wethAddress;
         weth = IERC20(WETH_ADDRESS);
@@ -91,6 +107,30 @@ contract RentableNFTMarketplace is
 
     function getListingPrice() public view returns (uint256) {
         return listingPrice;
+    }
+
+    function decodeImportedRentedKey(bytes32 rentalId) public view returns (address, uint256) {
+        ImportedItem storage info = idToImportedItem[rentalId];
+        return (info.collection, info.tokenId);
+    }
+
+    function getImportedRentedKeys() public view returns (bytes32[] memory) {
+        uint itemCount = 0;
+        for (uint i = 0; i < _itemsImported.current(); i++) {
+            if (idToImportedItem[i].rented) {
+                itemCount++;
+            }
+        }
+        bytes32[] memory rentedKeys = new bytes32[](itemCount);
+        uint currentIndex = 0;
+        for (uint i = 0; i < _itemsImported.current(); i++) {
+            if (idToImportedItem[i].rented) {
+                bytes32 rentalId = keccak256(abi.encodePacked(idToImportedItem[i].collection, idToImportedItem[i].tokenId));
+                rentedKeys[currentIndex] = rentalId;
+                currentIndex++;
+            }
+        }
+        return rentedKeys;
     }
 
     function createToken(
@@ -165,18 +205,72 @@ contract RentableNFTMarketplace is
         _itemsSold.decrement();
     }
 
-    // function createMarketSale(uint256 tokenId) public payable {
-    //     uint price = idToMarketItem[tokenId].price;
-    //     address currOwner = idToMarketItem[tokenId].owner;
-    //     require(msg.value == price, "Please pay the asking price in order to complete the purchase");
-    //     idToMarketItem[tokenId].owner = payable(msg.sender);
-    //     idToMarketItem[tokenId].sold = true;
-    //     idToMarketItem[tokenId].forSale = false;
-    //     idToMarketItem[tokenId].forRent = false;
-    //     _itemsSold.increment();
-    //     _transfer(currOwner, msg.sender, tokenId);
-    //     payable(currOwner).transfer(msg.value);
-    // }
+    function importNFT(
+        address _collection, 
+        uint256 _tokenId, 
+        bool _isWETH, 
+        uint256 _rentalPrice
+    ) public {
+        require(_rentalPrice > 0, "Rental price must be greater than 0");
+        require(IERC721(_collection).ownerOf(_tokenId) == msg.sender, "You are not the owner of this NFT");
+        require(msg.value == listingPrice, "Price must be equal to listing price");
+
+        bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
+        _itemsImported.increment();
+
+        idToImportedItem[rentalId] = ImportedItem({
+            tokenId: _tokenId,
+            collection: _collection,
+            owner: msg.sender,
+            isWETH: _isWETH,
+            rentalPrice: _rentalPrice,
+            rented: false,
+            expiry: 0,
+            renter: address(0)
+        });
+    }
+
+    function rentImportedNFT(uint256 _tokenId, address _collection, uint64 _expires) public payable {
+        bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
+        ImportedItem storage item = idToImportedItem[rentalId];
+
+        require(_expires > block.timestamp, "Expiration must be in the future");
+        require(item.rented == false, "Item already rented");
+        require(IERC721(_collection).ownerOf(_tokenId) == item.owner, "Item is not owned by the importer");
+
+        if (item.isWETH) {
+            require(IWETH(WETH_ADDRESS).transferFrom(msg.sender, item.owner, item.rentalPrice), "Failed to transfer WETH for rent");
+        } else {
+            require(msg.value >= item.rentalPrice, "Insufficient funds to rent the token");
+            payable(item.owner).transfer(msg.value);
+        }
+
+        item.renter = msg.sender;
+        item.rented = true;
+        item.expiry = _expires;
+        IERC721(_collection).transferFrom(item.owner, msg.sender, _tokenId);
+    }
+
+    function rentOutToken(uint256 _tokenId, uint64 _expires) public payable {
+        MarketItem storage item = idToMarketItem[_tokenId];
+        
+        require(item.forRent, "Token is not available for rent");
+        require(ownerOf(_tokenId) == item.owner, "Item is not owned by the importer");
+        require(item.isWETH ? msg.value == 0 : msg.value >= item.rentPrice, "Incorrect payment method or amount");
+        
+        if(item.isWETH) {
+            require(IWETH(WETH_ADDRESS).transferFrom(msg.sender, item.owner, item.rentPrice), "Failed to transfer WETH for rent");
+        } else {
+            require(msg.value >= item.rentPrice, "Insufficient funds to rent the token in MATIC");
+            payable(item.owner).transfer(msg.value);
+        }
+
+        item.rented = true;
+        _itemsRented.increment();
+        idToRentedItem[_tokenId] = RentedItem(_tokenId, msg.sender, _expires);
+        rentedTokenIds.push(_tokenId);
+        transferFrom(item.owner, msg.sender, _tokenId);
+    }
 
     function createMarketSale(uint256 tokenId) public payable {
         address currOwner = idToMarketItem[tokenId].owner;
@@ -201,75 +295,69 @@ contract RentableNFTMarketplace is
         _transfer(currOwner, msg.sender, tokenId);
     }
 
-    // function rentOutToken(uint256 _tokenId, uint64 _expires) public payable {
-    //     require(idToMarketItem[_tokenId].forRent, "Token is not available for rent");
-    //     require(userOf(_tokenId) == address(0), "Token is already rented");
-    //     require(msg.value >= idToMarketItem[_tokenId].rentPrice, "Insufficient funds to rent the token");
-
-    //     address currOwner = idToMarketItem[_tokenId].owner;
-
-    //     idToMarketItem[_tokenId].rented = true;
-
-    //     _itemsRented.increment();
-    //     idToRentedItem[_tokenId] = RentedItem(_tokenId, msg.sender, _expires);
-    //     rentedTokenIds.push(_tokenId);
-    //     _setUser(_tokenId, msg.sender, _expires);
-    //     payable(currOwner).transfer(msg.value);
-    // }
-
-    function rentOutToken(uint256 _tokenId, uint64 _expires) public payable {
-        MarketItem storage item = idToMarketItem[_tokenId];
-        
-        require(item.forRent, "Token is not available for rent");
-        require(userOf(_tokenId) == address(0), "Token is already rented");
-        require(item.isWETH ? msg.value == 0 : msg.value >= item.rentPrice, "Incorrect payment method or amount");
-        
-        if(item.isWETH) {
-            require(IWETH(WETH_ADDRESS).transferFrom(msg.sender, item.owner, item.rentPrice), "Failed to transfer WETH for rent");
-        } else {
-            require(msg.value >= item.rentPrice, "Insufficient funds to rent the token in MATIC");
-            payable(item.owner).transfer(msg.value);
-        }
-
-        item.rented = true;
-        _itemsRented.increment();
-        idToRentedItem[_tokenId] = RentedItem(_tokenId, msg.sender, _expires);
-        rentedTokenIds.push(_tokenId);
-        _setUser(_tokenId, msg.sender, _expires);
-    }
-
-
-    // Chainlink Automation: Check if any rented NFT's rental period has expired
     function checkUpkeep(bytes calldata /*checkData*/)
         external
         override
         view
         returns (bool upkeepNeeded, bytes memory performData)
     {
+        // Check native rented tokens
         for (uint i = 0; i < rentedTokenIds.length; i++) {
             uint256 tokenId = rentedTokenIds[i];
             RentedItem storage item = idToRentedItem[tokenId];
             if (block.timestamp >= item.expires) {
-                return (true, abi.encode(tokenId));
+                return (true, abi.encode(tokenId, true)); // true indicates a native token
+            }
+        }
+        bytes32[] memory keys = getImportedRentedKeys(); // You need to implement this method
+        for (uint i = 0; i < keys.length; i++) {
+            ImportedItem storage item = idToImportedItem[keys[i]];
+            if (block.timestamp >= item.expiry) {
+                return (true, abi.encode(keys[i], false)); // false indicates an imported token
             }
         }
         return (false, "");
     }
 
-    // Chainlink Automation: Perform the return of the NFT
     function performUpkeep(bytes calldata performData) external override {
-        uint256 tokenId = abi.decode(performData, (uint256));
-        RentedItem storage item = idToRentedItem[tokenId];
-        if (block.timestamp >= item.expires) {
-            _returnToken(tokenId);
+        (bytes32 encodedId, bool isNative) = abi.decode(performData, (bytes32, bool));
+        
+        if (isNative) {
+            uint256 tokenId = uint256(encodedId);
+            RentedItem storage item = idToRentedItem[tokenId];
+            if (block.timestamp >= item.expires) {
+                _returnToken(tokenId);
+            }
+        } else {
+            (address collection, uint256 tokenId) = decodeImportedRentedKey(encodedId); // Implement this
+            ImportedItem storage item = idToImportedItem[encodedId];
+            if (block.timestamp >= item.expiry) {
+                _returnImportedToken(tokenId, collection);
+            }
         }
+    }
+
+    function _returnImportedToken(uint256 _tokenId, address _collection) private {
+        bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
+        ImportedItem storage importedItem = idToImportedItem[rentalId];
+
+        require(importedItem.rented, "Token is not currently rented");
+        require(block.timestamp >= importedItem.expiry, "Rental period has not expired yet");
+
+        IERC721(_collection).transferFrom(importedItem.renter, importedItem.owner, _tokenId);
+
+        _itemsImported.decrement();
+        importedItem.rented = false;
+        importedItem.renter = address(0);
+        importedItem.expiry = 0;
     }
 
     function _returnToken(uint256 _tokenId) private {
         MarketItem storage marketItem = idToMarketItem[_tokenId];
+        RentedItem storage rentedItem = idToRentedItem[_tokenId];
         marketItem.rented = false;
-        _setUser(_tokenId, address(0), 0);
-
+        transferFrom(rentedItem.renter, marketItem.owner, _tokenId);
+        _itemsRented.decrement();
         for (uint i = 0; i < rentedTokenIds.length; i++) {
             if (rentedTokenIds[i] == _tokenId) {
                 rentedTokenIds[i] = rentedTokenIds[rentedTokenIds.length - 1];
@@ -302,7 +390,27 @@ contract RentableNFTMarketplace is
         return items;
     }
 
-    // Add a new function to return all items owned by the user
+    function fetchImportedMarketItems() public view returns (ImportedItem[] memory) {
+        uint totalItemCount = _itemsImported.current();
+        uint itemCount = 0;
+        uint currentIndex = 0;
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToImportedItem[i].rented == false) {
+                itemCount += 1;
+            }
+        }
+
+        ImportedItem[] memory items = new ImportedItem[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToImportedItem[i].rented == false) {
+                ImportedItem storage currentItem = idToImportedItem[i];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+        return items;
+    }
+
     function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint totalItemCount = _tokenIds.current();
         uint itemCount = 0;
@@ -331,7 +439,7 @@ contract RentableNFTMarketplace is
         uint[] memory rentedItemIds = new uint[](totalItemCount);
 
         for (uint i = 0; i < totalItemCount; i++) {
-            if (userOf(i + 1) == msg.sender && idToMarketItem[i + 1].rented) {
+            if ((ownerOf(i + 1) == msg.sender) && idToMarketItem[i + 1].rented) {
                 rentedItemIds[itemCount] = i + 1;
                 itemCount += 1;
             }
@@ -360,15 +468,27 @@ contract RentableNFTMarketplace is
         return items;
     }
 
-    // function updateRentPrice(uint256 _tokenId, uint256 rent_price) public {
-    //     require(idToMarketItem[_tokenId].owner == msg.sender, "Only item owner can perform this operation");
-    //     idToMarketItem[_tokenId].rentPrice = rent_price;
-    // }
+    //fetchMyRentedImportedNFTs
+    function fetchMyRentedImportedNFTs() public view returns (ImportedItem[] memory) {
+        uint totalItemCount = _itemsImported.current();
+        uint itemCount = 0;
+        uint currentIndex = 0;
 
-    // function updatePrice(uint256 _tokenId, uint256 price) public {
-    //     require(idToMarketItem[_tokenId].owner == msg.sender, "Only item owner can perform this operation");
-    //     idToMarketItem[_tokenId].price = price;
-    // }
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToImportedItem[i].rented && idToImportedItem[i].renter == msg.sender) {
+                itemCount += 1;
+            }
+        }
+        ImportedItem[] memory items = new ImportedItem[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToImportedItem[i].rented && idToImportedItem[i].renter == msg.sender) {
+                ImportedItem storage currentItem = idToImportedItem[i];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+        return items;
+    }
 
     function tokenURI(
         uint256 _tokenId
@@ -384,6 +504,6 @@ contract RentableNFTMarketplace is
     }
 
     function getUserOf(uint256 tokenId) public view returns (address) {
-        return userOf(tokenId);
+        return ownerOf(tokenId);
     }
 }

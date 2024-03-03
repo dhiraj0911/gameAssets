@@ -242,7 +242,7 @@ export const NFTProvider = ({ children }) => {
     const priceInWei = ethers.utils.parseUnits(forminputPrice, "ether");
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, "ether");
 
-    const listingPrice = ethers.utils.parseUnits("0.01", "ether");
+    const listingPrice = ethers.utils.parseUnits("0.00001", "ether");
     const transaction = await contract.createToken(
       url,
       isWETH,
@@ -274,7 +274,7 @@ export const NFTProvider = ({ children }) => {
     const priceInWei = ethers.utils.parseUnits(forminputPrice, "ether");
     const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, "ether");
 
-    const listingPrice = ethers.utils.parseUnits("0.01", "ether");
+    const listingPrice = ethers.utils.parseUnits("0.00001", "ether");
     const transaction = await contract.resellToken(
       tokenId,
       isWETH,
