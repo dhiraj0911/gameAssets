@@ -509,7 +509,7 @@ contract RentableNFTMarketplace is
         payable(msg.sender).transfer(balance);
     }
 
-    function getUserOf(uint256 tokenId) public view returns (address) {
-        return ownerOf(tokenId);
+    function getUserOf(uint256 tokenId, address _collection) public view returns (address) {
+        return IERC721(_collection).ownerOf(tokenId);
     }
 }

@@ -126,94 +126,6 @@ export const NFTProvider = ({ children }) => {
     window.location.href = "/";
   };
 
-  // const checkIfWalletIsConnected = async () => {
-  //   if (!window.ethereum) return alert("Please install Metamask wallet");
-  //   if(window.localStorage.getItem("vendor") === null) return;
-  //   const accounts = await window.ethereum.request({ method: "eth_accounts" });
-  //   if (accounts.length) {
-  //     setCurrentAccount(accounts[0]);
-  //     // try {
-  //     //   let vendorId = window.localStorage.getItem("vendor");
-  //     //   await axios.post(`${API_BASE_URL}/api/address/`, {
-  //     //     vendorId,
-  //     //     address: accounts[0]
-  //     //   })
-  //     // }
-  //     // catch (error) {
-  //     //   console.error("Not signed In:", error);
-  //     // }
-  //   }
-  //   if (process.env.NEXT_PUBLIC_TESTNET === "true") {
-  //     await switchToPolygonMumbaiTestnet();
-  //   } else {
-  //     console.log("No accounts found");
-  //   }
-  // };
-
-  // const connectWallet = async () => {
-  //   if (!window.ethereum) return alert("Please install Metamask wallet");
-  //   if(window.localStorage.getItem("vendor") === null) return;
-  //   const accounts = await window.ethereum.request({
-  //     method: "eth_requestAccounts",
-  //   });
-  //   setCurrentAccount(accounts[0]);
-  //   try {
-  //     let vendorId = window.localStorage.getItem("vendor");
-  //     await axios.post(`${API_BASE_URL}/api/address/`, {
-  //       vendorId,
-  //       address: accounts[0]
-  //     })
-  //   }
-  //   catch (error) {
-  //     console.error("Not signed In:", error);
-  //   }
-  //   if (process.env.NEXT_PUBLIC_TESTNET === "true") {
-  //     await switchToPolygonMumbaiTestnet();
-  //   }
-  //   window.location.reload();
-  // };
-
-  // const switchToPolygonMumbaiTestnet = async () => {
-  //   const chainId = '0x13881'; // Polygon Mumbai Testnet
-  //   const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-
-  //   if (currentChainId !== chainId) {
-  //     try {
-  //       await window.ethereum.request({
-  //         method: 'wallet_switchEthereumChain',
-  //         params: [{ chainId: chainId }]
-  //       });
-  //     } catch (err) {
-  //       if (err.code === 4902) {
-  //         try {
-  //           await window.ethereum.request({
-  //             method: 'wallet_addEthereumChain',
-  //             params: [
-  //               {
-  //                 chainId: chainId,
-  //                 chainName: 'Matic(Polygon) Mumbai Testnet',
-  //                 nativeCurrency: {
-  //                   name: 'MATIC',
-  //                   symbol: 'MATIC',
-  //                   decimals: 18
-  //                 },
-  //                 rpcUrls: ['https://rpc-mumbai.maticvigil.com/'],
-  //                 blockExplorerUrls: ['https://mumbai.polygonscan.com/']
-  //               }
-  //             ]
-  //           });
-  //         } catch (addError) {
-  //           console.error('Error adding the Polygon Mumbai testnet:', addError);
-  //         }
-  //       } else {
-  //         console.error('Error switching to the Polygon Mumbai testnet:', err);
-  //       }
-  //     }
-  //   } else {
-  //     console.log('Already connected to the Polygon Mumbai testnet.');
-  //   }
-  // };
-
   const userOf = async (id) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -289,26 +201,6 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
   };
 
-  // const buyNft = async (nft) => {
-  //   const web3Modal = new Web3Modal();
-  //   const connection = await web3Modal.connect();
-  //   const provider = new ethers.providers.Web3Provider(connection);
-  //   const signer = provider.getSigner();
-  //   const contract = new ethers.Contract(
-  //     MarketAddress,
-  //     MarketAddressABI,
-  //     signer
-  //   );
-
-  //   const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-
-  //   const transaction = await contract.createMarketSale(nft.tokenId, {
-  //     value: price,
-  //   });
-  //   setIsLoadingNFT(true);
-  //   await transaction.wait();
-  //   setIsLoadingNFT(false);
-  // };
 
   const buyNft = async (nft) => {
     const web3Modal = new Web3Modal();
@@ -342,36 +234,6 @@ export const NFTProvider = ({ children }) => {
     await transaction.wait();
     setIsLoadingNFT(false);
   };
-
-  // const rentNFT = async (nft, rentalPeriodInDays) => {
-  //   const web3Modal = new Web3Modal();
-  //   const connection = await web3Modal.connect();
-  //   const provider = new ethers.providers.Web3Provider(connection);
-  //   const signer = provider.getSigner();
-  //   const contract = new ethers.Contract(
-  //     MarketAddress,
-  //     MarketAddressABI,
-  //     signer
-  //   );
-
-  //   const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
-  //   const rentPrice = ethers.utils.parseUnits(
-  //     totalRentPrice.toString(),
-  //     "ether"
-  //   );
-  //   // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
-  //   //for 2 minute
-  //   const expiry = Math.floor(Date.now() / 1000) + 120;
-
-  //   const transaction = await contract.rentOutToken(nft.tokenId, expiry, {
-  //     value: rentPrice,
-  //   });
-
-  //   await transaction.wait();
-  //   console.log(
-  //     `NFT with tokenId ${nft.tokenId} rented successfully! to ${signer.address}`
-  //   );
-  // };
 
   const rentNFT = async (nft, rentalPeriodInDays) => {
     const web3Modal = new Web3Modal();
