@@ -6,9 +6,10 @@ import {
   useConnectionStatus,
   useDisconnect,
   useAddress,
-} from "@thirdweb-dev/react"; 
+} from "@thirdweb-dev/react";
 import { MarketAddress, MarketAddressABI, WETHAddress, WETHAddressABI } from "./constants";
 import toast from "react-hot-toast";
+import { contextSourcesMap } from "tailwindcss/lib/lib/sharedState";
 
 export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) =>
@@ -55,7 +56,7 @@ export const NFTProvider = ({ children }) => {
         email,
         password,
       });
-  
+
       if (response.status === 200) {
         const token = response.data.token;
         if (token) {
@@ -74,7 +75,7 @@ export const NFTProvider = ({ children }) => {
       throw error; // This will reject the promise returned by signIn
     }
   };
-  
+
   const signUp = async (email, password) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/vendor/signup`, {
@@ -201,11 +202,14 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
   };
 
-  const importNFT = async (
-    collection,
+  const reSaleImported = async (
     tokenId,
+    collection,
     isWETH,
-    rentPrice,
+    forminputPrice,
+    forminputRentPrice,
+    forRent,
+    forSale
   ) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -213,14 +217,52 @@ export const NFTProvider = ({ children }) => {
     const signer = provider.getSigner();
     const contract = fetchContract(signer);
 
+    const priceInWei = ethers.utils.parseUnits(forminputPrice, "ether");
+    const rentPriceInWei = ethers.utils.parseUnits(forminputRentPrice, "ether");
+
+    const listingPrice = ethers.utils.parseUnits("0.00001", "ether");
+    const transaction = await contract.resellImportedNFT(
+      tokenId,
+      collection,
+      isWETH,
+      priceInWei,
+      rentPriceInWei,
+      forRent,
+      forSale,
+      { value: listingPrice.toString() }
+    );
+    setIsLoadingNFT(true);
+    await transaction.wait();
+    setIsLoadingNFT(false);
+  };
+
+  const importNFT = async (
+    collection,
+    tokenId,
+    isWETH,
+    price,
+    rentPrice,
+    forSale,
+    forRent
+  ) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = fetchContract(signer);
+    console.log(collection, tokenId, currentAddress)
+    const priceInWei = ethers.utils.parseUnits(price, "ether");
     const rentPriceInWei = ethers.utils.parseUnits(rentPrice, "ether");
     const listingPrice = ethers.utils.parseUnits("0.00001", "ether");
 
-    const transaction = await contract.importToken(
+    const transaction = await contract.importNFT(
       collection,
       tokenId,
       isWETH,
       rentPriceInWei,
+      priceInWei,
+      forSale,
+      forRent,
       { value: listingPrice.toString() }
     );
     setIsLoadingNFT(true);
@@ -297,6 +339,39 @@ export const NFTProvider = ({ children }) => {
     } else {
       transaction = await contract.rentImportedNFT(nft.tokenId, nft.collection, expiry, {
         value: rentPrice,
+      });
+    }
+
+    setIsLoadingNFT(true);
+    await transaction.wait();
+    setIsLoadingNFT(false);
+  }
+
+  const buyImportedNFT = async () => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      MarketAddress,
+      MarketAddressABI,
+      signer
+    );
+    let transaction;
+    const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
+    if (nft.isWETH === 'true' || nft.isWETH === true) {
+      const wethContract = new ethers.Contract(
+        WETHAddress,
+        WETHAddressABI,
+        signer
+      );
+
+      const approvalTx = await wethContract.approve(MarketAddress, price);
+      await approvalTx.wait();
+      transaction = await contract.purchaseImportedNFT(nft.tokenId, nft.collection);
+    } else {
+      transaction = await contract.purchaseImportedNFT(nft.tokenId, nft.collection, {
+        value: price,
       });
     }
 
@@ -427,23 +502,38 @@ export const NFTProvider = ({ children }) => {
           tokenId,
           collection,
           owner,
+          isWETH,
+          price: temp,
           rentalPrice,
-          isWETH
+          forSale,
+          forRent,
         }) => {
+          console.log(collection)
+          console.log(tokenId)
+          console.log(owner)
           const tokenURI = await contract.getTokenURLFromImportedNFT(collection, tokenId);
+          console.log("hit 2")
+
           const {
             data: { name, description },
           } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+          const price = ethers.utils.formatUnits(
+            temp.toString(),
+            "ether"
+          );
           const rentPrice = ethers.utils.formatUnits(
             rentalPrice.toString(),
             "ether"
           );
           return {
             tokenId: tokenId.toNumber(),
+            collection,
             owner,
             isWETH,
+            price,
             rentPrice,
-            collection,
+            forSale,
+            forRent,
             name,
             description,
             tokenURI,
@@ -455,7 +545,7 @@ export const NFTProvider = ({ children }) => {
     return items;
   }
 
-  const fetchMyRentedImportedNFTs = async () => {
+  const fetchMyRentedImportedNFT = async () => {
     setIsLoadingNFT(false);
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -470,10 +560,14 @@ export const NFTProvider = ({ children }) => {
           tokenId,
           collection,
           owner,
-          rentalPrice,
           isWETH,
+          price,
+          rentalPrice,
+          forSale,
+          forRent,
           expiry,
           renter,
+          sold,
           rented
         }) => {
           const tokenURI = await contract.getTokenURLFromImportedNFT(collection, tokenId);
@@ -486,15 +580,16 @@ export const NFTProvider = ({ children }) => {
           );
           return {
             tokenId: tokenId.toNumber(),
-            owner,
-            rentPrice,
             collection,
-            name,
-            description,
-            tokenURI,
+            owner,
             isWETH,
+            price,
+            rentalPrice,
+            forSale,
+            forRent,
             expiry,
             renter,
+            sold,
             rented
           };
         }
@@ -503,64 +598,65 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
     return items;
   }
-  const fetchMyNFTs = async () => {
-    setIsLoadingNFT(false);
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-    const contract = fetchContract(signer);
 
-    const data = await contract.fetchMyNFTs();
-    const items = await Promise.all(
-      data.map(
-        async ({
-          tokenId,
-          owner,
-          isWETH,
-          price: unformmattedPrice,
-          rentPrice: unformmattedRentPrice,
-          forRent,
-          forSale,
-          sold,
-          rented,
-        }) => {
-          console.log(tokenId);
-          const tokenURI = await contract.tokenURI(tokenId);
+  // const fetchMyNFTs = async () => {
+  //   setIsLoadingNFT(false);
+  //   const web3Modal = new Web3Modal();
+  //   const connection = await web3Modal.connect();
+  //   const provider = new ethers.providers.Web3Provider(connection);
+  //   const signer = provider.getSigner();
+  //   const contract = fetchContract(signer);
 
-          const {
-            data: { name, id, description },
-          } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
-          const price = ethers.utils.formatUnits(
-            unformmattedPrice.toString(),
-            "ether"
-          );
-          const rentPrice = ethers.utils.formatUnits(
-            unformmattedRentPrice.toString(),
-            "ether"
-          );
+  //   const data = await contract.fetchMyNFTs();
+  //   const items = await Promise.all(
+  //     data.map(
+  //       async ({
+  //         tokenId,
+  //         owner,
+  //         isWETH,
+  //         price: unformmattedPrice,
+  //         rentPrice: unformmattedRentPrice,
+  //         forRent,
+  //         forSale,
+  //         sold,
+  //         rented,
+  //       }) => {
+  //         console.log(tokenId);
+  //         const tokenURI = await contract.tokenURI(tokenId);
 
-          return {
-            tokenId: tokenId.toNumber(),
-            owner,
-            isWETH,
-            price,
-            rentPrice,
-            forRent,
-            forSale,
-            sold,
-            rented,
-            name,
-            id,
-            description,
-            tokenURI,
-          };
-        }
-      )
-    );
+  //         const {
+  //           data: { name, id, description },
+  //         } = await axios.get(`https://ipfs.io/ipfs/${tokenURI}`);
+  //         const price = ethers.utils.formatUnits(
+  //           unformmattedPrice.toString(),
+  //           "ether"
+  //         );
+  //         const rentPrice = ethers.utils.formatUnits(
+  //           unformmattedRentPrice.toString(),
+  //           "ether"
+  //         );
 
-    return items;
-  };
+  //         return {
+  //           tokenId: tokenId.toNumber(),
+  //           owner,
+  //           isWETH,
+  //           price,
+  //           rentPrice,
+  //           forRent,
+  //           forSale,
+  //           sold,
+  //           rented,
+  //           name,
+  //           id,
+  //           description,
+  //           tokenURI,
+  //         };
+  //       }
+  //     )
+  //   );
+  // 
+  //   return items;
+  // };
 
   //fetch nft from my digital wallet using https://testnets-api.opensea.io/api/v2/chain/mumbai/account/0x158f65db710824CE337c91efC379FEBc985Cf59E/nfts
   const fetchMyAllNFTs = async () => {
@@ -568,14 +664,16 @@ export const NFTProvider = ({ children }) => {
       const response = await axios.get(
         `https://testnets-api.opensea.io/api/v2/chain/mumbai/account/${currentAddress}/nfts`
       );
-      console.log(response.data.nfts);
-  
       const items = await Promise.all(
         response.data.nfts.map(async (nft) => {
-  
           const tokenId = parseInt(nft.identifier);
-          const owner = currentAddress; // This might be different based on your implementation
+          const collection = nft.collection;
+          const contract = nft.contract;
+          const image = nft.image;
           const tokenURI = nft.metadata_url;
+          const name = nft.name;
+          const description = nft.description;
+          const owner = currentAddress;
           const isWETH = false;
           const price = "0";
           const rentPrice = "0";
@@ -586,6 +684,10 @@ export const NFTProvider = ({ children }) => {
 
           return {
             tokenId,
+            collection,
+            contract,
+            image,
+            name,
             owner,
             isWETH,
             price,
@@ -594,9 +696,7 @@ export const NFTProvider = ({ children }) => {
             forSale,
             sold,
             rented,
-            name: nft.name,
-            id: tokenId, // Assuming the id is the same as tokenId
-            description: nft.description,
+            description,
             tokenURI,
           };
         })
@@ -607,8 +707,6 @@ export const NFTProvider = ({ children }) => {
       console.error("Error during fetching NFTs:", error);
     }
   };
-  
-
 
   const fetchMyRentedNFT = async () => {
     setIsLoadingNFT(false);
@@ -676,14 +774,14 @@ export const NFTProvider = ({ children }) => {
   };
 
   useEffect(async () => {
-      // checkIfWalletIsConnected();
-      if(!window.ethereum) {
-        toast.error("Please Install Ethereum wallet first!", {
-          position: "top-right",
-          style: { marginTop: "70px" },
-        });
-        return;
-      }
+    // checkIfWalletIsConnected();
+    if (!window.ethereum) {
+      toast.error("Please Install Ethereum wallet first!", {
+        position: "top-right",
+        style: { marginTop: "70px" },
+      });
+      return;
+    }
   }, []);
 
   return (
@@ -694,10 +792,12 @@ export const NFTProvider = ({ children }) => {
         buyNft,
         fetchImportedNFTs,
         importNFT,
+        buyImportedNFT,
         rentImportedNFT,
         createSale,
         rentNFT,
-        fetchMyNFTs,
+        fetchMyRentedImportedNFT,
+        // fetchMyNFTs,
         fetchMyAllNFTs,
         fetchMyRentedNFT,
         userOf,
@@ -710,7 +810,7 @@ export const NFTProvider = ({ children }) => {
         verify,
         isSingedUp,
         wrongOTP,
-        avatar, 
+        avatar,
         setAvatar
       }}
     >
