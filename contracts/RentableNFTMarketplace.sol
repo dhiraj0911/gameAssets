@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
@@ -31,6 +31,8 @@ contract RentableNFTMarketplace is
     mapping(bytes32 => ImportedItem) public idToImportedItem;
 
     uint256[] public rentedTokenIds;
+    bytes32[] public importedTokenIds;
+
     IERC20 weth;
 
     struct MarketItem {
@@ -56,12 +58,13 @@ contract RentableNFTMarketplace is
         address collection;
         address owner;
         bool isWETH;
-        // uint256 price;
+        uint256 price;
         uint256 rentalPrice;
-        // bool forSale;
-        // bool forRent;
+        bool forSale;
+        bool forRent;
         uint256 expiry;
         address renter;
+        bool sold;
         bool rented;
     }
 
@@ -113,27 +116,6 @@ contract RentableNFTMarketplace is
     function decodeImportedRentedKey(bytes32 rentalId) public view returns (address, uint256) {
         ImportedItem storage info = idToImportedItem[rentalId];
         return (info.collection, info.tokenId);
-    }
-
-    function getImportedRentedKeys() public view returns (bytes32[] memory) {
-        uint itemCount = 0;
-        for (uint i = 0; i < _itemsImported.current(); i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented) {
-                itemCount++;
-            }
-        }
-        bytes32[] memory rentedKeys = new bytes32[](itemCount);
-        uint currentIndex = 0;
-        for (uint i = 0; i < _itemsImported.current(); i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented) {
-                bytes32 rentalId = keccak256(abi.encodePacked(idToImportedItem[key].collection, idToImportedItem[key].tokenId));
-                rentedKeys[currentIndex] = rentalId;
-                currentIndex++;
-            }
-        }
-        return rentedKeys;
     }
 
     function createToken(
@@ -212,31 +194,54 @@ contract RentableNFTMarketplace is
         address _collection, 
         uint256 _tokenId, 
         bool _isWETH, 
-        uint256 _rentalPrice
+        uint256 _rentalPrice,
+        uint256 _price,
+        bool _forSale,
+        bool _forRent
     ) public payable{
-        require(_rentalPrice > 0, "Rental price must be greater than 0");
+        require(!_forSale || _price > 0, "price required");
+        require(!_forRent || _rentalPrice > 0, "rent price required");
         require(IERC721(_collection).ownerOf(_tokenId) == msg.sender, "You are not the owner of this NFT");
         require(msg.value == listingPrice, "Price must be equal to listing price");
 
-        bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
+        bytes32 newId = keccak256(abi.encodePacked(_collection, _tokenId));
         _itemsImported.increment();
-
-        idToImportedItem[rentalId] = ImportedItem({
+        importedTokenIds.push(newId);
+        idToImportedItem[newId] = ImportedItem({
             tokenId: _tokenId,
             collection: _collection,
             owner: msg.sender,
             isWETH: _isWETH,
+            price: _price,
             rentalPrice: _rentalPrice,
+            forSale: _forSale,
+            forRent: _forRent,
+            sold: false,
             rented: false,
             expiry: 0,
             renter: address(0)
         });
     }
 
-    function rentImportedNFT(uint256 _tokenId, address _collection, uint64 _expires) public payable {
-        bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
-        ImportedItem storage item = idToImportedItem[rentalId];
+    function resellImportedNFT(uint256 _tokenId, address _collection, bool _isWETH, uint256 _price, uint256 _rentalPrice, bool _forSale, bool _forRent) public payable {
+        bytes32 tokenId = keccak256(abi.encodePacked(_collection, _tokenId));
+        ImportedItem storage item = idToImportedItem[tokenId];
+        require(item.owner == msg.sender, "Only the owner can resell the token");
+        require(msg.value == listingPrice, "Price must be equal to listing price");
+        importedTokenIds.push(tokenId);
+        item.isWETH = _isWETH;
+        item.price = _price;
+        item.rentalPrice = _rentalPrice;
+        item.forSale = _forSale;
+        item.forRent = _forRent;
+        item.sold = false;
+        item.rented = false;
+    }
 
+    function rentImportedNFT(uint256 _tokenId, address _collection, uint64 _expires) public payable {
+        bytes32 tokenId = keccak256(abi.encodePacked(_collection, _tokenId));
+        ImportedItem storage item = idToImportedItem[tokenId];
+        
         require(_expires > block.timestamp, "Expiration must be in the future");
         require(item.rented == false, "Item already rented");
         require(IERC721(_collection).ownerOf(_tokenId) == item.owner, "Item is not owned by the importer");
@@ -251,6 +256,33 @@ contract RentableNFTMarketplace is
         item.renter = msg.sender;
         item.rented = true;
         item.expiry = _expires;
+        IERC721(_collection).transferFrom(item.owner, msg.sender, _tokenId);
+    }
+
+    function purchaseImportedNFT(uint256 _tokenId, address _collection) public payable {
+        bytes32 tokenId = keccak256(abi.encodePacked(_collection, _tokenId));
+        ImportedItem storage item = idToImportedItem[tokenId];
+
+        require(IERC721(_collection).ownerOf(_tokenId) == item.owner, "Item is not owned by the imported");
+        require(item.forSale == true, "Not Listed for purchase");
+
+        if (item.isWETH) {
+            require(IWETH(WETH_ADDRESS).transferFrom(msg.sender, item.owner, item.price), "Failed to transfer WETH for rent");
+        } else {
+            require(msg.value == item.price, "Insufficient funds to rent the token");
+            payable(item.owner).transfer(msg.value);
+        }
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (importedTokenIds[i] == tokenId) {
+                importedTokenIds[i] = importedTokenIds[importedTokenIds.length - 1];
+                importedTokenIds.pop();
+            }
+        }
+        item.owner = msg.sender;
+        item.sold = true;
+        item.price = 0;
+        item.forSale = false;
+        item.forRent = false;
         IERC721(_collection).transferFrom(item.owner, msg.sender, _tokenId);
     }
 
@@ -312,11 +344,11 @@ contract RentableNFTMarketplace is
                 return (true, abi.encode(tokenId, true)); // true indicates a native token
             }
         }
-        bytes32[] memory keys = getImportedRentedKeys(); // You need to implement this method
-        for (uint i = 0; i < keys.length; i++) {
-            ImportedItem storage item = idToImportedItem[keys[i]];
+        // You need to implement this method
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            ImportedItem storage item = idToImportedItem[importedTokenIds[i]];
             if (block.timestamp >= item.expiry) {
-                return (true, abi.encode(keys[i], false)); // false indicates an imported token
+                return (true, abi.encode(importedTokenIds[i], false)); // false indicates an imported token
             }
         }
         return (false, "");
@@ -332,7 +364,7 @@ contract RentableNFTMarketplace is
                 _returnToken(tokenId);
             }
         } else {
-            (address collection, uint256 tokenId) = decodeImportedRentedKey(encodedId); // Implement this
+            (address collection, uint256 tokenId) = decodeImportedRentedKey(encodedId);
             ImportedItem storage item = idToImportedItem[encodedId];
             if (block.timestamp >= item.expiry) {
                 _returnImportedToken(tokenId, collection);
@@ -405,10 +437,9 @@ contract RentableNFTMarketplace is
         }
 
         ImportedItem[] memory items = new ImportedItem[](itemCount);
-        for (uint i = 0; i < totalItemCount; i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented == false) {
-                ImportedItem storage currentItem = idToImportedItem[key];
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].rented == false) {
+                ImportedItem storage currentItem = idToImportedItem[importedTokenIds[i]];
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }
@@ -474,21 +505,38 @@ contract RentableNFTMarketplace is
     }
 
     function fetchMyRentedImportedNFTs() public view returns (ImportedItem[] memory) {
-        uint totalItemCount = _itemsImported.current();
         uint itemCount = 0;
         uint currentIndex = 0;
 
-        for (uint i = 0; i < totalItemCount; i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented && idToImportedItem[key].renter == msg.sender) {
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].rented && idToImportedItem[importedTokenIds[i]].renter == msg.sender) {
                 itemCount += 1;
             }
         }
         ImportedItem[] memory items = new ImportedItem[](itemCount);
-        for (uint i = 0; i < totalItemCount; i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented && idToImportedItem[key].renter == msg.sender) {
-                ImportedItem storage currentItem = idToImportedItem[key];
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].rented && idToImportedItem[importedTokenIds[i]].renter == msg.sender) {
+                ImportedItem storage currentItem = idToImportedItem[importedTokenIds[i]];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+        return items;
+    }
+
+    function fetchMyOwnedImportedNFTs() public view returns (ImportedItem[] memory) {
+        uint itemCount = 0;
+        uint currentIndex = 0;
+
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].owner == msg.sender) {
+                itemCount += 1;
+            }
+        }
+        ImportedItem[] memory items = new ImportedItem[](itemCount);
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].owner == msg.sender) {
+                ImportedItem storage currentItem = idToImportedItem[importedTokenIds[i]];
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }
