@@ -19,7 +19,6 @@ contract RentableNFTMarketplace is
     Counters.Counter public _tokenIds;
     Counters.Counter public _itemsSold;
     Counters.Counter public _itemsRented;
-    Counters.Counter public _itemsImported;
     mapping(uint256 => string) public tokenURIs;
 
     uint256 listingPrice = 0.00001 ether;
@@ -205,7 +204,6 @@ contract RentableNFTMarketplace is
         require(msg.value == listingPrice, "Price must be equal to listing price");
 
         bytes32 newId = keccak256(abi.encodePacked(_collection, _tokenId));
-        _itemsImported.increment();
         importedTokenIds.push(newId);
         idToImportedItem[newId] = ImportedItem({
             tokenId: _tokenId,
@@ -252,7 +250,12 @@ contract RentableNFTMarketplace is
             require(msg.value >= item.rentalPrice, "Insufficient funds to rent the token");
             payable(item.owner).transfer(msg.value);
         }
-
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (importedTokenIds[i] == tokenId) {
+                importedTokenIds[i] = importedTokenIds[importedTokenIds.length - 1];
+                importedTokenIds.pop();
+            }
+        }
         item.renter = msg.sender;
         item.rented = true;
         item.expiry = _expires;
@@ -380,8 +383,7 @@ contract RentableNFTMarketplace is
         require(block.timestamp >= importedItem.expiry, "Rental period has not expired yet");
 
         IERC721(_collection).transferFrom(importedItem.renter, importedItem.owner, _tokenId);
-
-        _itemsImported.decrement();
+        importedTokenIds.push(rentalId);
         importedItem.rented = false;
         importedItem.renter = address(0);
         importedItem.expiry = 0;
@@ -426,12 +428,10 @@ contract RentableNFTMarketplace is
     }
 
     function fetchImportedMarketItems() public view returns (ImportedItem[] memory) {
-        uint totalItemCount = _itemsImported.current();
         uint itemCount = 0;
         uint currentIndex = 0;
-        for (uint i = 0; i < totalItemCount; i++) {
-            bytes32 key = bytes32(i);
-            if (idToImportedItem[key].rented == false) {
+        for (uint i = 0; i < importedTokenIds.length; i++) {
+            if (idToImportedItem[importedTokenIds[i]].rented == false) {
                 itemCount += 1;
             }
         }
