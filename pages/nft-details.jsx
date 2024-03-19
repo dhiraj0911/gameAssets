@@ -7,7 +7,6 @@ import {
 } from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
 import { Loader, Button, Modal } from "../components";
-
 import { shortenAddress } from "../utils/shortenAddress";
 
 const calculateRentalCost = (nft, rentalPeriodInDays) => {
@@ -119,8 +118,12 @@ const NFTDetails = () => {
 
   const [nft, setNft] = useState({
     description: "",
-    id: "",
+    tokenId: "",
     name: "",
+    contract: "",
+    collection: "",
+    image: "",
+    owner: "",
     price: "",
     rentPrice: "",
     forSale: "",
@@ -129,7 +132,6 @@ const NFTDetails = () => {
     isWETH: "",
     rented: "",
     sold: "",
-    tokenId: "",
     tokenURI: "",
     avatar:""
   });
@@ -188,6 +190,8 @@ const NFTDetails = () => {
   const buyCheckout = async () => {
     try {
       await buyNft(nft);
+      setPaymentModal(false);
+      setBuySuccessModal(true);
       await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
         sold: true,
         isForSale: false,
@@ -204,8 +208,6 @@ const NFTDetails = () => {
         vendorId,
         transactionType: "Buy",
       });
-      setPaymentModal(false);
-      setBuySuccessModal(true);
     } catch (error) {
       console.error("Error buying NFT:", error);
     }
@@ -214,6 +216,8 @@ const NFTDetails = () => {
   const rentCheckout = async (rentalPeriodInDays) => {
     try {
       await rentNFT(nft, rentalPeriodInDays);
+      setRentPaymentModal(false);
+      setRentSuccessModal(true);
       await axios.put(`${API_BASE_URL}/api/assets/${nft.id}`, {
         rented: true,
         rentStart: Math.floor(Date.now() / 1000),
@@ -228,8 +232,6 @@ const NFTDetails = () => {
         vendorId,
         transactionType: "Rent",
       });
-      setRentPaymentModal(false);
-      setRentSuccessModal(true);
     } catch (error) {
       console.error("Error renting NFT:", error);
     }
@@ -252,11 +254,11 @@ const NFTDetails = () => {
               <div className="bg-pink-500 w-10 h-10 rounded-full rounded-tl-none mb-4 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-pink-900 transition-all"></div>
               <div className="uppercase font-bold text-xl">{nft.name}</div>
               <div className="text-gray-300 uppercase tracking-widest">
-                {nft.id}
+                Token Id: {nft.tokenId}
               </div>
               <div className="text-gray-400 mt-8">
-                <p className="font-bold">{nft.price}</p>
-                <p>Perfect everywhere</p>
+                <p className="font-bold">{shortenAddress(nft.contract)}</p>
+                <p>Collection: {nft.collection}</p>
               </div>
             </div>
             <div className="h-2 w-full bg-gradient-to-l via-pink-500 group-hover:blur-xl blur-2xl m-auto rounded transition-all absolute bottom-0"></div>

@@ -24,6 +24,11 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 80001,
     },
+    sepolia: {
+      url: "https://eth-sepolia.g.alchemy.com/v2/89ZEtVsAXCOPKfrGQ6YuROLUb8ASmsGp",
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
+    },
   },
   settings: { optimizer: { enabled: true, runs: 200 } },  
 };

@@ -6,17 +6,18 @@ import {
   useAddress,
 } from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
-import { Loader, BuyCard, RentCard, Banner, SearchBar } from "../components";
+import { Loader, BuyCard, ListCard, RentCard, Banner, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyAllNFTs, fetchMyRentedNFT, avatar } =
+  const { fetchMyRentedImportedNFT, fetchMyRentedNFT, fetchMyAllNFTs, avatar } =
     useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rentedNfts, setRentedNfts] = useState([]);
+  const [importedRented, setImportedRented] = useState([]);
   const [listedNfts, setListedNfts] = useState([]);
   const [activeTab, setActiveTab] = useState("ownedNfts"); // Added for tab selection
   const currentAccount =
@@ -32,13 +33,14 @@ const MyNFTs = () => {
       if (currentAccount) {
         const ownedNfts = await fetchMyAllNFTs();
         const rentedNFTs = await fetchMyRentedNFT();
+        const importedRentedNFTs = await fetchMyRentedImportedNFT();
 
         if (isMounted) {
           setNftsCopy(ownedNfts);
           setRentedNfts(rentedNFTs);
+          setImportedRented(importedRentedNFTs);
           setNfts(ownedNfts);
           setIsLoading(false);
-          console.log("test")
         }
       }
     };
@@ -57,7 +59,7 @@ const MyNFTs = () => {
       case "ownedNfts":
         return nfts;
       case "rentedNfts":
-        return rentedNfts;
+        return importedRented.concat(rentedNfts);
       default:
         return nfts;
     }
@@ -136,9 +138,9 @@ const MyNFTs = () => {
       <div className="mt-3 w-full flex flex-wrap">
         {displayedNfts().map((nft) =>
           activeTab === "ownedNfts" ? (
-            <BuyCard nft={nft} key={nft.id} />
+            <ListCard nft={nft} />
           ) : (
-            <RentCard nft={nft} key={nft.id} />
+            <RentCard nft={nft} key={nft.tokenId} />
           )
         )}
       </div>

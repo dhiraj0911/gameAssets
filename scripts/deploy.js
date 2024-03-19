@@ -7,14 +7,15 @@ async function main() {
 
   await weth.deployed();
 
-  console.log('WETH deployed to:', weth.address);
+  
 
   const RentableNFTMarketplace = await hre.ethers.getContractFactory('RentableNFTMarketplace');
   const rentableNFTMarketplace = await RentableNFTMarketplace.deploy(weth.address);
 
   await rentableNFTMarketplace.deployed();
 
-  console.log('RentableNFTMarketplace deployed to:', rentableNFTMarketplace.address);
+  console.log('NEXT_PUBLIC_CONTRACT_ADDRESS=',rentableNFTMarketplace.address);
+  console.log('NEXT_PUBLIC_WETH_ADDRESS=',weth.address);
 }
 
 main()
