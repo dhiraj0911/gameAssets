@@ -257,7 +257,7 @@ const NFTDetails = () => {
                 Token Id: {nft.tokenId}
               </div>
               <div className="text-gray-400 mt-8">
-                <p className="font-bold">{shortenAddress(nft.contract)}</p>
+                <p className="font-bold">{nft.contract}</p>
                 <p>Collection: {nft.collection}</p>
               </div>
             </div>

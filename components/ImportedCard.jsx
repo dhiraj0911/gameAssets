@@ -24,8 +24,8 @@ const ImportedCard = ({ nft }) => {
     await buyImportedNFT(nft, currentAccountAddress);
   };
 
-  const handleRent = async (timeInDay) => {
-    await rentImportedNFT(nft, timeInDay);
+  const handleRent = async () => {
+    await rentImportedNFT(nft, currentAccountAddress);
   };
 
   return (
@@ -48,7 +48,7 @@ const ImportedCard = ({ nft }) => {
             </p>
             <Link
               href={{
-                pathname: `https://sepolia.etherscan.io//nft/${nft.contract}/${nft.tokenId}`,
+                pathname: `https://sepolia.etherscan.io/nft/${nft.contract}/${nft.tokenId}`,
               }}
             >
               <a

@@ -325,7 +325,7 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
   };
 
-  const rentImportedNFT = async (nft, rentalPeriodInDays, currentAccountAddress) => {
+  const rentImportedNFT = async (nft, currentAccountAddress) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -336,7 +336,7 @@ export const NFTProvider = ({ children }) => {
       signer
     );
 
-    const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
+    const totalRentPrice = nft.rentPrice * 1;
     const rentPrice = ethers.utils.parseUnits(
       totalRentPrice.toString(),
       "ether"
@@ -432,12 +432,13 @@ export const NFTProvider = ({ children }) => {
       signer
     );
 
+    console.log("working 1")
     const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
     const rentPrice = ethers.utils.parseUnits(
       totalRentPrice.toString(),
       "ether"
     );
-
+    console.log("working 2")
     // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
     //for 2 minute
     const expiry = Math.floor(Date.now() / 1000) + 120;
@@ -455,6 +456,7 @@ export const NFTProvider = ({ children }) => {
       transaction = await contract.rentOutToken(nft.tokenId, expiry);
 
     } else {
+    console.log("working 3")
       transaction = await contract.rentOutToken(nft.tokenId, expiry, {
         value: rentPrice,
       });
@@ -576,6 +578,7 @@ export const NFTProvider = ({ children }) => {
             image_url
           };
         }
+        //break map
       )
     );
     setIsLoadingNFT(false);

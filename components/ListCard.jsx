@@ -39,7 +39,7 @@ const ListCard = ({ nft }) => {
             </p>
             <Link
               href={{
-                pathname: `https://sepolia.etherscan.io//nft/${nft.contract}/${nft.tokenId}`,
+                pathname: `https://sepolia.etherscan.io/nft/${nft.contract}/${nft.tokenId}`,
               }}
             >
               <a
