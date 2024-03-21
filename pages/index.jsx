@@ -88,6 +88,7 @@ const Home = () => {
   }, [myListings, searchQueryListed, sortOptionListed]);
 
   useEffect(() => {
+    console.log('hit')
     let isMounted = true;
   
     const fetchData = async () => {

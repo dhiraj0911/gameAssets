@@ -456,7 +456,7 @@ export const NFTProvider = ({ children }) => {
       transaction = await contract.rentOutToken(nft.tokenId, expiry);
 
     } else {
-    console.log("working 3")
+      console.log("working 3")
       transaction = await contract.rentOutToken(nft.tokenId, expiry, {
         value: rentPrice,
       });
@@ -526,8 +526,8 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
     return items;
   };
-
   const fetchImportedNFTs = async () => {
+
     console.log("Fetching imported assets...");
     setIsLoadingNFT(false);
     const RPC_URL =
@@ -552,9 +552,28 @@ export const NFTProvider = ({ children }) => {
           forSale,
           forRent,
         }) => {
+          let url = `https://eth-sepolia.g.alchemy.com/nft/v3/89ZEtVsAXCOPKfrGQ6YuROLUb8ASmsGp/getNFTMetadata?contractAddress=${collection}&tokenId=${tokenId.toNumber()}&refreshCache=false`;
+          let name;
+          let response;
+          let description;
+          let image_url;
+          try {
+              response = await axios.get(url);
+            if (response.data && response.data.name) {
+              name = response.data.name;
+              description = response.data.description;
+            } else {
+              console.log(`Unexpected response structure for token ID ${tokenId}:`, response.data);
+              name = "Unknown";
+              description = "No description available";
+            }
+          } catch (err) {
+            console.error(`Error fetching data for token ID ${tokenId} from URL ${url}:`, err.message);
+            name = "Error fetching name";
+            description = "Error fetching description";
+            image_url = "";
+          }
 
-          const response = await axios.get(`https://testnets-api.opensea.io/api/v2/chain/sepolia/contract/${collection}/nfts/${tokenId.toNumber()}`);
-          const { name, description, image_url } = response.data.nft;
           const price = ethers.utils.formatUnits(
             temp.toString(),
             "ether"
@@ -575,7 +594,7 @@ export const NFTProvider = ({ children }) => {
             forRent,
             name,
             description,
-            image_url
+            // image_url
           };
         }
         //break map
