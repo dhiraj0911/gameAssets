@@ -552,7 +552,7 @@ export const NFTProvider = ({ children }) => {
           forSale,
           forRent,
         }) => {
-          let url = `https://eth-sepolia.g.alchemy.com/nft/v3/89ZEtVsAXCOPKfrGQ6YuROLUb8ASmsGp/getNFTMetadata?contractAddress=${collection}&tokenId=${tokenId.toNumber()}&refreshCache=false`;
+          let url = `https://eth-sepolia.g.alchemy.com/nft/v3/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}/getNFTMetadata?contractAddress=${collection}&tokenId=${tokenId.toNumber()}&refreshCache=false`;
           let name;
           let response;
           let description;
