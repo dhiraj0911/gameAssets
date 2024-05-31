@@ -9,7 +9,6 @@ import {
 } from "@thirdweb-dev/react";
 import { MarketAddress, MarketAddressABI, WETHAddress, WETHAddressABI } from "./constants";
 import toast from "react-hot-toast";
-import { contextSourcesMap } from "tailwindcss/lib/lib/sharedState";
 
 export const NFTContext = React.createContext();
 const fetchContract = (signerORProvider) =>
@@ -552,7 +551,9 @@ export const NFTProvider = ({ children }) => {
           forSale,
           forRent,
         }) => {
-          let url = `https://eth-sepolia.g.alchemy.com/nft/v3/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}/getNFTMetadata?contractAddress=${collection}&tokenId=${tokenId.toNumber()}&refreshCache=false`;
+
+          // Network
+          let url = `https://${process.env.NEXT_PUBLIC_NETWORK}.g.alchemy.com/nft/v3/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}/getNFTMetadata?contractAddress=${collection}&tokenId=${tokenId.toNumber()}&refreshCache=false`;
           let name;
           let response;
           let description;
@@ -721,15 +722,16 @@ export const NFTProvider = ({ children }) => {
   const fetchMyAllNFTs = async () => {
     try {
       const response = await axios.get(
-        `https://testnets-api.opensea.io/api/v2/chain/sepolia/account/${currentAddress}/nfts`
+        `https://${process.env.NEXT_PUBLIC_NETWORK}.g.alchemy.com/nft/v3/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}/getNFTsForOwner?owner=${currentAddress}&withMetadata=true&pageSize=100`
       );
+      
       const items = await Promise.all(
-        response.data.nfts.map(async (nft) => {
-          const tokenId = parseInt(nft.identifier);
-          const collection = nft.collection;
-          const contract = nft.contract;
-          const image = nft.image;
-          const tokenURI = nft.metadata_url;
+        response.data.ownedNfts.map(async (nft) => {
+          const tokenId = parseInt(nft.tokenId);
+          const collection = nft.contract.name || nft.collection;
+          const contract = nft.contract.address;
+          const image = nft.image.cachedUrl || nft.image.thumbnailUrl || nft.image.pngUrl || nft.image.originalUrl;
+          const tokenURI = nft.tokenUri;
           const name = nft.name;
           const description = nft.description;
           const owner = currentAddress;
@@ -740,7 +742,7 @@ export const NFTProvider = ({ children }) => {
           const forSale = false;
           const sold = false;
           const rented = false;
-
+  
           return {
             tokenId,
             collection,
@@ -760,13 +762,13 @@ export const NFTProvider = ({ children }) => {
           };
         })
       );
-
+  
       return items;
     } catch (error) {
       console.error("Error during fetching NFTs:", error);
     }
   };
-
+  
   const fetchMyRentedNFT = async () => {
     setIsLoadingNFT(false);
 

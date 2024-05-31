@@ -37,9 +37,9 @@ const ListCard = ({ nft }) => {
             <p className="mt-6 text-sm text-gray-100">
               Collection: {nft.collection}
             </p>
-            <Link
+            {/* <Link
               href={{
-                pathname: `https://sepolia.etherscan.io/nft/${nft.contract}/${nft.tokenId}`,
+                pathname: `https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`,
               }}
             >
               <a
@@ -49,7 +49,15 @@ const ListCard = ({ nft }) => {
               >
                 View on Explorer
               </a>
-            </Link>
+            </Link> */}
+            <a
+              href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
+              aria-describedby="tier-starter"
+              className="items-center justify-center w-1/2 px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
+              target="_blank"
+            >
+              View on Explorer
+            </a>
           </div>
           {ownerAddress === currentAccountAddress ? (
             <Button

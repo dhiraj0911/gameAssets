@@ -165,7 +165,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
             //   classStyles="mx-2 h-8 mt-2 rounded-xl"
             //   handleClick={connectWallet}
             // />
-            <ConnectWallet/>
+            <ConnectWallet switchToActiveChain={true}/>
           )}
           <Menu as="div" className="relative">
             <div>

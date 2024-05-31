@@ -14,12 +14,13 @@ import { Toaster } from "react-hot-toast";
 import { Navbar, Footer } from "../components";
 import "../styles/globals.css";
 import { NFTProvider } from "../context/NFTContext";
+import { ArbitrumSepolia } from "@thirdweb-dev/chains";
 
 const projectId = `${process.env.NEXT_PUBLIC_WALLETCONNECT}`;
 
 const MyApp = ({ Component, pageProps }) => (
   <ThirdwebProvider
-    activeChain="mumbai"
+    activeChain={ArbitrumSepolia}
     clientId={projectId}
     supportedWallets={[
       metamaskWallet(),
@@ -27,6 +28,7 @@ const MyApp = ({ Component, pageProps }) => (
       walletConnect(),
       trustWallet(),
     ]}
+    autoConnect={false}
   >
     <NFTProvider>
       <ThemeProvider enableSystem attribute="class">
