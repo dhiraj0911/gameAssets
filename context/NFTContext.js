@@ -404,13 +404,13 @@ export const NFTProvider = ({ children }) => {
     } else {
       console.log("hit 4")
       try {
-        // transaction = await contract.purchaseImportedNFT(nft.tokenId, nft.contract, {
-        //   value: price,
-        // });
         transaction = await contract.purchaseImportedNFT(nft.tokenId, nft.contract, {
-          from: currentAccountAddress,
-          value: price
+          value: price,
         });
+        // transaction = await contract.purchaseImportedNFT(nft.tokenId, nft.contract, {
+        //   from: currentAccountAddress,
+        //   value: price
+        // });
         setIsLoadingNFT(true);
         await transaction.wait();
         setIsLoadingNFT(false);

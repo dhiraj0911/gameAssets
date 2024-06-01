@@ -28,7 +28,6 @@ const MyApp = ({ Component, pageProps }) => (
       walletConnect(),
       trustWallet(),
     ]}
-    autoConnect={false}
   >
     <NFTProvider>
       <ThemeProvider enableSystem attribute="class">

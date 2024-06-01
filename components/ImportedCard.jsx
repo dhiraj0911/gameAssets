@@ -55,7 +55,7 @@ const ImportedCard = ({ nft }) => {
               </p>
             )}
           </div>
-          {ownerAddress !== currentAccountAddress && (
+          {ownerAddress !== currentAccountAddress ? (
             <div className="flex flex-row justify-between mt-4">
               <div>
                 <Button
@@ -65,12 +65,13 @@ const ImportedCard = ({ nft }) => {
                 />
                 <Button
                   btnName="Rent"
-                  handleClick={handleRent}
+                  // handleClick={handleRent}
                   classStyles="ml-3 px-4 text-white bg-green-500 rounded-lg text-sm"
                 />
               </div>
 
-              <Link
+              {/* <Link
+                // href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
                 href={{
                   pathname: `https://sepolia.etherscan.io/nft/${nft.contract}/${nft.tokenId}`,
                 }}
@@ -82,8 +83,29 @@ const ImportedCard = ({ nft }) => {
                 >
                   View on Explorer
                 </a>
-              </Link>
+              </Link> */}
+              {/* Network */}
+              <a
+                href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
+                aria-describedby="tier-starter"
+                className="items-center justify-center px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
+                target="_blank"
+              >
+                View on Explorer
+              </a>
             </div>
+          ): (
+            <>
+            {/* Network */}
+              <a
+                href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
+                aria-describedby="tier-starter"
+                className="items-center justify-center w-1/2 px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
+                target="_blank"
+              >
+                View on Explorer
+              </a>
+            </>
           )}
         </div>
       </div>

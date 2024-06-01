@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import Link from "next/link";
 import { NFTContext } from "../context/NFTContext";
 import {
@@ -6,18 +6,30 @@ import {
   useDisconnect,
   useAddress,
 } from "@thirdweb-dev/react";
-import { Button, Modal, Loader } from "../components";
+import { Button, Loader } from "../components";
+import MintAssetModal from "../components/MintAssetModal";
+
 const ListCard = ({ nft }) => {
-  const { nftCurrency, importNFT } = useContext(NFTContext);
+  const { nftCurrency, importNFT, reSale } = useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
   const currentAccountAddress =
     useConnectionStatus() === "connected" ? useAddress().toLowerCase() : null;
   const contract = nft.contract.toLowerCase();
+  const platformContract = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();
 
-  const handleList = async () => {
-    await importNFT(contract, nft.tokenId, false, '0.001', '0.001', true, true);
-    console.log("working");
-  }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleImport = async () => {
+    handleOpenModal(); // Open the modal when the button is clicked
+  };
 
   return (
     <div
@@ -37,19 +49,6 @@ const ListCard = ({ nft }) => {
             <p className="mt-6 text-sm text-gray-100">
               Collection: {nft.collection}
             </p>
-            {/* <Link
-              href={{
-                pathname: `https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`,
-              }}
-            >
-              <a
-                aria-describedby="tier-starter"
-                className="items-center justify-center w-1/2 px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
-                target="_blank"
-              >
-                View on Explorer
-              </a>
-            </Link> */}
             <a
               href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
               aria-describedby="tier-starter"
@@ -59,20 +58,33 @@ const ListCard = ({ nft }) => {
               View on Explorer
             </a>
           </div>
-          {ownerAddress === currentAccountAddress ? (
+          {contract === platformContract ? (
+            <Link href={{ pathname: "/nft-details", query: nft }}>
+              <div className="flex px-6 pb-8 sm:px-8">
+                <a
+                  aria-describedby="tier-starter"
+                  className="ml-3 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-800"
+                >
+                  View More
+                </a>
+              </div>
+            </Link>
+          ) : (
             <Button
-              btnName="List"
+              btnName="Import NFT"
               type="submit"
-              handleClick={handleList}
+              handleClick={handleImport}
               classStyles="ml-3 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-800"
             />
-          ) : nft.sold ? (
-            <>This NFT is already sold.</>
-          ) : (
-            <></>
           )}
         </div>
       </div>
+      <MintAssetModal
+        contract={contract}
+        isModalOpen={isModalOpen}
+        handleCloseModal={handleCloseModal}
+        currentAsset={nft} // Pass the current NFT details to the modal
+      />
     </div>
   );
 };

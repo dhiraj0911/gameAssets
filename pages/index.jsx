@@ -330,7 +330,7 @@ const Home = () => {
                 <div className="mt-10 mb-10">
                   <div className="flex items-center">
                     <h1 className="font-poppins dark:text-white text-nft-black-1 text-2xl minlg:text-4xl font-semibold">
-                      NFT for rent exclusive
+                      Exclusive imported NFTs
                     </h1>
                     <div
                       className=""
