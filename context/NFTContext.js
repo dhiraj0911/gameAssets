@@ -324,7 +324,7 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
   };
 
-  const rentImportedNFT = async (nft, currentAccountAddress) => {
+  const rentImportedNFT = async (nft, rentalPeriodInDays, currentAccountAddress) => {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -334,12 +334,15 @@ export const NFTProvider = ({ children }) => {
       MarketAddressABI,
       signer
     );
+    console.log(nft);
+    console.log("hit 1");
 
-    const totalRentPrice = nft.rentPrice * 1;
+    const totalRentPrice = nft.rentPrice * rentalPeriodInDays;
     const rentPrice = ethers.utils.parseUnits(
       totalRentPrice.toString(),
       "ether"
     );
+    console.log("hit 2");
 
     // const expiry = Math.floor(Date.now() / 1000) + rentalPeriodInDays * 24 * 60 * 60;
     //for 2 minute
@@ -347,6 +350,7 @@ export const NFTProvider = ({ children }) => {
     let transaction;
 
     if (nft.isWETH === 'true' || nft.isWETH === true) {
+      console.log("hit 3");
       const wethContract = new ethers.Contract(
         WETHAddress,
         WETHAddressABI,
@@ -355,15 +359,17 @@ export const NFTProvider = ({ children }) => {
 
       const approvalTx = await wethContract.approve(MarketAddress, rentPrice);
       await approvalTx.wait();
-      transaction = await contract.rentImportedNFT(nft.tokenId, nft.collection, expiry, {
+      transaction = await contract.rentImportedNFT(nft.tokenId, nft.contract, expiry, {
         from: currentAccountAddress
       });
 
     } else {
-      transaction = await contract.rentImportedNFT(nft.tokenId, nft.collection, expiry, {
-        from: currentAccountAddress,
+      console.log("hit 4");
+      transaction = await contract.rentImportedNFT(nft.tokenId, nft.contract, expiry, {
+        // from: currentAccountAddress,
         value: rentPrice,
       });
+      console.log("hit 5");
     }
 
     setIsLoadingNFT(true);

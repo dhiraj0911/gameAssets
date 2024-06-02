@@ -1,31 +1,37 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import Link from "next/link";
 import { NFTContext } from "../context/NFTContext";
 import {
   useConnectionStatus,
-  useDisconnect,
   useAddress,
 } from "@thirdweb-dev/react";
-import { Button, Modal, Loader } from "../components";
+import { Button } from "../components";
+
 const ImportedCard = ({ nft }) => {
   const { nftCurrency, buyImportedNFT, rentImportedNFT } =
     useContext(NFTContext);
   const ownerAddress = nft.owner.toLowerCase();
   const currentAccountAddress =
     useConnectionStatus() === "connected" ? useAddress().toLowerCase() : null;
-  const contract = nft.contract.toLowerCase();
 
-  const handleList = async () => {
-    // await importNFT(contract, nft.tokenId, false, '0.001', '0.001', true, true);
-    console.log("working");
-  };
+  const [rentalPeriodInDays, setRentalPeriodInDays] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleBuy = async () => {
     await buyImportedNFT(nft, currentAccountAddress);
   };
 
   const handleRent = async () => {
-    await rentImportedNFT(nft, currentAccountAddress);
+    await rentImportedNFT(nft, rentalPeriodInDays);
+    setIsModalOpen(false); // Close the modal after renting
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -65,26 +71,11 @@ const ImportedCard = ({ nft }) => {
                 />
                 <Button
                   btnName="Rent"
-                  // handleClick={handleRent}
+                  handleClick={openModal}
                   classStyles="ml-3 px-4 text-white bg-green-500 rounded-lg text-sm"
                 />
               </div>
 
-              {/* <Link
-                // href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
-                href={{
-                  pathname: `https://sepolia.etherscan.io/nft/${nft.contract}/${nft.tokenId}`,
-                }}
-              >
-                <a
-                  aria-describedby="tier-starter"
-                  className="items-center justify-center px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
-                  target="_blank"
-                >
-                  View on Explorer
-                </a>
-              </Link> */}
-              {/* Network */}
               <a
                 href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
                 aria-describedby="tier-starter"
@@ -94,21 +85,45 @@ const ImportedCard = ({ nft }) => {
                 View on Explorer
               </a>
             </div>
-          ): (
-            <>
-            {/* Network */}
-              <a
-                href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
-                aria-describedby="tier-starter"
-                className="items-center justify-center w-1/2 px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
-                target="_blank"
-              >
-                View on Explorer
-              </a>
-            </>
+          ) : (
+            <a
+              href={`https://sepolia.arbiscan.io/token/${nft.contract}?a=${nft.tokenId}`}
+              aria-describedby="tier-starter"
+              className="items-center justify-center w-1/2 px-2 py-2.5 text-center text-black duration-50 bg-white border-2 border-white rounded inline-flex hover:bg-transparent hover:border-white hover:text-white focus:outline-none focus-visible:outline-white text-xs focus-visible:ring-white"
+              target="_blank"
+            >
+              View on Explorer
+            </a>
           )}
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-green p-4 rounded-lg border-left has-background-black">
+            <h2 className="text-lg font-medium mb-4">Enter Rental Period (Days)</h2>
+            <input
+              type="number"
+              value={rentalPeriodInDays}
+              onChange={(e) => setRentalPeriodInDays(Number(e.target.value))}
+              className="border p-2 rounded"
+              min="1"
+            />
+            <div className="flex justify-end mt-4">
+              <Button
+                btnName="Cancel"
+                handleClick={closeModal}
+                classStyles="mr-2 px-4 text-black bg-gray-300 rounded-lg text-sm"
+              />
+              <Button
+                btnName="Submit"
+                handleClick={handleRent}
+                classStyles="px-4 text-white bg-green-500 rounded-lg text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -310,7 +310,7 @@ contract RentableNFTMarketplace is
         _itemsRented.increment();
         idToRentedItem[_tokenId] = RentedItem(_tokenId, msg.sender, _expires);
         rentedTokenIds.push(_tokenId);
-        transferFrom(item.owner, msg.sender, _tokenId);
+        _transfer(item.owner, msg.sender, _tokenId);
     }
 
     function createMarketSale(uint256 tokenId) public payable {
