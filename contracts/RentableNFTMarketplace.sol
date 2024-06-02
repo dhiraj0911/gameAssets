@@ -336,25 +336,29 @@ contract RentableNFTMarketplace is
         _transfer(currOwner, msg.sender, tokenId);
     }
 
-    function checkUpkeep(bytes calldata /*checkData*/)
+    // Chainlink Automation: Check if any rented NFT's rental period has expired
+    function checkUpkeep(bytes calldata checkData)
         external
         override
         view
         returns (bool upkeepNeeded, bytes memory performData)
     {
-        // Check native rented tokens
-        for (uint i = 0; i < rentedTokenIds.length; i++) {
-            uint256 tokenId = rentedTokenIds[i];
-            RentedItem storage item = idToRentedItem[tokenId];
-            if (block.timestamp >= item.expires) {
-                return (true, abi.encode(tokenId, true)); // true indicates a native token
+        if(keccak256(checkData) == keccak256(hex'01')) {
+            for (uint i = 0; i < rentedTokenIds.length; i++) {
+                uint256 tokenId = rentedTokenIds[i];
+                RentedItem storage item = idToRentedItem[tokenId];
+                if (block.timestamp >= item.expires) {
+                    return (true, abi.encode(tokenId, true)); // true indicates it's a native token
+                }
             }
         }
-        // You need to implement this method
-        for (uint i = 0; i < importedTokenIds.length; i++) {
-            ImportedItem storage item = idToImportedItem[importedTokenIds[i]];
-            if (block.timestamp >= item.expiry) {
-                return (true, abi.encode(importedTokenIds[i], false)); // false indicates an imported token
+        if(keccak256(checkData) == keccak256(hex'02')) {
+            for (uint i = 0; i < importedTokenIds.length; i++) {
+                bytes32 tokenId = importedTokenIds[i];
+                ImportedItem storage item = idToImportedItem[tokenId];
+                if (block.timestamp >= item.expiry) {
+                    return (true, abi.encode(tokenId, false)); // false indicates it's an imported token
+                }
             }
         }
         return (false, "");
@@ -363,7 +367,7 @@ contract RentableNFTMarketplace is
     function performUpkeep(bytes calldata performData) external override {
         (bytes32 encodedId, bool isNative) = abi.decode(performData, (bytes32, bool));
         
-        if (isNative) {
+        if(isNative) {
             uint256 tokenId = uint256(encodedId);
             RentedItem storage item = idToRentedItem[tokenId];
             if (block.timestamp >= item.expires) {
@@ -377,7 +381,7 @@ contract RentableNFTMarketplace is
             }
         }
     }
-
+    
     function _returnImportedToken(uint256 _tokenId, address _collection) private {
         bytes32 rentalId = keccak256(abi.encodePacked(_collection, _tokenId));
         ImportedItem storage importedItem = idToImportedItem[rentalId];
