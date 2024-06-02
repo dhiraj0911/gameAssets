@@ -4,41 +4,54 @@ import {
   useConnectionStatus,
   useDisconnect,
   useAddress,
-} from "@thirdweb-dev/react"; 
+} from "@thirdweb-dev/react";
 import { NFTContext } from "../context/NFTContext";
-import { Loader, BuyCard, RentCard, Banner, SearchBar } from "../components";
+import { Loader, BuyCard, ListCard, RentCard, Banner, SearchBar } from "../components";
 import images from "../assets";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const MyNFTs = () => {
-  const { fetchMyNFTs, fetchMyRentedNFT, avatar } =
+  const { fetchMyRentedImportedNFT, fetchMyRentedNFT, fetchMyAllNFTs, avatar } =
     useContext(NFTContext);
   const [nfts, setNfts] = useState([]);
   const [nftsCopy, setNftsCopy] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rentedNfts, setRentedNfts] = useState([]);
+  const [importedRented, setImportedRented] = useState([]);
   const [listedNfts, setListedNfts] = useState([]);
   const [activeTab, setActiveTab] = useState("ownedNfts"); // Added for tab selection
-  const currentAccount = useAddress();
+  const currentAccount =
+    useConnectionStatus() === "connected" ? useAddress() : null;
+
   useEffect(() => {
+    let isMounted = true; // Flag to track mounted state
+
     const fetchData = async () => {
-      setIsLoading(true);
-      const ownedNfts = await fetchMyNFTs();
-      const rentedNFTs = await fetchMyRentedNFT();
+      if (isMounted) {
+        setIsLoading(true);
+      }
+      if (currentAccount) {
+        const ownedNfts = await fetchMyAllNFTs();
+        const rentedNFTs = await fetchMyRentedNFT();
+        const importedRentedNFTs = await fetchMyRentedImportedNFT();
 
-      setNftsCopy(ownedNfts);
-      setRentedNfts(rentedNFTs);
-
-      // const listedItems = ownedNfts.filter((item) => item.forSale || item.forRent);
-      // const ownedNotListed = ownedNfts.filter(
-      //   (item) => !item.forSale && !item.forRent
-      // );
-      setNfts(ownedNfts);
-      setIsLoading(false);
+        if (isMounted) {
+          setNftsCopy(ownedNfts);
+          setRentedNfts(rentedNFTs);
+          setImportedRented(importedRentedNFTs);
+          setNfts(ownedNfts);
+          setIsLoading(false);
+        }
+      }
     };
 
     fetchData();
-  }, [fetchMyNFTs, fetchMyRentedNFT]);
+
+    // Cleanup function to set isMounted to false when component unmounts
+    return () => {
+      isMounted = false;
+    };
+  }, [currentAccount]);
 
   // Determine which NFTs to display based on the active tab
   const displayedNfts = () => {
@@ -46,7 +59,7 @@ const MyNFTs = () => {
       case "ownedNfts":
         return nfts;
       case "rentedNfts":
-        return rentedNfts;
+        return importedRented.concat(rentedNfts);
       default:
         return nfts;
     }
@@ -125,9 +138,9 @@ const MyNFTs = () => {
       <div className="mt-3 w-full flex flex-wrap">
         {displayedNfts().map((nft) =>
           activeTab === "ownedNfts" ? (
-            <BuyCard nft={nft} key={nft.id} />
+            <ListCard nft={nft} />
           ) : (
-            <RentCard nft={nft} key={nft.id} />
+            <RentCard nft={nft} key={nft.tokenId} />
           )
         )}
       </div>

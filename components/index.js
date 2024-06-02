@@ -9,6 +9,8 @@ import Input from './Input';
 import Loader from './Loader';
 import Modal from './Modal';
 import SearchBar from './SearchBar';
+import ListCard from "./ListCard";
+import ImportedCard from './ImportedCard';
 import { from } from 'form-data';
 
 export {
@@ -23,4 +25,6 @@ export {
   Loader,
   Modal,
   SearchBar,
+  ListCard,
+  ImportedCard
 };

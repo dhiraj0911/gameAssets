@@ -14,12 +14,13 @@ import { Toaster } from "react-hot-toast";
 import { Navbar, Footer } from "../components";
 import "../styles/globals.css";
 import { NFTProvider } from "../context/NFTContext";
+import { Sepolia } from "@thirdweb-dev/chains";
 
 const projectId = `${process.env.NEXT_PUBLIC_WALLETCONNECT}`;
 
 const MyApp = ({ Component, pageProps }) => (
   <ThirdwebProvider
-    activeChain="mumbai"
+    activeChain={Sepolia}
     clientId={projectId}
     supportedWallets={[
       metamaskWallet(),

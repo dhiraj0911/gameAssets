@@ -151,7 +151,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
         <div className="flex flex-row">
           {currentAccount ? (
             <Button
-              btnName="Create"
+              btnName="Mint assets"
               classStyles="mx-2 mt-1 h-10 rounded-xl"
               handleClick={() => {
                 setActive("");
@@ -165,7 +165,7 @@ const ButtonGroup = ({ setActive, router, setIsOpen }) => {
             //   classStyles="mx-2 h-8 mt-2 rounded-xl"
             //   handleClick={connectWallet}
             // />
-            <ConnectWallet/>
+            <ConnectWallet switchToActiveChain={true}/>
           )}
           <Menu as="div" className="relative">
             <div>

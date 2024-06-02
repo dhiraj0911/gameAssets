@@ -35,7 +35,7 @@ describe("RentableNFTMarketplace", function () {
   describe("Marketplace", function () {
     it("Should create and execute market sales", async function () {
       // Seller lists an item
-      await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("1"), ethers.utils.parseEther("0.01"), true, true, false, { value: listingPrice });
+      await marketplace.connect(seller).createToken("tokenURI", ethers.utils.parseEther("1"), ethers.utils.parseEther("0.00001"), true, true, false, { value: listingPrice });
       const newTokenId = await marketplace._tokenIds();
 
       // Buyer purchases an item
@@ -60,13 +60,13 @@ describe("RentableNFTMarketplace", function () {
         console.log(seller.address, item.owner, buyer.address, owner.address);
 
         // Buyer resells the item
-        await marketplace.connect(buyer).resellToken(newTokenId, ethers.utils.parseEther("1"), ethers.utils.parseEther("0.01"), true, true, false, { value: listingPrice });
+        await marketplace.connect(buyer).resellToken(newTokenId, ethers.utils.parseEther("1"), ethers.utils.parseEther("0.00001"), true, true, false, { value: listingPrice });
         let newItem = await marketplace.idToMarketItem(newTokenId);
       
         console.log(seller.address, newItem.owner, buyer.address, owner.address);
         // expect(newItem.owner).to.equal(marketplaceAddress.address);  // Check against buyer, not owner
         expect(newItem.price).to.equal(ethers.utils.parseEther("1"));  // Check newItem's price
-        expect(newItem.rentPrice).to.equal(ethers.utils.parseEther("0.01"));  // Check newItem's rentPrice
+        expect(newItem.rentPrice).to.equal(ethers.utils.parseEther("0.00001"));  // Check newItem's rentPrice
     });
 
     it("Should not allow users to rent out tokens after expiry", async function () {

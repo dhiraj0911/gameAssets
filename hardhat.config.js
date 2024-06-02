@@ -19,10 +19,20 @@ module.exports = {
       // allowUnlimitedContractSize: true,
       chainId: 1337,
     },
-    mumbai: {
+    amoy: {
       url: API_URL,
       accounts: [PRIVATE_KEY],
       chainId: 80001,
+    },
+    sepolia: {
+      url: API_URL,
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
+    },
+    arb_sepolia: {
+      url: "https://arb-sepolia.g.alchemy.com/v2/jojD2pcZBUa_hixqqp4jnHsLWf4zQfiF",
+      accounts: [PRIVATE_KEY],
+      chainId: 421614,
     },
   },
   settings: { optimizer: { enabled: true, runs: 200 } },  
