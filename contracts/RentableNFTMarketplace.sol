@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
+import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 
 interface IWETH {
     function transferFrom(address sender, address recipient, uint amount) external returns (bool);
@@ -13,7 +13,7 @@ interface IWETH {
 
 contract RentableNFTMarketplace is
     ERC721,
-    KeeperCompatibleInterface
+    AutomationCompatible
 {
     using Counters for Counters.Counter;
     Counters.Counter public _tokenIds;
@@ -337,47 +337,61 @@ contract RentableNFTMarketplace is
     }
 
     // Chainlink Automation: Check if any rented NFT's rental period has expired
-    function checkUpkeep(bytes calldata checkData)
-        external
-        override
-        view
-        returns (bool upkeepNeeded, bytes memory performData)
-    {
-        if(keccak256(checkData) == keccak256(hex'01')) {
-            for (uint i = 0; i < rentedTokenIds.length; i++) {
-                uint256 tokenId = rentedTokenIds[i];
-                RentedItem storage item = idToRentedItem[tokenId];
-                if (block.timestamp >= item.expires) {
-                    return (true, abi.encode(tokenId, true)); // true indicates it's a native token
-                }
+    function checkUpkeep(
+        bytes calldata /* checkData */
+    ) external view override returns (bool upkeepNeeded, bytes memory performData) {
+        uint256[] memory expiredTokenIds = new uint256[](rentedTokenIds.length);
+        bytes32[] memory expiredImportedTokenIds = new bytes32[](importedTokenIds.length);
+        uint256 expiredCount = 0;
+        uint256 importedExpiredCount = 0;
+
+        for (uint256 i = 0; i < rentedTokenIds.length; i++) {
+            uint256 tokenId = rentedTokenIds[i];
+            RentedItem memory rentedItem = idToRentedItem[tokenId];
+            if (block.timestamp >= rentedItem.expires) {
+                expiredTokenIds[expiredCount] = tokenId;
+                expiredCount++;
             }
         }
-        if(keccak256(checkData) == keccak256(hex'02')) {
-            for (uint i = 0; i < importedTokenIds.length; i++) {
-                bytes32 tokenId = importedTokenIds[i];
-                ImportedItem storage item = idToImportedItem[tokenId];
-                if (block.timestamp >= item.expiry) {
-                    return (true, abi.encode(tokenId, false)); // false indicates it's an imported token
-                }
+
+        for (uint256 i = 0; i < importedTokenIds.length; i++) {
+            bytes32 rentalId = importedTokenIds[i];
+            ImportedItem memory importedItem = idToImportedItem[rentalId];
+            if (block.timestamp >= importedItem.expiry) {
+                expiredImportedTokenIds[importedExpiredCount] = rentalId;
+                importedExpiredCount++;
             }
         }
-        return (false, "");
+
+        if (expiredCount > 0 || importedExpiredCount > 0) {
+            upkeepNeeded = true;
+            performData = abi.encode(expiredTokenIds, expiredCount, expiredImportedTokenIds, importedExpiredCount);
+        } else {
+            upkeepNeeded = false;
+            performData = bytes("");
+        }
     }
 
     function performUpkeep(bytes calldata performData) external override {
-        (bytes32 encodedId, bool isNative) = abi.decode(performData, (bytes32, bool));
-        
-        if(isNative) {
-            uint256 tokenId = uint256(encodedId);
-            RentedItem storage item = idToRentedItem[tokenId];
-            if (block.timestamp >= item.expires) {
+        (
+            uint256[] memory expiredTokenIds,
+            uint256 expiredCount,
+            bytes32[] memory expiredImportedTokenIds,
+            uint256 importedExpiredCount
+        ) = abi.decode(performData, (uint256[], uint256, bytes32[], uint256));
+
+        for (uint256 i = 0; i < expiredCount; i++) {
+            uint256 tokenId = expiredTokenIds[i];
+            if (tokenId != 0) {
                 _returnToken(tokenId);
             }
-        } else {
-            (address collection, uint256 tokenId) = decodeImportedRentedKey(encodedId);
-            ImportedItem storage item = idToImportedItem[encodedId];
-            if (block.timestamp >= item.expiry) {
-                _returnImportedToken(tokenId, collection);
+        }
+
+        for (uint256 i = 0; i < importedExpiredCount; i++) {
+            bytes32 rentalId = expiredImportedTokenIds[i];
+            if (rentalId != bytes32(0)) {
+                ImportedItem memory importedItem = idToImportedItem[rentalId];
+                _returnImportedToken(importedItem.tokenId, importedItem.collection);
             }
         }
     }
